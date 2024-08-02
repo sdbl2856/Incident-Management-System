@@ -1,0 +1,50 @@
+
+.custom-btn {
+    margin-right: 60px; /* Adjust the value as needed */
+  }
+  
+ /* styles.css or styles.scss */
+.larger-width-snackbar {
+  min-width: 500px; /* Adjust the width as needed */
+  min-height: 400px;
+  top: 0; /* Adjust the top position */
+}
+
+.card-content-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.card-content-container .row {
+  width: 100%;
+  max-width: 800px; /* Adjust the maximum width as needed */
+  margin: 0 auto;
+}
+
+.detail {
+  text-align: left; /* Ensure text aligns to the left inside each detail div */
+}
+.detail strong {
+  font-weight: bold; /* Ensure titles are bold */
+}
+
+.alert_msg {
+  color: red;
+  text-align: center;
+}
+
+.success-message {
+  background-color: whitesmoke;
+  padding: 10px;
+  max-width: 400px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.success-message h4 {
+  color: rgb(6, 204, 39);
+  margin: 0;
+}

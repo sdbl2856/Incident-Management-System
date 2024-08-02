@@ -1,0 +1,545 @@
+
+<div  *ngIf="loading">
+  <div *ngIf="showform" class="form-add" >
+
+
+    <app-card
+      cardTitle="Incident Creation Page"
+      [options]="false"
+      blockClass="table-border-style"
+      class="centered-bold-title"
+    >
+  
+  
+      <form [formGroup]="formValue" class="form" style="margin-left: 75px">
+        <!-- Single Row with Three Columns -->
+        <div class="row">
+          <!-- Column 1 -->
+          <div class="col-sm-4">
+            <div class="form-group">
+              <label for="description" class="form-label"
+                >Description
+                <label
+                  style="color: red"
+                  *ngIf="description == null || description == ''"
+                  >*</label
+                >
+              </label>
+              <textarea
+                placeholder="About the incident"
+                style="width: 80%"
+                class="form-control"
+                id="description"
+                rows="3"
+                formControlName="description"
+              ></textarea>
+            </div>
+          </div>
+  
+          <!-- Column 2 -->
+          <div class="col-sm-4">
+            <div class="form-group">
+              <label for="risk_cause" class="form-label"
+                >Risk Cause Description:
+                <label
+                  style="color: red"
+                  *ngIf="selectedOption == null || selectedOption == ''"
+                  >*</label
+                >
+              </label>
+              <select
+                style="width: 80%"
+                id="risk_cause"
+                formControlName="risk_cause"
+                class="form-select"
+                required
+                (change)="onRiskChange()"
+              >
+                <option value="null" disabled selected>Select</option>
+                <option
+                  *ngFor="let risk_cause of risk_causes"
+                  [value]="risk_cause.risk_causeId"
+                >
+                  {{ risk_cause.description }}
+                </option>
+              </select>
+              <!-- Explanation div -->
+              <div
+                *ngIf="selectedOption && explanationMap[selectedOption]"
+                class="explanation"
+              >
+                {{ explanationMap[selectedOption] }}
+              </div>
+            </div>
+          </div>
+  
+          <!-- Column 3 -->
+          <div class="col-sm-4">
+            <div class="form-group">
+              <label for="sub_category" class="form-label"
+                >Sub Category <label
+                style="color: red"
+               
+                >*</label
+              >
+                <label
+                  style="color: red"
+                  *ngIf="selectedOption == null || selectedOption == ''"
+                  ></label
+                >
+              </label>
+              <select
+                style="width: 80%"
+                id="sub_category"
+                formControlName="sub_category"
+                class="form-select"
+                required
+                (change)="onSubCategoryChange()"
+              >
+                <option value="null" disabled selected>Select</option>
+                <option
+                  *ngFor="let sub_cat of specificSubCategory"
+                  [value]="sub_cat.risk_causeId"
+                >
+                  {{ sub_cat.description }}
+                </option>
+              </select>
+            </div>
+          </div>
+        </div>
+       
+        <!-- Single Row with Three Columns (Continued) -->
+        <div class="row">
+          <!-- Column 1 -->
+          <div class="col-sm-4">
+            <div class="form-group">
+              <label for="risk_owner" class="form-label"
+                >Risk Owner
+                <label
+                  style="color: red"
+                  *ngIf="risk_owner == null || risk_owner == ''"
+                  >*</label
+                >
+              </label>
+  
+              <input
+                placeholder="Enter the Name here"
+                style="width: 80%"
+                type="text"
+                formControlName="risk_owner"
+                class="form-control"
+                id="risk_owner"
+              />
+            </div>
+          </div>
+  
+          <!-- Column 2 -->
+          <div class="col-sm-4">
+            <div class="form-group">
+              <label for="oc_date" class="form-label" readonly
+                >Occurrence Date
+                <label style="color: red" *ngIf="oc_date == null || oc_date == ''"
+                  >*</label
+                >
+              </label>
+              <input
+                style="width: 80%"
+                type="date"
+                formControlName="oc_date"
+                class="form-control"
+                id="oc_date"
+                (keydown)="disableDate()"
+              />
+              <div
+                *ngIf="formValue.get('oc_date').hasError('futureDate')"
+                style="color: red"
+              >
+                Occurrence Date must be present or in the past.
+              </div>
+            </div>
+          </div>
+  
+          <!-- Column 3 -->
+          <div class="col-sm-4">
+            <div class="form-group">
+              <label for="sub_type" class="form-label"
+                >Sub Type
+                <label style="color: red">*</label>
+              </label>
+              <select
+                style="width: 80%"
+                id="sub_type"
+                formControlName="sub_type"
+                class="form-select"
+                required
+              >
+                <option value="null" disabled selected>Select</option>
+                <option
+                  *ngFor="let sub_type of specificSubTypes"
+                  [value]="sub_type.riskSubTypeId"
+                >
+                  {{ sub_type.description }}
+                </option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div
+        *ngIf="showSuccessMessage"
+        class="success-message"
+        style="
+          background-color: whitesmoke;
+          padding: 10px;
+          max-width: 500px;
+          margin: 0 auto;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        "
+      >
+      <h4 style="color: rgb(6, 204, 39); margin: 0; font-size: 2em; padding: 1px;">
+        {{ successMessage }}
+      </h4>
+      
+      
+      </div>
+   
+        <br />
+        <br />
+     
+        <!-- Single Row with Three Columns (Continued) -->
+        <div class="row">
+          <!-- Column 1 -->
+          <div class="col-sm-4">
+            <div class="form-group">
+              <label for="detected_date" class="form-label" readonly
+                >Detected Date
+                <label
+                  style="color: red"
+                  *ngIf="detected_date == null || detected_date == ''"
+                  >*</label
+                >
+              </label>
+              <input
+                style="width: 80%"
+                type="date"
+                formControlName="detected_date"
+                class="form-control"
+                id="detected_date"
+                (keydown)="disableDate()"
+              />
+              <div
+                *ngIf="formValue.get('detected_date').hasError('futureDate')"
+                style="color: red"
+              >
+                Detected Date must be present or in the past.
+              </div>
+            </div>
+          </div>
+  
+          <!-- Column 2 -->
+          <div class="col-sm-4">
+            <div class="form-group">
+              <label for="contact_number" class="form-label"
+                >Contact Number
+                <label
+                  style="color: red"
+                  *ngIf="contact_number == null || contact_number == ''"
+                  >*</label
+                >
+              </label>
+              <input
+                placeholder="Enter the mobile Number"
+                style="width: 80%"
+                type="text"
+                formControlName="contact_number"
+                class="form-control"
+                id="contact_number"
+              />
+            </div>
+          </div>
+  
+          <!-- Column 3 -->
+          <div class="col-sm-4">
+            <div class="form-group">
+              <label for="potential_amount" class="form-label"
+                >Potential loss Amount
+                <!-- <label style="color: red">*</label> -->
+              </label>
+              <input
+                placeholder="Potential amount"
+                style="width: 80%"
+                type="number"
+                formControlName="potential_amount"
+                class="form-control"
+                id="potential_amount"
+                step="0.01"
+                class="form-control"
+                id="price"
+              />
+  
+              <!-- <script >
+                function validate(e) {
+                  e.value = parseFloat(e.value).toFixed(2)
+                }
+              </script> -->
+            </div>
+          </div>
+        </div>
+        <br />
+  
+        <!-- Single Row with Three Columns (Continued) -->
+        <div class="row">
+          <!-- Column 1 -->
+          <div class="col-sm-4">
+            <div class="form-group">
+              <label for="recoverd_amount" class="form-label"
+                >Recovered Amount
+                <!-- <label style="color: red">*</label> -->
+              </label>
+              <input
+                placeholder="Recovered amount"
+                style="width: 80%"
+                type="number"
+                formControlName="recoverd_amount"
+                class="form-control"
+                id="recoverd_amount"
+              />
+            </div>
+          </div>
+  
+          <!-- Column 2 -->
+          <div class="col-sm-4">
+            <div class="form-group">
+              <label for="actual_loss_amount" class="form-label"
+                >Actual loss Amount
+                <!-- <label style="color: red">*</label> -->
+              </label>
+              <input
+                placeholder="Actual loss amount"
+                style="width: 80%"
+                type="number"
+                formControlName="actual_loss_amount"
+                class="form-control"
+                id="actual_loss_amount"
+              />
+            </div>
+          </div>
+  
+          <!-- Column 3 -->
+          <div class="col-sm-4">
+            <div class="form-group">
+              <label for="account_number" class="form-label"
+                >Account Number
+                <!-- <label style="color: red">*</label> -->
+              </label>
+              <input
+                placeholder="Account Number"
+                style="width: 80%"
+                type="number"
+                formControlName="account_number"
+                class="form-control"
+                id="account_number"
+              />
+            </div>
+          </div>
+        </div>
+        <br />
+        <!-- Single Row with Three Columns (Continued) -->
+        <div class="row">
+          <!-- Column 1 -->
+          <div class="col-sm-4">
+            <div class="form-group">
+              <label for="recovery_action" class="form-label"
+                >Recovery Actions
+                <!-- <label style="color: red">*</label> -->
+              </label>
+              <textarea
+                placeholder="Recovery Action"
+                style="width: 80%"
+                class="form-control"
+                id="recovery_action"
+                rows="3"
+                formControlName="recovery_action"
+              ></textarea>
+            </div>
+          </div>
+  
+          <!-- Column 2 -->
+          <div class="col-sm-4">
+            <div class="form-group">
+              <label for="reporting_officer" class="form-label">
+                Reporting Officer
+                <label style="color: red" *ngIf="reporting_officer == null || description == ''">*</label>
+              </label>
+              <label style="color: rgb(0, 38, 255)">
+                (SDBL Number)
+              </label>
+              <input
+                placeholder="Enter the number after SDBL"
+                style="width: 80%"
+                class="form-control"
+                type="text"
+                id="reporting_officer"
+                formControlName="reporting_officer"
+                (input)="prependSDBL($event)"
+              />
+            </div>
+            <br />
+          </div>
+
+          <br /> <br>
+          <div class="row" *ngIf="any_user_div">
+            
+            <div class="col-sm-4">
+              <!-- incident.component.html -->
+  
+              <div class="form-group">
+                <label for="level" class="form-label"
+                  >SELECT LEVEL
+                  <label style="color: red">*</label>
+                </label>
+                <select
+                  style="width: 80%"
+                  id="level"
+                  formControlName="level"
+                  class="form-select"
+                  required
+                  (change)="onLevelChange($event)"
+                >
+                  <option value="" disabled selected>Select</option>
+                  <option value="BRANCH">BRANCH</option>
+                  <option value="REGION">REGION</option>
+                  <option value="DEPARTMENT">DEPARTMENT</option>
+                </select>
+                <div *ngIf="formValue.get('level').invalid && formValue.get('level').touched" class="text-danger">
+                  Please select a level.
+              </div>
+              </div>
+            </div>
+           <div class="col-sm-4" *ngIf="branch_div">
+            <div class="form-group">
+              <label for="branch" class="form-label">BRANCH <label style="color: red">*</label></label>
+              <select style="width: 80%" id="branch" formControlName="branch" class="form-select" required>
+                <option value="" disabled selected>Select</option>
+                <option *ngFor="let branch of branches" [value]="branch.branchId" [disabled]="branch.branchId === 999">
+                  {{ branch.description }}
+                </option>
+              </select>
+            </div>
+          </div>
+  
+            <!-- <div class="col-sm-4" *ngIf="region_div">
+              <div class="form-group">
+                <label for="region" class="form-label"
+                  >REGION
+                  <label style="color: red">*</label>
+                </label>
+                <select
+                  style="width: 80%"
+                  id="region"
+                  formControlName="region"
+                  class="form-select"
+                  required
+                 
+                >
+                  <option value="" disabled selected>Select</option>
+                  <option
+                    *ngFor="let region of regions"
+                    [value]="region.regionId"
+                    [disabled]="region.regionId === 999"
+                  >
+                    {{ region.description }}
+                  </option>
+                </select>
+              </div>
+            </div> -->
+  
+            <div class="col-sm-4" *ngIf="region_div">
+              <div class="form-group">
+                <label for="region" class="form-label">REGION <label style="color: red">*</label></label>
+                <select style="width: 80%" id="region" formControlName="region" class="form-select" required>
+                  <option value="" disabled selected>Select</option>
+                  <option *ngFor="let region of regions" [value]="region.regionId" [disabled]="region.regionId === 11">
+                    {{ region.description }}
+                  </option>
+                </select>
+              </div>
+            </div>
+            
+            <div class="col-sm-4">
+              <div class="form-group">
+                <label for="email" class="form-label"
+                  >Email <label style="color: red"> * </label></label
+                >
+                <input
+                  placeholder="eg:nav@gmail.com"
+                  style="width: 80%"
+                  type="email"
+                  formControlName="email"
+                  class="form-control"
+                  id="email"
+                />
+              </div>
+            </div>
+            <div class="col-sm-4" *ngIf="dep_div">
+              <div class="form-group">
+                <label for="dep" class="form-label"
+                  >DEPARTMENT
+                  <label style="color: red">*</label>
+                </label>
+                <select
+                  style="width: 80%"
+                  id="dep"
+                  formControlName="dep"
+                  class="form-select"
+                  required
+                >
+                  <option value="" disabled selected>Select</option>
+                  <option
+                    *ngFor="let departments of departments"
+                    [value]="departments.departmentId"
+                  >
+                    {{ departments.description }}
+                  </option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <br>
+        </div>
+        <br>
+        <div class="row">
+  
+          <div class="col-sm-4">
+            <br> 
+            <h6 style="color: rgb(17, 15, 15)">
+              <span style="color: red">*</span> Mark is for required all the fields.
+            </h6>
+          </div>
+          <div class="col-sm-4">
+            <h4
+            *ngIf="not_filled"
+            class="alert_msg"
+            style="color: red; text-align: center"
+          >
+            Please Fill All the Fields Correctlly
+          </h4>
+          </div>
+          <div class="col-sm-4 d-flex" style="margin-left: 71%; " >
+            <button (click)="clickCancel()" class="btn btn-danger" type="button">CANCEL</button>
+            <div style="width: 5px" ></div>
+            <button class="btn btn-primary" type="button" (click)="postDetails()">CREATE</button>
+          </div>
+         
+        </div>
+      </form>
+    </app-card>
+  </div>
+
+</div>
+
+<div *ngIf="!loading" style="justify-content: center;
+align-items: center;margin: 0;padding: 0;display: flex;height: 100%;" >
+  <img src="assets/images/loading.svg"   style="width:7%;align-items: center;" />
+</div>

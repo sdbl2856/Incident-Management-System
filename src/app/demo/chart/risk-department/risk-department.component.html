@@ -1,0 +1,888 @@
+<div class="row " >
+  <strong
+    ><label style="color: black" for="risk_dep_status" class="form-label"
+      >FILTER WITH</label
+    ></strong
+  >
+  <div class="col-md-8">
+    <form [formGroup]="formValue">
+      <div class="mb-3">
+        <select
+          id="risk_dep_status"
+          formControlName="status"
+          class="form-select"
+          style="width: 30%"
+          required
+          (change)="onChangeStatus()"
+        >
+          <option value="CO">COMPLETED</option>
+          <option value="DE">DECLINED</option>
+          <option value="PE">PENDING</option>
+        </select>
+      </div>
+    </form>
+  </div>
+  <div class="col-md-4">
+    <div class="col-md-8 offset-md-4" style="text-align: right">
+      <button class="btn btn-success" (click)="exportToExcel()">
+        To-Excel
+      </button>
+    </div>
+  </div>
+</div>
+
+<br />
+
+<div class="col-sm-12">
+  <div class="card-body">
+    <ul class="nav nav-pills mb-3" ngbNav #nav1="ngbNav">
+      <li class="nav-item" [ngbNavItem]="1">
+        <a
+          (click)="clickTab1()"
+          class="nav-link"
+          ngbNavLink
+          aria-controls="pills-home"
+          aria-selected="true"
+          >Incidents</a
+        >
+        <ng-template ngbNavContent>
+          <div *ngIf="showdata">
+            <app-card
+              cardTitle="Received Incidents"
+              [options]="false"
+              blockClass="table-border-style"
+            >
+              <!-- Table headers with sorting -->
+              <table class="table-responsive" style="margin-left: 30px">
+                <div class="table table-hover">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+
+                      <th>Occurance Date</th>
+                      <th>Detected Date</th>
+                      <th>Reporting Date</th>
+                      <th>Risk Owner</th>
+
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+
+                  <!-- Display the paged and sorted incidents -->
+                  <tbody>
+                    <tr *ngFor="let row of displayedIncidentList">
+                      <td>{{ row.incidentId }}</td>
+
+                      <td>{{ row.occurence_date | date: "yyyy-MM-dd" }}</td>
+                      <td>{{ row.detected_date | date: "yyyy-MM-dd" }}</td>
+                      <td>{{ row.reporting_date | date: "yyyy-MM-dd" }}</td>
+                      <td>{{ row.risk_owner }}</td>
+
+                      <td>
+                        <button class="btn btn-primary" (click)="onView(row)">
+                          View
+                        </button>
+                        <br />
+                      </td>
+                    </tr>
+                  </tbody>
+                </div>
+              </table>
+              <br />
+
+              <!-- pagination -->
+              <nav
+                style="margin-left: 75%"
+                aria-label="Page navigation example"
+              >
+                <ul class="pagination">
+                  <li class="page-item">
+                    <a
+                      class="page-link"
+                      href="javascript:"
+                      (click)="prevPage()"
+                      aria-label="Previous"
+                    >
+                      <span aria-hidden="true">&laquo;</span>
+                      <span class="sr-only">Previous</span>
+                    </a>
+                  </li>
+
+                  <li class="page-item" *ngFor="let page of getPageArray()">
+                    <a
+                      class="page-link"
+                      href="javascript:"
+                      (click)="goToPage(page)"
+                      >{{ page }}</a
+                    >
+                  </li>
+
+                  <li class="page-item">
+                    <a
+                      class="page-link"
+                      href="javascript:"
+                      (click)="nextPage()"
+                      aria-label="Next"
+                    >
+                      <span aria-hidden="true">&raquo;</span>
+                      <span class="sr-only">Next</span>
+                    </a>
+                  </li>
+                </ul>
+              </nav>
+            </app-card>
+          </div>
+        </ng-template>
+      </li>
+
+      <li class="nav-item" [ngbNavItem]="2">
+        <a
+          class="nav-link"
+          ngbNavLink
+          aria-controls="pills-home"
+          aria-selected="true"
+          >Details</a
+        >
+        <ng-template ngbNavContent>
+          <!-- table for view data-->
+          <div class="form-view" *ngIf="showform">
+            <!-- Show the Comments -->
+
+            <div class="row no-margin">
+              <!-- comments section -->
+              <app-card
+              *ngIf="displayedCommentList.length > 0"
+                cardTitle="Comments"
+                [options]="false"
+                blockClass="table-border-style"
+              >
+                <div class="card-body">
+                  <table class="table">
+                    <thead>
+                      <tr>
+                        <th>Description</th>
+                        <th>Date</th>
+                      
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr *ngFor="let comment of displayedCommentList">
+                        <ng-container
+                          *ngIf="
+                            comment.incident.incidentId === selectedIncidentId
+                          "
+                        >
+                          <td>{{ comment.description }}</td>
+                          <td>
+                            {{ comment.commentedDate | date: "yyyy-MM-dd" }}
+                          </td>
+                     
+                        </ng-container>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <!-- Pagination for comments -->
+                <nav
+                  aria-label="Page navigation example"
+                  style="margin-right: 15%"
+                >
+                  <ul class="pagination justify-content-end">
+                    <li class="page-item">
+                      <a
+                        class="page-link"
+                        href="javascript:"
+                        (click)="prevCommentPage()"
+                        aria-label="Previous"
+                      >
+                        <span aria-hidden="true">&laquo;</span>
+                        <span class="sr-only">Previous</span>
+                      </a>
+                    </li>
+                    <li
+                      class="page-item"
+                      *ngFor="let page of getCommentPageArray()"
+                    >
+                      <a
+                        class="page-link"
+                        href="javascript:"
+                        (click)="goToCommentPage(page)"
+                        >{{ page }}</a
+                      >
+                    </li>
+                    <li class="page-item">
+                      <a
+                        class="page-link"
+                        href="javascript:"
+                        (click)="nextCommentPage()"
+                        aria-label="Next"
+                      >
+                        <span aria-hidden="true">&raquo;</span>
+                        <span class="sr-only">Next</span>
+                      </a>
+                    </li>
+                  </ul>
+                </nav>
+              </app-card>
+            </div>
+            <div>
+              <br />
+              <app-card style="margin-left:60px;"
+                cardTitle="Incident Details"
+                [options]="false"
+                blockClass="table-border-style"
+              >
+              
+                <h4 class="text-center">CREATION LEVEL DETAILS</h4>
+                <br />
+                <div class="row" style="margin-left: 14%;">
+                  <div class="col-md-6">
+                    <div class="detail">
+                      <strong>ID :</strong>
+                      <p style="display: inline-block" class="field-value">
+                        {{ row.incidentId }}
+                      </p>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="detail">
+                      <strong>Occurrence Date:</strong>
+                      <p style="display: inline-block" class="field-value">
+                        {{ row.occurence_date | date: "yyyy-MM-dd" }}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div class="row" style="margin-left: 14%;">
+                  <div class="col-md-6">
+                    <div class="detail">
+                      <strong>Risk Owner:</strong>
+                      <p style="display: inline-block" class="field-value">
+                        {{ row.risk_owner }}
+                      </p>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="detail">
+                      <strong>Detected Date:</strong>
+                      <p style="display: inline-block" class="field-value">
+                        {{ row.detected_date | date: "yyyy-MM-dd" }}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div class="row" style="margin-left: 14%;">
+                  <div class="col-md-6">
+                    <div class="detail">
+                      <strong>Reporting Date:</strong>
+                      <p style="display: inline-block" class="field-value">
+                        {{ row.reporting_date | date: "yyyy-MM-dd" }}
+                      </p>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="detail">
+                      <strong>Risk Cause :</strong>
+                      <p style="display: inline-block" class="field-value">
+                        {{ row.sub_type.riskCause.description }}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div class="row" style="margin-left: 14%;">
+                  <div class="col-md-6">
+                    <div class="detail">
+                      <strong>Sub Category:</strong>
+                      <p style="display: inline-block" class="field-value">
+                        {{ row.sub_type.riskSubCategory.description }}
+                      </p>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="detail">
+                      <strong>Sub Type :</strong>
+                      <p style="display: inline-block" class="field-value">
+                        {{ row.sub_type.description }}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div class="row" style="margin-left: 14%;">
+                  <div class="col-md-6">
+                    <div class="detail">
+                      <strong>Reporting Officer:</strong>
+                      <p style="display: inline-block" class="field-value">
+                        {{ row.reporting_officer }}
+                      </p>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="detail">
+                      <strong>Contact Number :</strong>
+                      <p style="display: inline-block" class="field-value">
+                        {{ row.contact_number }}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div class="row" style="margin-left: 14%;">
+                  <div class="col-md-6">
+                    <div class="detail">
+                      <strong>Recoverd Amount:</strong>
+                      <p style="display: inline-block" class="field-value">
+                        {{ row.recoverd_amount }}
+                      </p>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="detail">
+                      <strong>Account Number :</strong>
+                      <p style="display: inline-block" class="field-value">
+                        {{ row.account_number }}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row" style="margin-left: 14%;">
+                  <div class="col-md-6">
+                    <div class="detail">
+                      <strong>Potential Loss Amount :</strong>
+                      <p style="display: inline-block" class="field-value">
+                        {{ row.potential_amount }}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div class="col-md-6">
+                    <div class="detail">
+                      <strong>Actual Loss Amount :</strong>
+                      <p style="display: inline-block" class="field-value">
+                        {{ row.actual_amount }}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row" style="margin-left: 14%;">
+                  <div class="col-md-6" *ngIf="row.branch?.description">
+                    <div class="detail">
+                      <strong>Branch :</strong>
+                      <p style="display: inline-block" class="field-value">
+                        {{ row.branch?.description }}
+                      </p>
+                    </div>
+                  </div>
+                  <div class="col-md-6" *ngIf="row.region?.description">
+                    <div class="detail">
+                      <strong>Region:</strong>
+                      <p style="display: inline-block" class="field-value">
+                        {{ row.region?.description }}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                
+
+                <div class="row" style="margin-left: 14%;">
+                 
+                   <div class="col-md-6" *ngIf="row.department?.description">
+                    <div class="detail">
+                      <strong>Department :</strong>
+                      <p style="display: inline-block" class="field-value">
+                        {{ row.department?.description }}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div class="row" style="margin-left: 14%;">
+                  <div class="col-md-6">
+                    <div class="detail">
+                      <strong>Description:</strong>
+                      <p style="display: inline-block" class="field-value">
+                        {{ row.inc_description }}
+                      </p>
+                    </div>
+                    
+                  </div>
+                  <div class="col-md-6">
+                 
+                      <div class="detail" *ngIf="row.recovery_action">
+                        <strong>Recovery Action :</strong>
+                        <p style="display: inline-block" class="field-value">
+                          {{ row.recovery_action }}
+                        </p>
+                      </div>
+         
+                    
+                  </div>
+                 
+                </div>
+
+              
+                <!-- showing risk deparment data filled by RO -->
+                <div *ngIf="ro_data">
+                  <h4 class="text-center">RISK DEPARTMENT DETAILS</h4>
+                    <br />
+                  <div class="row" style="margin-left: 14%;">
+                   
+                    <div class="col-md-6">
+                      <div class="detail">
+                        <strong>Incident Type:</strong>
+                        <p style="display: inline-block" class="field-value">
+                          {{ row.incidentType.description }}
+                        </p>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="detail">
+                        <strong>Action Taken By the Department :</strong>
+                        <p style="display: inline-block" class="field-value">
+                          {{ row.action }}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row" style="margin-left: 14%;">
+                    <div class="col-md-6">
+                      <div class="detail">
+                        <strong>Loss Event Type:</strong>
+                        <p style="display: inline-block" class="field-value">
+                          {{ row.lossEventType.description }}
+                        </p>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="detail">
+                        <strong>Business Line:</strong>
+                        <p style="display: inline-block" class="field-value">
+                          {{ row.businessLine.description }}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row" style="margin-left: 14%;">
+                    <div class="col-md-6">
+                      <div class="detail">
+                        <strong>Business Aria:</strong>
+                        <p style="display: inline-block" class="field-value">
+                          {{ row.businessAria.description }}
+                        </p>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="detail">
+                        <strong>Consequences of incident:</strong>
+                        <p style="display: inline-block" class="field-value">
+                          {{ row.consequence.description }}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row" style="margin-left: 14%;">
+                    <div class="col-md-6">
+                      <div class="detail">
+                        <strong>Root cause analysis:</strong>
+                        <p style="display: inline-block" class="field-value">
+                          {{ row.rootCause }}
+                        </p>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="detail">
+                        <strong>Potential Loss Amount:</strong>
+                        <p style="display: inline-block" class="field-value">
+                          {{ row.potential_amount }}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row" style="margin-left: 14%;">
+                    <div class="col-md-6">
+                      <div class="detail">
+                        <strong>Actual Amount:</strong>
+                        <p style="display: inline-block" class="field-value">
+                          {{ row.actual_amount }}
+                        </p>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="detail">
+                        <strong>Risk Level:</strong>
+                        <p style="display: inline-block" class="field-value">
+                          {{ row.riskLevel.description }}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row" style="margin-left: 14%;">
+                    <div class="col-md-6">
+                      <div class="detail">
+                        <strong>Status :</strong>
+                        <p style="display: inline-block" class="field-value">
+                          {{ statusDescriptions[row.status] }}
+                        </p>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                 
+                    </div>
+                  </div>
+                </div>
+                <div
+                *ngIf="showEmtyMessage"
+                class="emty-message"
+                style="
+                  background-color: whitesmoke;
+                  padding: 10px;
+                  max-width: 400px;
+                  margin: 0 auto;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                "
+              >
+                <h4 style="color: rgb(6, 204, 39); margin: 0">
+                  {{ emtyMessage }}
+                </h4>
+              </div>
+              <div
+                *ngIf="showSuccessMessage"
+                class="success-message"
+                style="
+                  background-color: whitesmoke;
+                  padding: 10px;
+                  max-width: 500px;
+                  margin: 0 auto;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                "
+              >
+                <h3 style="color: rgb(6, 204, 39); margin: 0">
+                  {{ successMessage }}
+                </h3>
+              </div>
+
+                <!-- RO filling Form Start  -->
+                <form
+                  [formGroup]="formValue"
+                  class="container"
+                  *ngIf="form_fill"
+                >
+                  <!-- Row 1: Comment and Action -->
+
+                  <div class="row" >
+                    <div class="col-md-6">
+                      <label style="font-weight: bold" class="comment-label"
+                        >Root Cause Analysis</label
+                      ><label style="color: red"> * </label>
+                      <textarea
+                        class="comment-input form-control"
+                        rows="3"
+                        formControlName="root_cause"
+                        required
+                      ></textarea>
+                    </div>
+                    <div class="col-md-6">
+                      <label style="font-weight: bold" class="comment-label"
+                        >Action taken by Department</label
+                      ><label style="color: red"> * </label>
+                      <br />
+                      <textarea
+                        class="comment-input form-control"
+                        rows="3"
+                        formControlName="action_taken"
+                        required
+                      ></textarea>
+                    </div>
+                  </div>
+
+                  <!-- Row 2: Dropdowns -->
+                  <div class="row mt-3">
+                    <!-- Dropdown 1 -->
+                    <div class="col-md-4">
+                      <label for="incident_type" class="form-label"
+                        >Incident Type</label
+                      ><label style="color: red"> * </label>
+                      <select
+                        style="width: 100%"
+                        id="incident_type"
+                        formControlName="incident_type"
+                        class="form-select"
+                        required
+                      >
+                        <option value="0" disabled>select..</option>
+                        <option
+                          *ngFor="let incidentTypeList of incidentTypeList"
+                          [value]="incidentTypeList.incidentTypeId"
+                        >
+                          {{ incidentTypeList.description }}
+                        </option>
+                      </select>
+                    </div>
+
+                    <!-- Dropdown 2 -->
+                    <div class="col-md-4">
+                      <label for="loss_event_type" class="form-label"
+                        >Loss Event Type</label
+                      ><label style="color: red"> * </label>
+                      <select
+                        style="width: 100%"
+                        id="loss_event_type"
+                        formControlName="loss_event_type"
+                        class="form-select"
+                        required
+                      >
+                        <option value="0" disabled>select..</option>
+                        <option
+                          *ngFor="let lossEventTypeList of lossEventTypeList"
+                          [value]="lossEventTypeList.lossEventTypeId"
+                        >
+                          {{ lossEventTypeList.description }}
+                        </option>
+                      </select>
+                    </div>
+
+                    <!-- Dropdown 3 -->
+                    <div class="col-md-4">
+                      <label for="business_line" class="form-label"
+                        >Business Line</label
+                      ><label style="color: red"> * </label>
+                      <select
+                        style="width: 100%"
+                        id="business_line"
+                        formControlName="business_line"
+                        class="form-select"
+                        required
+                      >
+                        <option value="0" disabled>select..</option>
+                        <option
+                          *ngFor="let businessLineList of businessLineList"
+                          [value]="businessLineList.businessLineId"
+                        >
+                          {{ businessLineList.description }}
+                        </option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <!-- Row 3: More Dropdowns -->
+                  <div class="row mt-3">
+                    <!-- Dropdown 4 -->
+                    <div class="col-md-4">
+                      <label for="business_aria" class="form-label"
+                        >Business Aria</label
+                      ><label style="color: red"> * </label>
+                      <select
+                        style="width: 100%"
+                        id="business_aria"
+                        formControlName="business_aria"
+                        class="form-select"
+                        required
+                      >
+                        <option value="0" disabled>select..</option>
+                        <option
+                          *ngFor="let businessAriaList of businessAriaList"
+                          [value]="businessAriaList.businessAriaId"
+                        >
+                          {{ businessAriaList.description }}
+                        </option>
+                      </select>
+                    </div>
+
+                    <!-- Dropdown 5 -->
+                    <div class="col-md-4">
+                      <label for="consequence" class="form-label"
+                        >Consequences of Incident</label
+                      ><label style="color: red"> * </label>
+                      <select
+                        style="width: 100%"
+                        id="consequence"
+                        formControlName="consequence"
+                        class="form-select"
+                        required
+                      >
+                        <option value="0" disabled>select..</option>
+                        <option
+                          *ngFor="let consequenceList of consequenceList"
+                          [value]="consequenceList.consequenceId"
+                        >
+                          {{ consequenceList.description }}
+                        </option>
+                      </select>
+                    </div>
+
+                    <!-- Dropdown 6 -->
+                    <div class="col-md-4">
+                      <label for="risk_level" class="form-label"
+                        >Risk Level</label
+                      ><label style="color: red"> * </label>
+                      <select
+                        style="width: 100%"
+                        id="risk_level"
+                        formControlName="risk_level"
+                        class="form-select"
+                        required
+                      >
+                        <option value="0" disabled>select..</option>
+                        <option
+                          *ngFor="let riskLevelList of riskLevelList"
+                          [value]="riskLevelList.riskLevelId"
+                        >
+                          {{ riskLevelList.description }}
+                        </option>
+                      </select>
+                    </div>
+                  </div>
+                  <br />
+                  <!-- Row 4: Root Cause Analysis and Buttons -->
+                  <div class="row">
+                    <div class="col-md-4">
+                      <label for="potential_amount" class="form-label"
+                        >Potential loss Amount<label style="color: red">
+                          *
+                        </label></label
+                      >
+                      <input
+                        placeholder="Potential amount"
+                        style="width: 100%"
+                        type="number"
+                        formControlName="potential_amount"
+                        class="form-control"
+                        id="potential_amount"
+                      />
+                    </div>
+                    <div class="col-md-4">
+                      <label for="actual_amount" class="form-label"
+                        >Actual loss Amount<label style="color: red">
+                          *
+                        </label></label
+                      >
+                      <input
+                        placeholder="Actual Amount"
+                        style="width: 100%"
+                        type="number"
+                        formControlName="actual_amount"
+                        class="form-control"
+                        id="actual_amount"
+                      />
+                    </div>
+                    <div class="col-md-4">
+                      <label style="font-weight: bold" class="comment-label"
+                        >Comment</label
+                      ><label style="color: red"> * </label>
+                      <br />
+                      <textarea
+                        class="comment-input form-control"
+                        rows="3"
+                        [(ngModel)]="comment"
+                        formControlName="comment"
+                        required
+                      ></textarea>
+                    </div>
+                  </div>
+
+                  <div class="row align-items-center">
+                    <div class="col-md-4"></div>
+
+                    <div class="col-md-4">
+                      <button
+                        class="btn btn-danger"
+                        (click)="sendBackDetails(row)"
+                      >
+                        SEND-BACK
+                      </button>
+                      <button
+                        class="btn btn-primary"
+                        (click)="updateIncidents()"
+                      >
+                        APPROVE
+                      </button>
+                    </div>
+                  </div>
+                </form>
+
+                <!-- Form End -->
+
+                <!-- other form srt -->
+                <div class="form-container d-flex justify-content-center">
+                  <form [formGroup]="formValue" *ngIf="form_decide" class="col-md-8 mx-auto">
+                    <div class="mb-3" style="margin-left: 14%;">
+                      <label style="font-weight: bold" class="comment-label">Comment</label><br /><br />
+                      <textarea
+                        class="comment-input form-control"
+                        rows="3"
+                        formControlName="comment"
+                        style="width: 80%"
+                        [(ngModel)]="comment"
+                        required
+                      ></textarea>
+                      <label style="color: red" *ngIf="comment == null || comment == ''">Required</label><br />
+                    </div>
+                
+                    <div class="text-md-end">
+                      <div class="d-flex justify-content-center">
+                        <button class="btn btn-danger" (click)="sendBack(row)">REVERT</button>
+                        <button class="btn btn-primary" (click)="forward(row)">FORWARD</button>
+                      </div>
+                    </div>
+                  </form>
+                </div>
+                
+
+                <!-- other form end -->
+
+                <!-- ORM form start -->
+                <form [formGroup]="formValue" *ngIf="status_fill">
+                  <div class="row align-items-center" style="margin-left: 14%;">
+                    <div class="col-md-4">
+                      <label style="font-weight: bold" class="comment-label"
+                        >Comment</label
+                      ><label style="color: red"> * </label>
+
+                      <br />
+                      <textarea
+                        class="comment-input form-control"
+                        rows="3"
+                        formControlName="comment"
+                        required
+                      ></textarea>
+                    </div>
+
+                    <div class="col-md-4">
+                      <label for="risk_dep_status" class="form-label"
+                        >Status</label
+                      ><label style="color: red"> * </label>
+                      <select
+                        id="risk_dep_status"
+                        formControlName="risk_status"
+                        class="form-select"
+                        required
+                      
+                      >
+                        <option value="CO">Completed</option>
+                        <option value="RE">Revert</option>
+                        <option value="DE">Declined</option>
+                        <option value="PE">Pending</option>
+                      </select>
+                    </div>
+
+                    <div class="col-md-4">
+                      <!-- <button class="btn btn-danger" (click)="sendBackDetails(row)">SEND-BACK </button> -->
+                      <button class="btn btn-primary" (click)="updateStatus()" [disabled]="isIncidentCompleted">
+                        UPDATE
+                      </button>
+                    </div>
+                  </div>
+                </form>
+                <!-- ORM form End -->
+              </app-card>
+            </div>
+          </div>
+        </ng-template>
+      </li>
+    </ul>
+    <div [ngbNavOutlet]="nav1" class="mt-2"></div>
+  </div>
+</div>

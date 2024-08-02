@@ -1,0 +1,682 @@
+<ul class="nav nav-pills mb-3" ngbNav #nav1="ngbNav">
+  <li class="nav-item" [ngbNavItem]="1">
+    <a
+      (click)="clickTab1()"
+      class="nav-link"
+      ngbNavLink
+      aria-controls="pills-home"
+      aria-selected="true"
+      >Incidents</a
+    >
+    <ng-template ngbNavContent>
+      <!-- Table headers with sorting -->
+      <div *ngIf="showtable">
+        <app-card
+          cardTitle="Reverted Incidents"
+          [options]="false"
+          blockClass="table-border-style"
+        >
+          <table class="table-responsive" style="margin-left: 40px">
+            <div class="table table-hover">
+              <thead>
+                <tr>
+                  <th>ID</th>
+
+                  <th>Occurance Date</th>
+                  <th>Detected Date</th>
+                  <th>Reporting Date</th>
+                  <th>Risk Owner</th>
+
+                  <th>ACTION</th>
+                </tr>
+              </thead>
+
+              <!-- Display the paged and sorted incidents -->
+              <tbody>
+                <tr *ngFor="let row of displayedIncidentList">
+                  <td>{{ row.incidentId }}</td>
+
+                  <td>{{ row.occurence_date | date: "yyyy-MM-dd" }}</td>
+                  <td>{{ row.detected_date | date: "yyyy-MM-dd" }}</td>
+                  <td>{{ row.reporting_date | date: "yyyy-MM-dd" }}</td>
+                  <td>{{ row.risk_owner }}</td>
+
+                  <td class="cell-small">
+                    <button class="btn btn-primary" (click)="onEdit(row)">
+                      VIEW
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </div>
+          </table>
+
+          <br />
+          <!-- pagination -->
+          <nav style="margin-left: 75%" aria-label="Page navigation example">
+            <ul class="pagination">
+              <li class="page-item">
+                <a
+                  class="page-link"
+                  href="javascript:"
+                  (click)="prevPage()"
+                  aria-label="Previous"
+                >
+                  <span aria-hidden="true">&laquo;</span>
+                  <span class="sr-only">Previous</span>
+                </a>
+              </li>
+
+              <li class="page-item" *ngFor="let page of getPageArray()">
+                <a
+                  class="page-link"
+                  href="javascript:"
+                  (click)="goToPage(page)"
+                  >{{ page }}</a
+                >
+              </li>
+
+              <li class="page-item">
+                <a
+                  class="page-link"
+                  href="javascript:"
+                  (click)="nextPage()"
+                  aria-label="Next"
+                >
+                  <span aria-hidden="true">&raquo;</span>
+                  <span class="sr-only">Next</span>
+                </a>
+              </li>
+            </ul>
+          </nav>
+
+          <!--  -->
+        </app-card>
+      </div>
+    </ng-template>
+  </li>
+
+  <li class="nav-item" [ngbNavItem]="2">
+    <a
+      class="nav-link"
+      ngbNavLink
+      aria-controls="pills-home"
+      aria-selected="true"
+      >Details</a
+    >
+    <ng-template ngbNavContent>
+      <!-- form to edit the data -->
+      <div *ngIf="showform" class="form-edit">
+        <app-card
+          cardTitle="Reverted Incidents"
+          [options]="false"
+          blockClass="table-border-style"
+        >
+        
+
+          <form [formGroup]="formValue" class="form">
+            <!-- sec- 1-->
+            <div class="row">
+              <div class="col-sm-4">
+                <div class="form-group">
+                  <label for="oc_date" class="form-label"
+                    >Reporting Officer</label
+                  >
+                  <input
+                    style="width: 70%"
+                    type="text"
+                    formControlName="reporting_officer"
+                    class="form-control"
+                    id="oc_date"
+                  />
+                </div>
+              </div>
+              <div class="col-sm-4">
+                <div class="form-group">
+                  <label for="detected_date" class="form-label"
+                    >Contact Number</label
+                  >
+                  <input
+                    style="width: 70%"
+                    type="number"
+                    formControlName="contact_number"
+                    class="form-control"
+                    id="contact_number"
+                  />
+                </div>
+              </div>
+              <div class="col-sm-4">
+                <div class="form-group">
+                  <label for="risk_owner" class="form-label">Risk Owner</label>
+                  <input
+                    style="width: 70%"
+                    type="text"
+                    formControlName="risk_owner"
+                    class="form-control"
+                    id="risk_owner"
+                  />
+                </div>
+              </div>
+            </div>
+            <br />
+            <!-- sec-2 -->
+            <div class="row">
+              <div class="col-sm-4">
+                <div class="form-group">
+                  <label for="oc_date" class="form-label" readonly
+                    >Occurrence Date</label
+                  >
+                  <input
+                    style="width: 70%"
+                    type="date"
+                    formControlName="oc_date"
+                    class="form-control"
+                    id="oc_date"
+                    (keydown)="disableDate()"
+                  />
+                </div>
+              </div>
+              <div class="col-sm-4">
+                <div class="form-group">
+                  <label for="detected_date" class="form-label" readonly
+                    >Detected Date</label
+                  >
+                  <input
+                    style="width: 70%"
+                    type="date"
+                    formControlName="detected_date"
+                    class="form-control"
+                    id="detected_date"
+                    (keydown)="disableDate()"
+                  />
+                </div>
+              </div>
+              <div class="col-sm-4">
+                <div class="form-group">
+                  <label for="reporting_date" class="form-label" readonly
+                    >Reporting Date</label
+                  >
+                  <input
+                    style="width: 70%"
+                    type="date"
+                    formControlName="reporting_date"
+                    class="form-control"
+                    id="reporting_date"
+                    (keydown)="disableDate()"
+                  />
+                </div>
+              </div>
+            </div>
+            <br />
+            <!-- sec-3 -->
+            <div class="row">
+              <div class="col-sm-4">
+                <div class="form-group">
+                  <label for="dropdown" class="form-label"
+                    >Risk Cause Description:</label
+                  >
+                  <select
+                    style="width: 70%"
+                    id="selectedOption"
+                    formControlName="risk_cause"
+                    class="form-select"
+                    required
+                    (change)="onRiskChange()"
+                  >
+                    <option
+                      *ngFor="let risk_cause of risk_causes"
+                      [value]="risk_cause.risk_causeId"
+                    >
+                      {{ risk_cause.description }}
+                    </option>
+                  </select>
+                </div>
+              </div>
+              <div class="col-sm-4">
+                <div class="form-group">
+                  <label for="dropdown" class="form-label">Sub Category</label>
+                  <select
+                    style="width: 70%"
+                    id="selectedOption"
+                    formControlName="subcat"
+                    class="form-select"
+                    required
+                    (change)="onSubCategoryChange()"
+                  >
+                    <option
+                      *ngFor="let sub_cat of specificSubCategory"
+                      [value]="sub_cat.risk_causeId"
+                    >
+                      {{ sub_cat.description }}
+                    </option>
+                  </select>
+                </div>
+              </div>
+              <div class="col-sm-4">
+                <div class="form-group">
+                  <label for="dropdown" class="form-label">Sub Type</label>
+                  <select
+                    style="width: 70%"
+                    id="selectedOption"
+                    formControlName="subtype"
+                    class="form-select"
+                    required
+                  >
+                    <option
+                      *ngFor="let sub_type of specificSubTypes"
+                      [value]="sub_type.riskSubTypeId"
+                    >
+                      {{ sub_type.description }}
+                    </option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <br />
+            <!-- sec-4 -->
+            <div class="row">
+              <div class="col-sm-4">
+                <div class="form-group">
+                  <label for="description" class="form-label"
+                    >Description</label
+                  >
+                  <textarea
+                    style="width: 100%"
+                    class="form-control"
+                    id="description"
+                    rows="3"
+                    formControlName="description"
+                  ></textarea>
+                </div>
+              </div>
+              <div class="col-sm-4">
+                <div class="form-group">
+                  <label for="recovery_action" class="form-label"
+                    >Recovery Actions</label
+                  >
+                  <textarea
+                    style="width: 100%"
+                    class="form-control"
+                    id="recovery_action"
+                    rows="3"
+                    formControlName="recovery_action"
+                  ></textarea>
+                </div>
+              </div>
+              <div class="col-sm-4">
+                <div class="form-group">
+                  <label for="recoverd_amount" class="form-label" readonly
+                    >Recoverd Amount</label
+                  >
+                  <input
+                    style="width: 70%"
+                    type="number"
+                    formControlName="recoverd_amount"
+                    class="form-control"
+                    id="recoverd_amount"
+                  />
+                </div>
+              </div>
+            </div>
+            <br />
+            <div class="row">
+              <div class="col-sm-4">
+
+                <div class="form-group">
+                  <label for="account_number" class="form-label" readonly
+                    >Account Number</label
+                  >
+                  <input
+                    style="width: 70%"
+                    type="number"
+                    formControlName="account_number"
+                    class="form-control"
+                    id="account_number"
+                  />
+                </div>  
+              </div>
+
+
+              
+
+
+              <div class="col-sm-4">
+
+                <div class="form-group">
+                  <label for="actual_amount" class="form-label" readonly
+                    >Actual Loss Amount</label
+                  >
+                  <input
+                    style="width: 70%"
+                    type="number"
+                    formControlName="actual_amount"
+                    class="form-control"
+                    id="actual_amount"
+                  />
+                </div>
+               
+              </div>
+              <div class="col-sm-4">
+                <div class="form-group">
+                  <label for="potential_amount" class="form-label" readonly
+                    >Potential Loss Amount</label
+                  >
+                  <input
+                    style="width: 70%"
+                    type="number"
+                    formControlName="potential_amount"
+                    class="form-control"
+                    id="potential_amount"
+                  />
+                </div>
+              
+              </div>
+            </div>
+            <div
+              *ngIf="showEmtyMessage"
+              class="emty-message"
+              style="
+                background-color: whitesmoke;
+                padding: 10px;
+                max-width: 400px;
+                margin: 0 auto;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+              "
+            >
+              <h4 style="color: rgb(6, 204, 39); margin: 0">
+                {{ emtyMessage }}
+              </h4>
+            </div>
+            <div
+            *ngIf="showSuccessMessage"
+            class="success-message"
+            style="
+              background-color: whitesmoke;
+              padding: 10px;
+              max-width: 400px;
+              margin: 0 auto;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            "
+          >
+            <h4 style="color: rgb(6, 204, 39); margin: 0">
+              {{ successMessage }}
+            </h4>
+          </div>
+            <br />
+            <div class="row">
+              <div class="col-sm-4">
+                <div class="form-group">
+                  <label for="dropdown" class="form-label"
+                    >Consequences of Incident</label
+                  >
+                  <select
+                    style="width: 70%"
+                    id="consequence"
+                    formControlName="consequence"
+                    class="form-select"
+                    required
+                  >
+                    <option
+                      *ngFor="let consequenceList of consequenceList"
+                      [value]="consequenceList.consequenceId"
+                    >
+                      {{ consequenceList.description }}
+                    </option>
+                  </select>
+                </div>
+              </div>
+              <div class="col-sm-4">
+                <div class="form-group">
+                  <label for="dropdown" class="form-label">Risk Level</label>
+                  <select
+                    style="width: 70%"
+                    id="risk_level"
+                    formControlName="risk_level"
+                    class="form-select"
+                    required
+                  >
+                    <option value="0" disabled>Select.....</option>
+                    <option
+                      *ngFor="let riskLevelList of riskLevelList"
+                      [value]="riskLevelList.riskLevelId"
+                    >
+                      {{ riskLevelList.description }}
+                    </option>
+                  </select>
+                </div>
+              </div>
+              <div class="col-sm-4">
+               
+                <div class="form-group">
+                  <label for="dropdown" class="form-label">Business Line</label>
+                  <select
+                    style="width: 70%"
+                    id="business_line"
+                    formControlName="business_line"
+                    class="form-select"
+                    required
+                  >
+                    <option
+                      *ngFor="let businessLineList of businessLineList"
+                      [value]="businessLineList.businessLineId"
+                    >
+                      {{ businessLineList.description }}
+                    </option>
+                  </select>
+                </div>
+              
+              </div>
+            </div>
+
+            <br />
+            <!-- extra -->
+            <div class="row">
+              <div class="col-sm-4">
+               
+                <div class="form-group">
+                  <label for="dropdown" class="form-label">Business Aria</label>
+                  <select
+                    style="width: 70%"
+                    id="business_aria"
+                    formControlName="business_aria"
+                    class="form-select"
+                    required
+                  >
+                    <option
+                      *ngFor="let businessAriaList of businessAriaList"
+                      [value]="businessAriaList.businessAriaId"
+                    >
+                      {{ businessAriaList.description }}
+                    </option>
+                  </select>
+                </div>
+
+
+              </div>
+              <div class="col-sm-4">
+                <div class="form-group">
+                  <label for="dropdown" class="form-label">Incident Type</label>
+                  <select
+                    style="width: 70%"
+                    id="incident_type"
+                    formControlName="incident_type"
+                    class="form-select"
+                    required
+                  >
+                    <option
+                      *ngFor="let incidentTypeList of incidentTypeList"
+                      [value]="incidentTypeList.incidentTypeId"
+                    >
+                      {{ incidentTypeList.description }}
+                    </option>
+                  </select>
+                </div>
+              </div>
+              <div class="col-sm-4">
+                <div class="form-group">
+                  <label for="dropdown" class="form-label"
+                    >LossEvent Type</label
+                  >
+                  <select
+                    style="width: 70%"
+                    id="loss_event_type"
+                    formControlName="loss_event_type"
+                    class="form-select"
+                    required
+                  >
+                    <option
+                      *ngFor="let lossEventTypeList of lossEventTypeList"
+                      [value]="lossEventTypeList.lossEventTypeId"
+                    >
+                      {{ lossEventTypeList.description }}
+                    </option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <br>
+            <!-- end -->
+            <div class="row">
+              <div class="col-sm-4">
+                <div class="form-group">
+                  <label for="action" class="form-label"
+                    >Action Taken By Department</label
+                  >
+                  <textarea
+                    style="width: 100%"
+                    class="form-control"
+                    id="action"
+                    rows="3"
+                    formControlName="action"
+                  ></textarea>
+                </div>     
+              </div>
+              <div class="col-sm-4">
+
+                <div class="form-group">
+                  <label for="root_cause" class="form-label">Root Cause</label>
+                  <textarea
+                    style="width: 100%"
+                    class="form-control"
+                    id="root_cause"
+                    rows="3"
+                    formControlName="root_cause"
+                  ></textarea>
+                </div>
+               
+              </div>
+              <div class="col-md-4">
+                <label style="font-weight: bold" class="comment-label"
+                  >Comment</label
+                >
+                <br />
+                <textarea
+                  class="comment-input form-control"
+                  rows="3"
+                  formControlName="comment"
+                  required
+                  [(ngModel)]="comment"
+                ></textarea>
+                <label
+                  style="color: red"
+                  *ngIf="comment == null || comment == ''"
+                >
+                  Required
+                </label>
+              </div>
+            </div>
+            <br />
+            <div class="row">
+              <div class="col-sm-4"></div>
+              <div class="col-sm-4"></div>
+              <div class="col-sm-4">
+                <button class="btn btn-danger" (click)="revertDetails(row)">
+                  REVERT
+                </button>
+                <button class="btn btn-primary" (click)="updateIncidents()">
+                FORWARD
+                </button>
+              </div>
+            </div>
+          </form>
+        </app-card>
+      
+    
+        <!-- Comments section with pagination -->
+        <div class="row no-margin">
+          <app-card
+            cardTitle="Comments"
+            [options]="false"
+            blockClass="table-border-style"
+          >
+            <div class="card-body">
+              <table class="table" style="margin-left: 5%,5%;">
+                <thead>
+                  <tr>
+                    <th >Description</th>
+                    <th>Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let comment of displayedCommentList">
+                    <!-- Log the values for debugging -->
+                    <ng-container
+                      *ngIf="comment.incident.incidentId === selectedIncidentId"
+                    >
+                      <td>{{ comment.description }}</td>
+                      <td>{{ comment.commentedDate | date: "yyyy-MM-dd" }}</td>
+                    </ng-container>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <!-- Pagination for comments -->
+            <nav aria-label="Page navigation example" style="margin-right: 15%">
+              <ul class="pagination justify-content-end">
+                <li class="page-item">
+                  <a
+                    class="page-link"
+                    href="javascript:"
+                    (click)="prevCommentPage()"
+                    aria-label="Previous"
+                  >
+                    <span aria-hidden="true">&laquo;</span>
+                    <span class="sr-only">Previous</span>
+                  </a>
+                </li>
+                <li
+                  class="page-item"
+                  *ngFor="let page of getCommentPageArray()"
+                >
+                  <a
+                    class="page-link"
+                    href="javascript:"
+                    (click)="goToCommentPage(page)"
+                    >{{ page }}</a
+                  >
+                </li>
+                <li class="page-item">
+                  <a
+                    class="page-link"
+                    href="javascript:"
+                    (click)="nextCommentPage()"
+                    aria-label="Next"
+                  >
+                    <span aria-hidden="true">&raquo;</span>
+                    <span class="sr-only">Next</span>
+                  </a>
+                </li>
+              </ul>
+            </nav>
+          </app-card>
+        </div>
+        
+      </div>
+    </ng-template>
+  </li>
+</ul>
+<div [ngbNavOutlet]="nav1" class="mt-2"></div>

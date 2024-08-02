@@ -1,0 +1,681 @@
+<strong
+  ><label style="color: black" for="search_by" class="form-label"
+    >SEARCH BY</label
+  ></strong
+>
+<div class="col-md-8">
+  <form [formGroup]="formValue">
+    <div class="mb-3">
+      <select
+        id="search_by"
+        formControlName="search_by"
+        class="form-select"
+        style="width: 30%"
+        required
+        (change)="onSearchTypeChange()"
+      >
+        <option value="REF">INCIDENT REF</option>
+        <option value="LEVEL">STATUS AND LEVEL</option>
+      </select>
+    </div>
+  </form>
+</div>
+
+<div *ngIf="search_ref_div">
+  <form [formGroup]="formValue">
+    <div *ngIf="search_box" class="row">
+      <div class="col-md-6">
+        <input
+          style="width: 42%"
+          type="text"
+          placeholder="Enter the REF ID..."
+          class="form-control"
+          formControlName="searchInput"
+        />
+      </div>
+    </div>
+    <br>
+    <div class="row" *ngIf="status_dropdown">
+      <div class="col-md-3">
+        <select
+          id="status"
+          formControlName="status"
+          class="form-select"
+          
+          required
+        >
+          <option value="" disabled selected>Select Status</option>
+          <option value="CO">COMPLETED</option>
+          <option value="DE">DECLINED</option>
+          <option value="PE">PENDING</option>
+          <option value="RE">RETURNED</option>
+        </select>
+      </div>
+      <div class="col-md-3">
+        <select
+          id="level"
+          formControlName="level"
+          class="form-select"
+         
+          required
+        >
+          <option value="" disabled selected>Select Level</option>
+          <option
+          *ngFor="let levels of levels"
+          [value]="levels.type"
+        >
+          {{ levels.description }}
+          
+          
+        </option>
+        </select>
+        
+      </div>
+      <div class="col-md-3">
+        <!-- Date range picker using Angular Material Datepicker -->
+        <div>
+          <label for="normalStartDate">StartDate:</label>
+          <input
+            type="date"
+            id="normalStartDate"
+            name="normalStartDate"
+            formControlName="startDate"
+          
+          />
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div>
+          <label for="normalEndDate"> End Date:</label>
+          <input
+            type="date"
+            id="normalEndDate"
+            name="normalEndDate"
+            formControlName="endDate"
+       
+          />
+        </div>
+      </div>
+    </div>
+    <br>
+    <div class="row">
+      <div class="col-md-12">
+        <button class="btn btn-success" (click)="getPosts()">SEARCH</button>
+      </div>
+    </div>
+  </form>
+  <br />
+  <br />
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="col-sm-12">
+  <div class="card-body">
+    <ul class="nav nav-pills mb-3" ngbNav #nav1="ngbNav">
+      <li class="nav-item" [ngbNavItem]="1">
+        <a
+          (click)="clickTab1()"
+          class="nav-link"
+          ngbNavLink
+          aria-controls="pills-home"
+          aria-selected="true"
+          >Incidents</a
+        >
+        <ng-template ngbNavContent>
+          <div *ngIf="showdata">
+            <app-card
+              cardTitle="Incidents"
+              [options]="false"
+              blockClass="table-border-style"
+            >
+              <div class="text-end">
+                <button
+                  class="btn btn-success custom-btn"
+                  (click)="exportToExcel()"
+                >
+                  To-Excel
+                </button>
+              </div>
+
+              <!-- Table headers with sorting -->
+              <table class="table-responsive" style="margin-left: 30px">
+                <div class="table table-hover">
+                  <thead>
+                    <tr>
+                      <th >ID
+                      
+                      </th>
+                      <th >
+                      Status
+                        
+                      </th>
+                      <th >
+                        current-Level
+                        
+                      </th>
+                      <th >
+                        Reporting Date
+                       
+                      </th>
+                      <th >
+                        Risk Owner
+                       
+                      </th>
+
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+
+                  <!-- Display the paged and sorted incidents -->
+                  <tbody>
+                    <tr *ngFor="let row of displayedIncidentList">
+                      <td>{{ row.incidentId }}</td>
+                      <td>{{ getStatusDescription(row.status) }}</td>
+                      <td>{{ row.currentLevel }}</td>
+                      <td>{{ row.reporting_date | date: "yyyy-MM-dd" }}</td>
+                      <td>{{ row.risk_owner }}</td>
+
+                      <td>
+                        <button class="btn btn-primary" (click)="onView(row)">
+                          View
+                        </button>
+                        <br />
+                      </td>
+                    </tr>
+                  </tbody>
+                </div>
+              </table>
+              <br />
+              <!-- pagination -->
+              <nav
+                style="margin-left: 75%"
+                aria-label="Page navigation example"
+              >
+                <ul class="pagination">
+                  <li class="page-item">
+                    <a
+                      class="page-link"
+                      href="javascript:"
+                      (click)="prevPage()"
+                      aria-label="Previous"
+                    >
+                      <span aria-hidden="true">&laquo;</span>
+                      <span class="sr-only">Previous</span>
+                    </a>
+                  </li>
+
+                  <li class="page-item" *ngFor="let page of getPageArray()">
+                    <a
+                      class="page-link"
+                      href="javascript:"
+                      (click)="goToPage(page)"
+                      >{{ page }}</a
+                    >
+                  </li>
+
+                  <li class="page-item">
+                    <a
+                      class="page-link"
+                      href="javascript:"
+                      (click)="nextPage()"
+                      aria-label="Next"
+                    >
+                      <span aria-hidden="true">&raquo;</span>
+                      <span class="sr-only">Next</span>
+                    </a>
+                  </li>
+                </ul>
+              </nav>
+            </app-card>
+          </div>
+        </ng-template>
+      </li>
+      <li class="nav-item" [ngbNavItem]="2">
+        <a
+          class="nav-link"
+          ngbNavLink
+          aria-controls="pills-home"
+          aria-selected="true"
+          >Details</a
+        >
+        <ng-template ngbNavContent>
+          <!-- table for view data-->
+
+          <div class="form-view" *ngIf="showform">
+            <div>
+              <br />
+              <app-card
+                cardTitle="Incident Details"
+                [options]="false"
+                blockClass="table-border-style"
+              >
+                <h4
+                  *ngIf="not_filled"
+                  class="alert_msg"
+                  style="color: red; text-align: center"
+                >
+                  Please Fill All the Fields
+                </h4>
+
+                <div
+                  *ngIf="showSuccessMessage"
+                  class="success-message"
+                  style="
+                    background-color: whitesmoke;
+                    padding: 10px;
+                    max-width: 400px;
+                    margin: 0 auto;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                  "
+                >
+                  <h4 style="color: rgb(6, 204, 39); margin: 0">
+                    {{ successMessage }}
+                  </h4>
+                </div>
+
+                <div class="row">
+                  <div class="col-md-6">
+                    <div hidden class="detail heading">
+                      <strong style="font-weight: bold; color: #333"
+                        >id:</strong
+                      >
+                      <p style="display: inline-block" class="field-value">
+                        {{ row.incidentId }}
+                      </p>
+                    </div>
+                    <div class="detail" *ngIf="row.inc_description">
+                      <strong style="font-weight: bold; color: #333"
+                        >Description :</strong
+                      >
+                      <p style="display: inline-block" class="field-value">
+                        {{ row.inc_description }}
+                      </p>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="detail" *ngIf="row.occurence_date">
+                      <strong style="font-weight: bold; color: #333"
+                        >Occurrence Date :</strong
+                      >
+                      <p style="display: inline-block" class="field-value">
+                        {{ row.occurence_date | date: "yyyy-MM-dd" }}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="detail" *ngIf="row.risk_owner">
+                      <strong style="font-weight: bold; color: #333"
+                        >Risk Owner :</strong
+                      >
+                      <p style="display: inline-block" class="field-value">
+                        {{ row.risk_owner }}
+                      </p>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="detail" *ngIf="row.detected_date">
+                      <strong style="font-weight: bold; color: #333"
+                        >Detected Date :</strong
+                      >
+                      <p style="display: inline-block" class="field-value">
+                        {{ row.detected_date | date: "yyyy-MM-dd" }}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="detail" *ngIf="row.sub_type">
+                      <strong style="font-weight: bold; color: #333"
+                        >Risk Cause :</strong
+                      >
+                      <p style="display: inline-block" class="field-value">
+                        {{ row.sub_type.riskCause.description }}
+                      </p>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="detail" *ngIf="row.sub_type">
+                      <strong style="font-weight: bold; color: #333"
+                        >Risk Sub Category :</strong
+                      >
+                      <p style="display: inline-block" class="field-value">
+                        {{ row.sub_type.riskSubCategory.description }}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="detail" *ngIf="row.sub_type">
+                      <strong style="font-weight: bold; color: #333"
+                        >Risk Sub Type :</strong
+                      >
+                      <p
+                        *ngIf="row.sub_type"
+                        style="display: inline-block"
+                        class="field-value"
+                      >
+                        {{ row.sub_type.description }}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div class="col-md-6">
+                    <div class="detail" *ngIf="row.lossEventType">
+                      <strong style="font-weight: bold; color: #333"
+                        >LossEvent Type :</strong
+                      >
+                      <p
+                        *ngIf="row.lossEventType"
+                        style="display: inline-block"
+                        class="field-value"
+                      >
+                        {{ row.lossEventType.description }}
+                      </p>
+                    </div>
+                  </div>
+
+
+
+                </div>
+
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="detail" *ngIf="row.businessLine">
+                      <strong style="font-weight: bold; color: #333"
+                        >Business Line :</strong
+                      >
+                      <p
+                        *ngIf="row.businessLine"
+                        style="display: inline-block"
+                        class="field-value"
+                      >
+                        {{ row.businessLine.description }}
+                      </p>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="detail" *ngIf="row.businessAria">
+                      <strong style="font-weight: bold; color: #333"
+                        >Business Aria :</strong
+                      >
+                      <p
+                        *ngIf="row.businessAria"
+                        style="display: inline-block"
+                        class="field-value"
+                      >
+                        {{ row.businessAria.description }}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="detail" *ngIf="row.consequence">
+                      <strong style="font-weight: bold; color: #333"
+                        >Consequence :</strong
+                      >
+                      <p
+                        *ngIf="row.consequence"
+                        style="display: inline-block"
+                        class="field-value"
+                      >
+                        {{ row.consequence.description }}
+                      </p>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="detail" *ngIf="row.riskLevel">
+                      <strong style="font-weight: bold; color: #333"
+                        >Risk-Level :</strong
+                      >
+                      <p
+                        *ngIf="row.riskLevel"
+                        style="display: inline-block"
+                        class="field-value"
+                      >
+                        {{ row.riskLevel.description }}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="detail" *ngIf="row.action">
+                      <strong style="font-weight: bold; color: #333"
+                        >Action :</strong
+                      >
+                      <p
+                        *ngIf="row.action"
+                        style="display: inline-block"
+                        class="field-value"
+                      >
+                        {{ row.action }}
+                      </p>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="detail" *ngIf="row.rootCause">
+                      <strong style="font-weight: bold; color: #333"
+                        >Root cause :</strong
+                      >
+                      <p
+                        *ngIf="row.rootCause"
+                        style="display: inline-block"
+                        class="field-value"
+                      >
+                        {{ row.rootCause }}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="detail" *ngIf="row.region">
+                      <strong style="font-weight: bold; color: #333"
+                        >Region :</strong
+                      >
+                      <p
+                        *ngIf="row.region"
+                        style="display: inline-block"
+                        class="field-value"
+                      >
+                        {{ row.region.description }}
+                      </p>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="detail" *ngIf="row.branch">
+                      <strong style="font-weight: bold; color: #333"
+                        >Branch :</strong
+                      >
+                      <p
+                        *ngIf="row.branch"
+                        style="display: inline-block"
+                        class="field-value"
+                      >
+                        {{ row.branch.description }}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-6">
+                    
+                    <div class="detail" *ngIf="row.incidentType">
+                      <strong style="font-weight: bold; color: #333"
+                        >Incident Type :</strong
+                      >
+                      <p
+                        *ngIf="row.incidentType"
+                        style="display: inline-block"
+                        class="field-value"
+                      >
+                        {{ row.incidentType.description }}
+                      </p>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="detail" *ngIf="row.actual_amount">
+                      <strong style="font-weight: bold; color: #333"
+                        >Actual Loss Amount :</strong
+                      >
+                      <p
+                        *ngIf="row.actual_amount"
+                        style="display: inline-block"
+                        class="field-value"
+                      >
+                        {{ row.actual_amount }}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+
+
+                  <div class="col-md-6">
+                    <div class="detail" *ngIf="row.potential_amount">
+                      <strong style="font-weight: bold; color: #333"
+                        >Potential Loss Amount :</strong
+                      >
+                      <p
+                        *ngIf="row.potential_amount"
+                        style="display: inline-block"
+                        class="field-value"
+                      >
+                        {{ row.potential_amount }}
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div class="col-md-6">
+                  
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="detail" *ngIf="row.currentLevel">
+                      <strong style="font-weight: bold; color: #333"
+                        >current-Level:</strong
+                      >
+                      <p
+                        *ngIf="row.currentLevel"
+                        style="display: inline-block"
+                        class="field-value"
+                      >
+                        {{ row.currentLevel }}
+                      </p>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="detail" *ngIf="row.status">
+                      <strong style="font-weight: bold; color: #333">Status :</strong>
+                      <span *ngIf="row.status">{{ getStatusDescription(row.status) }}</span>
+                    </div>
+                  </div>
+                  
+                </div>
+              </app-card>
+            </div>
+          </div>
+          <!-- Show the Comments -->
+          <div class="row no-margin" *ngIf="!showdata">
+            <app-card
+              cardTitle="Comments"
+              [options]="false"
+              blockClass="table-border-style"
+            >
+              <div class="card-body">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>Description</th>
+                      <th>Date</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let comment of displayedCommentList">
+                      <ng-container
+                        *ngIf="
+                          comment.incident.incidentId === selectedIncidentId
+                        "
+                      >
+                        <td>{{ comment.description }}</td>
+                        <td>
+                          {{ comment.commentedDate | date: "yyyy-MM-dd" }}
+                        </td>
+                      </ng-container>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+                   <!-- Pagination for comments -->
+                   <nav
+                   aria-label="Page navigation example"
+                   style="margin-right: 15%"
+                 >
+                   <ul class="pagination justify-content-end">
+                     <li class="page-item">
+                       <a
+                         class="page-link"
+                         href="javascript:"
+                         (click)="prevCommentPage()"
+                         aria-label="Previous"
+                       >
+                         <span aria-hidden="true">&laquo;</span>
+                         <span class="sr-only">Previous</span>
+                       </a>
+                     </li>
+                     <li
+                       class="page-item"
+                       *ngFor="let page of getCommentPageArray()"
+                     >
+                       <a
+                         class="page-link"
+                         href="javascript:"
+                         (click)="goToCommentPage(page)"
+                         >{{ page }}</a
+                       >
+                     </li>
+                     <li class="page-item">
+                       <a
+                         class="page-link"
+                         href="javascript:"
+                         (click)="nextCommentPage()"
+                         aria-label="Next"
+                       >
+                         <span aria-hidden="true">&raquo;</span>
+                         <span class="sr-only">Next</span>
+                       </a>
+                     </li>
+                   </ul>
+                 </nav>
+
+            </app-card>
+          </div>
+        </ng-template>
+      </li>
+    </ul>
+    <div [ngbNavOutlet]="nav1" class="mt-2"></div>
+  </div>
+</div>

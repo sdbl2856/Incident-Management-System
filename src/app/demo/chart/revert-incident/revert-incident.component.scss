@@ -1,0 +1,40 @@
+.button-container {
+  // display: flex;
+  // align-items: flex-end; /* Use flex-end to align items at the bottom of the container */
+  // justify-content: flex-end; /* Align items to the right */
+  gap: 15px;
+  margin-left: 26%;
+}
+
+
+  .form-group{
+    font-weight: bold;
+    gap: 10px;
+    margin-left: 20px;
+  }
+
+  td{
+    padding-bottom: 2px;
+    // margin-bottom: 20px;
+  }
+/* Inside your component's CSS file */
+.card {
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 16px;
+}
+
+.card-title {
+  color: #333;
+  font-size: 1rem;
+  margin-bottom: 10px;
+}
+
+.card-text {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #007bff; /* Bootstrap primary color */
+}
+
+

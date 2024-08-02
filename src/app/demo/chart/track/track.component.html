@@ -1,0 +1,464 @@
+<strong
+  ><label style="color: black" for="search_by" class="form-label"
+    >FILTER BY</label></strong>
+<div class="col-md-8">
+  <form [formGroup]="formValue">
+    <div class="mb-3">
+      <select
+        id="search_by"
+        formControlName="search_by"
+        class="form-select"
+        style="width: 30%"
+        required
+        (change)="getPosts()"
+      >
+      <option value="CO">COMPLETED</option>
+      <option value="DE">DECLINED</option>
+      <option value="PE">PENDING</option>
+      <option value="RE">REVERTED</option>
+      </select>
+    </div>
+  </form>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="col-sm-12">
+  <div class="card-body">
+    <ul class="nav nav-pills mb-3" ngbNav #nav1="ngbNav">
+      <li class="nav-item" [ngbNavItem]="1">
+        <a
+          (click)="clickTab1()"
+          class="nav-link"
+          ngbNavLink
+          aria-controls="pills-home"
+          aria-selected="true"
+          >Incidents</a
+        >
+        <ng-template ngbNavContent>
+          <div *ngIf="showdata">
+            <app-card
+              cardTitle="Received Incidents"
+              [options]="false"
+              blockClass="table-border-style"
+            >
+              <div class="text-end">
+                <button
+                  class="btn btn-success custom-btn"
+                  (click)="exportToExcel()"
+                >
+                  To-Excel
+                </button>
+              </div>
+
+              <!-- Table headers with sorting -->
+              <table class="table-responsive" style="margin-left: 30px">
+                <div class="table table-hover">
+                  <thead>
+                    <tr>
+                      <th >ID
+                      
+                      </th>
+                      <th >
+                      Status
+                        
+                      </th>
+                      <th >
+                        current-Level
+                        
+                      </th>
+                      <th >
+                        Reporting Date
+                       
+                      </th>
+                      <th >
+                        Risk Owner
+                       
+                      </th>
+
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+
+                  <!-- Display the paged and sorted incidents -->
+                  <tbody>
+                    <tr *ngFor="let row of displayedIncidentList">
+                      <td>{{ row.incidentId }}</td>
+                      <td>{{ getStatusDescription(row.status) }}</td>
+                      <td>{{ row.currentLevel }}</td>
+                      <td>{{ row.reporting_date | date: "yyyy-MM-dd" }}</td>
+                      <td>{{ row.risk_owner }}</td>
+
+                      <td>
+                        <button class="btn btn-primary" (click)="onView(row)">
+                          View
+                        </button>
+                        <br />
+                      </td>
+                    </tr>
+                  </tbody>
+                </div>
+              </table>
+              <br />
+              <!-- pagination -->
+              <nav
+                style="margin-left: 75%"
+                aria-label="Page navigation example"
+              >
+                <ul class="pagination">
+                  <li class="page-item">
+                    <a
+                      class="page-link"
+                      href="javascript:"
+                      (click)="prevPage()"
+                      aria-label="Previous"
+                    >
+                      <span aria-hidden="true">&laquo;</span>
+                      <span class="sr-only">Previous</span>
+                    </a>
+                  </li>
+
+                  <li class="page-item" *ngFor="let page of getPageArray()">
+                    <a
+                      class="page-link"
+                      href="javascript:"
+                      (click)="goToPage(page)"
+                      >{{ page }}</a
+                    >
+                  </li>
+
+                  <li class="page-item">
+                    <a
+                      class="page-link"
+                      href="javascript:"
+                      (click)="nextPage()"
+                      aria-label="Next"
+                    >
+                      <span aria-hidden="true">&raquo;</span>
+                      <span class="sr-only">Next</span>
+                    </a>
+                  </li>
+                </ul>
+              </nav>
+            </app-card>
+          </div>
+        </ng-template>
+      </li>
+      <li class="nav-item" [ngbNavItem]="2">
+        <a
+          class="nav-link"
+          ngbNavLink
+          aria-controls="pills-home"
+          aria-selected="true"
+          >Details</a
+        >
+        <ng-template ngbNavContent>
+          <!-- table for view data-->
+
+          <div class="form-view" *ngIf="showform">
+            <div>
+              <br />
+              <app-card
+              cardTitle="Incident Details"
+              [options]="false"
+              blockClass="table-border-style"
+            >
+              <div class="card-content-container">
+                <h4 *ngIf="not_filled" class="alert_msg">
+                  Please Fill All the Fields
+                </h4>
+            
+                <div *ngIf="showSuccessMessage" class="success-message">
+                  <h4>{{ successMessage }}</h4>
+                </div>
+            
+                <div class="row">
+                  <div class="col-md-6">
+                    <!-- <div class="detail heading">
+                      <strong>id:</strong>
+                      <p class="field-value">{{ row.incidentId }}</p>
+                    </div> -->
+                    <div class="detail">
+                      <strong>Description :</strong>
+                      <p class="field-value">{{ row.inc_description }}</p>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="detail">
+                      <strong>Occurrence Date :</strong>
+                      <p class="field-value">{{ row.occurence_date | date: 'yyyy-MM-dd' }}</p>
+                    </div>
+                  </div>
+                </div>
+            
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="detail">
+                      <strong>Risk Owner :</strong>
+                      <p class="field-value">{{ row.risk_owner }}</p>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="detail">
+                      <strong>Detected Date :</strong>
+                      <p class="field-value">{{ row.detected_date | date: 'yyyy-MM-dd' }}</p>
+                    </div>
+                  </div>
+                </div>
+            
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="detail">
+                      <strong>Risk Cause :</strong>
+                      <p class="field-value">{{ row.sub_type.riskCause.description }}</p>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="detail">
+                      <strong>Risk Sub Category :</strong>
+                      <p class="field-value">{{ row.sub_type.riskSubCategory.description }}</p>
+                    </div>
+                  </div>
+                </div>
+            
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="detail">
+                      <strong>Risk Sub Type :</strong>
+                      <p *ngIf="row.sub_type" class="field-value">
+                        {{ row.sub_type.description }}
+                      </p>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="detail">
+                      <strong>Current Level :</strong>
+                      <p class="field-value">{{ row.currentLevel }}</p>
+                    </div>
+                  </div>
+                </div>
+            
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="detail" *ngIf="row.businessLine">
+                      <strong>Business Line :</strong>
+                      <p *ngIf="row.businessLine" class="field-value">
+                        {{ row.businessLine.description }}
+                      </p>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="detail" *ngIf="row.businessAria">
+                      <strong>Business Aria :</strong>
+                      <p *ngIf="row.businessAria" class="field-value">
+                        {{ row.businessAria.description }}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+            
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="detail" *ngIf="row.consequence">
+                      <strong>Consequence :</strong>
+                      <p *ngIf="row.consequence" class="field-value">
+                        {{ row.consequence.description }}
+                      </p>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="detail" *ngIf="row.riskLevel">
+                      <strong>Risk-Level :</strong>
+                      <p *ngIf="row.riskLevel" class="field-value">
+                        {{ row.riskLevel.description }}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+            
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="detail" *ngIf="row.action">
+                      <strong>Action :</strong>
+                      <p *ngIf="row.action" class="field-value">
+                        {{ row.action }}
+                      </p>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="detail" *ngIf="row.rootCause">
+                      <strong>Root cause :</strong>
+                      <p *ngIf="row.rootCause" class="field-value">
+                        {{ row.rootCause }}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+            
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="detail" *ngIf="row.region">
+                      <strong>Region :</strong>
+                      <p *ngIf="row.region" class="field-value">
+                        {{ row.region.description }}
+                      </p>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="detail" *ngIf="row.branch">
+                      <strong>Branch :</strong>
+                      <p *ngIf="row.branch" class="field-value">
+                        {{ row.branch.description }}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+            
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="detail" *ngIf="row.incidentType">
+                      <strong>Incident Type :</strong>
+                      <p *ngIf="row.incidentType" class="field-value">
+                        {{ row.incidentType.description }}
+                      </p>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="detail" *ngIf="row.actual_amount">
+                      <strong>Actual Loss Amount :</strong>
+                      <p *ngIf="row.actual_amount" class="field-value">
+                        {{ row.actual_amount }}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+            
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="detail">
+                      <strong>Status :</strong>
+                      <span class="field-value">
+                        {{ getStatusDescription(row.status) }}
+                      </span>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="detail" *ngIf="row.potential_amount">
+                      <strong>Potential Loss Amount :</strong>
+                      <p *ngIf="row.potential_amount" class="field-value">
+                        {{ row.potential_amount }}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+            
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="detail" *ngIf="row.lossEventType">
+                      <strong>LossEvent Type :</strong>
+                      <p *ngIf="row.lossEventType" class="field-value">
+                        {{ row.lossEventType.description }}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </app-card>
+            
+            </div>
+          </div>
+
+          
+          <!-- Show the Comments -->
+          <div class="row no-margin" *ngIf="!showdata">
+            <app-card
+              cardTitle="Comments"
+              [options]="false"
+              blockClass="table-border-style"
+            >
+              <div class="card-body">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>Description</th>
+                      <th>Date</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let comment of displayedCommentList">
+                      <ng-container
+                        *ngIf="
+                          comment.incident.incidentId === selectedIncidentId
+                        "
+                      >
+                        <td>{{ comment.description }}</td>
+                        <td>
+                          {{ comment.commentedDate | date: "yyyy-MM-dd" }}
+                        </td>
+                      </ng-container>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+                   <!-- Pagination for comments -->
+                   <nav
+                   aria-label="Page navigation example"
+                   style="margin-right: 15%"
+                 >
+                   <ul class="pagination justify-content-end">
+                     <li class="page-item">
+                       <a
+                         class="page-link"
+                         href="javascript:"
+                         (click)="prevCommentPage()"
+                         aria-label="Previous"
+                       >
+                         <span aria-hidden="true">&laquo;</span>
+                         <span class="sr-only">Previous</span>
+                       </a>
+                     </li>
+                     <li
+                       class="page-item"
+                       *ngFor="let page of getCommentPageArray()"
+                     >
+                       <a
+                         class="page-link"
+                         href="javascript:"
+                         (click)="goToCommentPage(page)"
+                         >{{ page }}</a
+                       >
+                     </li>
+                     <li class="page-item">
+                       <a
+                         class="page-link"
+                         href="javascript:"
+                         (click)="nextCommentPage()"
+                         aria-label="Next"
+                       >
+                         <span aria-hidden="true">&raquo;</span>
+                         <span class="sr-only">Next</span>
+                       </a>
+                     </li>
+                   </ul>
+                 </nav>
+
+            </app-card>
+          </div>
+        </ng-template>
+      </li>
+    </ul>
+    <div [ngbNavOutlet]="nav1" class="mt-2"></div>
+  </div>
+</div>
