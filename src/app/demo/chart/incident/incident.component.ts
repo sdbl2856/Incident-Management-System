@@ -55,6 +55,8 @@ export class IncidentComponent {
   region_div: boolean = false;
   any_user_div=true;
   dep_div: boolean = false;
+  showSDBLError: boolean = false;
+  errorMessage: string = '';
   
 
   constructor(
@@ -75,7 +77,7 @@ export class IncidentComponent {
       risk_cause: [''],
       sub_category: [''],
       sub_type: [''],
-      reporting_officer: [''],
+      reporting_officer: ['', [Validators.required, this.sdbLValidator]],
       contact_number: [''],
       potential_amount: ['', Validators.required],
       recoverd_amount: [''],
@@ -88,6 +90,15 @@ export class IncidentComponent {
       email: [''],
       dep: [''],
     });
+  }
+
+  sdbLValidator(control: any) {
+    const value = control.value;
+    const isValid = /^SDBL\d+$/.test(value);
+    if (!isValid && value !== '') {
+      return { 'invalidSDBL': true };
+    }
+    return null;
   }
 
   pastDateValidator(): ValidatorFn {
@@ -264,6 +275,21 @@ export class IncidentComponent {
     }
   }
 
+
+  // postDetails() {
+  //   const reportingOfficer = this.formValue.value.reporting_officer;
+  
+  //   // Ensure the value starts with 'SDBL' and is followed by digits
+  //   const isValid = /^SDBL\d+$/.test(reportingOfficer);
+  
+  //   if (isValid) {
+  //     console.log("repo officer: " + reportingOfficer);
+  //   } else {
+  //     console.log("Invalid SDBL number");
+  //   }
+  // }
+  
+
   postDetails() {
 
     // this.loading=false;
@@ -314,24 +340,7 @@ export class IncidentComponent {
     const sriLankanPhoneNumberPattern = /^(?:\+94|0)?[1-9]\d{8}$/;
     const isValidPhoneNumber = sriLankanPhoneNumberPattern.test(contact_number);
   {
-     // console.log('Description:', description);
-    // console.log('oc_date:', oc_date);
-    // console.log('detected date :', detected_date);
-    
-    // console.log('risk_owner:', risk_owner);
-    // console.log('risk_cause:', risk_cause);
-    // console.log('sub_category :', sub_category);
 
-    // console.log('sub_type:', sub_type);
-    // console.log('reporting_officer:', reporting_officer);
-    // console.log('contact_number :', contact_number);
-
-    // console.log('recovery_action:', recovery_action);
-    // console.log('account_number:', account_number);
-    // console.log('actual_loss_amount :', actual_loss_amount);
-
-    // console.log('potential_amount:', potential_amount);
-    // console.log('recoverd_amount:', recoverd_amount);
 
     console.log('branch :', branch);
     console.log('region:', region);
@@ -394,7 +403,20 @@ export class IncidentComponent {
 
       }
       
+      const reportingOfficer = this.formValue.value.reporting_officer;
   
+      // Ensure the value starts with 'SDBL' and is followed by digits
+      const isValid = /^SDBL\d+$/.test(reportingOfficer);
+    
+      if (isValid) {
+        console.log("repo officer: " + reportingOfficer);
+        this.showSDBLError = false; // Hide error if valid
+      } else {
+      
+         this.errorMessage = 'Invalid SDBL number';
+         this.showSDBLError = true; // Show error if invalid
+         return;
+      }
       if (this.formValue.get('oc_date').hasError('futureDate') || this.formValue.get('detected_date').hasError('futureDate')) {
         alert('detected_date and oc_date should be present or in the past.');
       } 
@@ -437,8 +459,11 @@ export class IncidentComponent {
               this.loading = true;  
               console.log(res);
               this.formValue.reset();
+              this.errorMessage = '';
+              this.showSDBLError = false;
               this.showSuccessMessage = true;
               this.successMessage = res.message;
+             
               this.selectedOption = null;
               setTimeout(() => {
                 this.hideSuccess();   

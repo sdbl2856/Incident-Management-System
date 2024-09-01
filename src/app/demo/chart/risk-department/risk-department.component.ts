@@ -72,7 +72,7 @@ export class RiskDepartmentComponent {
       business_aria: ['0'],
       consequence: ['0'],
       risk_level: ['0'],
-      status: [''],
+      status: ['PE'],
       root_cause: [''],
       actual_amount:['', Validators.required],
       potential_amount:['', Validators.required],
@@ -131,9 +131,10 @@ export class RiskDepartmentComponent {
     }
     // this.getPosts(this.userId,'PE');
     this.getTypes();
-    if (this.userId && this.selectedStatus) {
-      this.getPosts(this.userId, 'PE');
-    }
+   
+    
+    this.getPosts(this.userId, 'PE');
+    
 
   
 

@@ -139,17 +139,18 @@
               [options]="false"
               blockClass="table-border-style"
             >
-              <div class="text-end">
+              <div class="text-end" style="margin-right: 480px">
                 <button
-                  class="btn btn-success custom-btn"
+                  class="btn btn-success "
                   (click)="exportToExcel()"
                 >
                   To-Excel
                 </button>
               </div>
+              <br>
 
               <!-- Table headers with sorting -->
-              <table class="table-responsive" style="margin-left: 30px">
+              <table class="table-responsive" style="margin-left: 100px">
                 <div class="table table-hover">
                   <thead>
                     <tr>
@@ -199,7 +200,7 @@
               <br />
               <!-- pagination -->
               <nav
-                style="margin-left: 75%"
+                style="margin-left: 50%"
                 aria-label="Page navigation example"
               >
                 <ul class="pagination">
@@ -241,6 +242,7 @@
           </div>
         </ng-template>
       </li>
+
       <li class="nav-item" [ngbNavItem]="2">
         <a
           class="nav-link"

@@ -9,13 +9,13 @@ describe('IncidentComponent', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [IncidentComponent]
-    });
+    }); 
     fixture = TestBed.createComponent(IncidentComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    fixture.detectChanges(); 
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
+  it('should create', () => { 
+    expect(component).toBeTruthy(); 
   });
 });

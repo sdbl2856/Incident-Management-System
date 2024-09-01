@@ -1,4 +1,25 @@
 
+
+.textarea-field {
+  width: 100%; /* Full width of the container */
+  min-height: 100px; /* Minimum height for better appearance */
+  padding: 10px; /* Padding inside the textarea */
+  border: 1px solid #ccc; /* Border color */
+  border-radius: 4px; /* Rounded corners */
+  background-color: #f9f9f9; /* Background color */
+  font-size: 14px; /* Font size */
+  line-height: 1.5; /* Adjust line-height for better readability */
+  box-sizing: border-box; /* Include padding and border in element's total width and height */
+  resize: none; /* Prevent resizing */
+  overflow: auto; /* Scroll if the content overflows */
+  white-space: pre-wrap; /* Preserve whitespace and wrap text */
+  word-break: break-word; /* Break long words to prevent overflow */
+}
+
+
+
+
+
 .custom-btn {
     margin-right: 60px; /* Adjust the value as needed */
   }

@@ -1,3 +1,26 @@
+
+
+.textarea-field{
+  display: block;
+  width: 100%; /* Ensure textarea takes up full width of its container */
+  height: 100px; /* Adjust height as needed */
+  overflow: auto; /* Add scrollbars if content overflows */
+  resize: vertical; /* Allows vertical resizing only */
+  box-sizing: border-box; /* Ensures padding is included in the width/height */
+  padding: 10px; /* Adds padding inside the textarea */
+  border: 1px solid #ccc; /* Adds a border around the textarea */
+  border-radius: 4px; /* Rounds the corners of the textarea */
+  font-family: Arial, sans-serif; /* Sets font for readability */
+  font-size: 14px; /* Sets font size */
+  background-color: #f9f9f9; /* Sets background color for better contrast */
+}
+
+
+
+
+
+
+
 .field-label {
     font-weight: bold;
     // margin-right: 10px; 

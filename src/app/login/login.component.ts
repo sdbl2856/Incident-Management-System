@@ -51,6 +51,7 @@ onSubmit() {
         this.loginMessage = response.message;
         this.loginMessageClass = 'login-message';
         console.log("response : "+response.user.incidentCount);
+        console.log("type : "+ response.user.userType);
         this.username = '';
         this.password = '';
         // this.loading = t;

@@ -8,8 +8,20 @@ import { Router } from '@angular/router';
   providedIn: 'root',
 })
 export class AuthService {
+
+  // live
   // private baseUrl = '//10.100.32.41:8082';
-  private baseUrl = '//localhost:8080';
+
+  
+    // test  live
+    // private baseUrl = '//10.100.31.123:8082';
+
+
+  // uat
+  // private baseUrl = '//10.100.57.133:8082';
+
+ 
+  private baseUrl = '//localhost:8082';
 
   private apiUrl = `${this.baseUrl}/login`;
 

@@ -376,7 +376,7 @@
                 (SDBL Number)
               </label>
               <input
-                placeholder="Enter the number after SDBL"
+                placeholder="Enter the number only"
                 style="width: 80%"
                 class="form-control"
                 type="text"
@@ -384,6 +384,9 @@
                 formControlName="reporting_officer"
                 (input)="prependSDBL($event)"
               />
+              <div *ngIf="formValue.controls['reporting_officer'].hasError('invalidSDBL')" style="color: red;">
+                {{ errorMessage }}
+              </div>
             </div>
             <br />
           </div>

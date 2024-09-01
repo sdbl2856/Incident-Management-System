@@ -186,14 +186,11 @@
             
                 <div class="row">
                   <div class="col-md-6">
-                    <!-- <div class="detail heading">
+                    <div class="detail heading">
                       <strong>id:</strong>
                       <p class="field-value">{{ row.incidentId }}</p>
-                    </div> -->
-                    <div class="detail">
-                      <strong>Description :</strong>
-                      <p class="field-value">{{ row.inc_description }}</p>
                     </div>
+                   
                   </div>
                   <div class="col-md-6">
                     <div class="detail">
@@ -288,24 +285,7 @@
                   </div>
                 </div>
             
-                <div class="row">
-                  <div class="col-md-6">
-                    <div class="detail" *ngIf="row.action">
-                      <strong>Action :</strong>
-                      <p *ngIf="row.action" class="field-value">
-                        {{ row.action }}
-                      </p>
-                    </div>
-                  </div>
-                  <div class="col-md-6">
-                    <div class="detail" *ngIf="row.rootCause">
-                      <strong>Root cause :</strong>
-                      <p *ngIf="row.rootCause" class="field-value">
-                        {{ row.rootCause }}
-                      </p>
-                    </div>
-                  </div>
-                </div>
+              
             
                 <div class="row">
                   <div class="col-md-6">
@@ -328,13 +308,14 @@
             
                 <div class="row">
                   <div class="col-md-6">
-                    <div class="detail" *ngIf="row.incidentType">
-                      <strong>Incident Type :</strong>
-                      <p *ngIf="row.incidentType" class="field-value">
-                        {{ row.incidentType.description }}
+                    <div class="detail" *ngIf="row.potential_amount">
+                      <strong>Potential Loss Amount :</strong>
+                      <p *ngIf="row.potential_amount" class="field-value">
+                        {{ row.potential_amount }}
                       </p>
                     </div>
                   </div>
+                
                   <div class="col-md-6">
                     <div class="detail" *ngIf="row.actual_amount">
                       <strong>Actual Loss Amount :</strong>
@@ -355,15 +336,16 @@
                     </div>
                   </div>
                   <div class="col-md-6">
-                    <div class="detail" *ngIf="row.potential_amount">
-                      <strong>Potential Loss Amount :</strong>
-                      <p *ngIf="row.potential_amount" class="field-value">
-                        {{ row.potential_amount }}
+                    <div class="detail" *ngIf="row.incidentType">
+                      <strong>Incident Type :</strong>
+                      <p *ngIf="row.incidentType" class="field-value">
+                        {{ row.incidentType.description }}
                       </p>
                     </div>
                   </div>
                 </div>
             
+
                 <div class="row">
                   <div class="col-md-6">
                     <div class="detail" *ngIf="row.lossEventType">
@@ -373,7 +355,39 @@
                       </p>
                     </div>
                   </div>
+              
+
+
+                  <div class="col-md-6">
+                    <div class="detail" *ngIf="row.rootCause">
+                      <strong>Root cause :</strong>
+                      <p *ngIf="row.rootCause" class="field-value">
+                        {{ row.rootCause }}
+                      </p>
+                      
+                    </div>
+                  </div>
                 </div>
+
+                <div class="row">
+                 
+                  <div class="col-md-6">
+
+                  <div class="detail" *ngIf="row.inc_description">
+                      <strong>Description :</strong>
+                      <!-- <p class="field-value">{{ row.inc_description }}</p> -->
+                      <textarea class="field-value textarea-field" readonly>{{ row.inc_description }}</textarea>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="detail" *ngIf="row.action">
+                      <strong>Action Taken By the Department :</strong>
+                      <textarea class="field-value textarea-field" readonly>{{ row.action }}</textarea>
+                    
+                    </div>
+                  </div>
+                 </div>
+            
               </div>
             </app-card>
             
