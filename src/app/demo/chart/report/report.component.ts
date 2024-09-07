@@ -35,6 +35,8 @@ export class ReportComponent {
   successMessage: string = '';
   Commentmodel_obj:CommentModel = new CommentModel();
   levels: any[];
+  departmentList: any[];
+  branchList: any[];
   search_ref_div=false;
   search_box=false;
   status_dropdown=false;
@@ -77,9 +79,15 @@ displayedCommentList: any[] = [];
   }
 
   getLevels() {
+
+    
     this.userService.getBranches().subscribe((data: any) => {
     
       this.levels = data.usertypeList;
+      this.departmentList = data.departmentList;
+      console.log(this.departmentList);
+      this.branchList = data.branchList;
+      
       // this.specificBranches = this.branches;
 
       // console.log(this.branches);
@@ -160,6 +168,12 @@ exportToExcel() {
   XLSX.writeFile(wb, 'incidents.xlsx');
 }
 
+
+
+    getBranches(){
+
+      
+    }
 
   getPosts() {
 

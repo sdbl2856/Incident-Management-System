@@ -348,13 +348,14 @@ export class RiskDepartmentComponent {
             console.log(res);
             this.showSuccessMessage = true;
             this.successMessage = res.message;
+            this.getPosts(this.userId, "PE");
             setTimeout(() => {
               this.hideSuccess();
               this.formValue.reset();
               this.showdata = true;  
               this.showform = false;
               this.nav1.select(1);
-              this.getPosts(this.userId, this.selectedStatus);
+              // this.getPosts(this.userId, this.selectedStatus);
               this.drop_down=true;
               this.formValue.controls['status'].setValue(this.row.status);
             }, 3000);  

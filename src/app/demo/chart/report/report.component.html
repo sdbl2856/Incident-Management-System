@@ -59,12 +59,12 @@
          
           required
         >
-          <option value="" disabled selected>Select Level</option>
+          <option value="" disabled selected>Select department</option>
           <option
-          *ngFor="let levels of levels"
-          [value]="levels.type"
+          *ngFor="let departmentList of departmentList"
+          [value]="departmentList.description"
         >
-          {{ levels.description }}
+          {{ departmentList.description }}
           
           
         </option>
