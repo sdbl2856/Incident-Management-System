@@ -397,79 +397,37 @@
           
           <!-- Show the Comments -->
           <div class="row no-margin" *ngIf="!showdata">
-            <app-card
-              cardTitle="Comments"
-              [options]="false"
-              blockClass="table-border-style"
-            >
-              <div class="card-body">
-                <table class="table">
-                  <thead>
-                    <tr>
-                      <th>Description</th>
-                      <th>Date</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr *ngFor="let comment of displayedCommentList">
-                      <ng-container
-                        *ngIf="
-                          comment.incident.incidentId === selectedIncidentId
-                        "
-                      >
-                        <td>{{ comment.description }}</td>
-                        <td>
-                          {{ comment.commentedDate | date: "yyyy-MM-dd" }}
-                        </td>
-                      </ng-container>
-                    </tr>
-                  </tbody>
+            <mat-card>
+              <mat-card-title>Comments</mat-card-title>
+              <mat-card-content>
+                <table mat-table [dataSource]="commentList" matSort class="mat-elevation-z8">
+          
+                  <!-- Description Column -->
+                  <ng-container matColumnDef="description">
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header>Description</th>
+                    <td mat-cell *matCellDef="let comment">{{ comment.description }}</td>
+                  </ng-container>
+          
+                  <!-- Date Column -->
+                  <ng-container matColumnDef="commentedDate">
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header>Date</th>
+                    <td mat-cell *matCellDef="let comment">{{ comment.commentedDate | date: 'yyyy-MM-dd' }}</td>
+                  </ng-container>
+          
+                  <!-- Header and Row Definitions -->
+                  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                  <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
                 </table>
-              </div>
-                   <!-- Pagination for comments -->
-                   <nav
-                   aria-label="Page navigation example"
-                   style="margin-right: 15%"
-                 >
-                   <ul class="pagination justify-content-end">
-                     <li class="page-item">
-                       <a
-                         class="page-link"
-                         href="javascript:"
-                         (click)="prevCommentPage()"
-                         aria-label="Previous"
-                       >
-                         <span aria-hidden="true">&laquo;</span>
-                         <span class="sr-only">Previous</span>
-                       </a>
-                     </li>
-                     <li
-                       class="page-item"
-                       *ngFor="let page of getCommentPageArray()"
-                     >
-                       <a
-                         class="page-link"
-                         href="javascript:"
-                         (click)="goToCommentPage(page)"
-                         >{{ page }}</a
-                       >
-                     </li>
-                     <li class="page-item">
-                       <a
-                         class="page-link"
-                         href="javascript:"
-                         (click)="nextCommentPage()"
-                         aria-label="Next"
-                       >
-                         <span aria-hidden="true">&raquo;</span>
-                         <span class="sr-only">Next</span>
-                       </a>
-                     </li>
-                   </ul>
-                 </nav>
-
-            </app-card>
+          
+                <!-- Pagination -->
+                <mat-paginator [pageSize]="5" [pageSizeOptions]="[5, 10, 25]" aria-label="Select page"></mat-paginator>
+              </mat-card-content>
+            </mat-card>
           </div>
+          
+
+
+
         </ng-template>
       </li>
     </ul>

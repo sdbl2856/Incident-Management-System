@@ -7,6 +7,9 @@ import { ReportService } from '../report/report.service';
 import { MatSnackBar, MatSnackBarConfig } from '@angular/material/snack-bar';
 import { UserService } from '../user/user.service';
 import * as XLSX from 'xlsx';
+import { MatPaginator } from '@angular/material/paginator';
+import { MatSort } from '@angular/material/sort';
+import { MatTableDataSource } from '@angular/material/table';
 
 
 
@@ -61,7 +64,7 @@ displayedCommentList: any[] = [];
   constructor(private formBuilder: FormBuilder,private authService: AuthService,private reportService:ReportService,private _snackBar: MatSnackBar,  private userService: UserService,) {
 
     this.formValue = this.formBuilder.group({
-      search_by: ['PE'],
+      search_by: ['PE'] ,
       searchInput: [''],
       status: [''],
       level: [''],
@@ -72,6 +75,11 @@ displayedCommentList: any[] = [];
 
   }
 
+  displayedColumns: string[] = ['description', 'commentedDate'];
+  dataSource = new MatTableDataSource<Comment>([]); // Replace `Comment` with your data model
+
+  @ViewChild(MatPaginator) paginator: MatPaginator;
+  @ViewChild(MatSort) sort: MatSort;
 
   
 

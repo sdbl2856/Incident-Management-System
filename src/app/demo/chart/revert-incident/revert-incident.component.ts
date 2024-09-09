@@ -44,6 +44,7 @@ export class RevertIncidentComponent {
    currentPageComment: number = 1;
    itemsPerPageComment: number = 5; 
    displayedCommentList: any[] = [];
+   displayedColumns: string[] = ['description', 'commentedDate'];
 
   // Sorting properties
   // sortBy: string = ''; // Initialize with an empty string
