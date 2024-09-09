@@ -10,7 +10,7 @@ import { Router } from '@angular/router';
 export class AuthService {
 
   // live
-  // private baseUrl = '//10.100.32.41:8082';
+  private baseUrl = '//10.100.32.41:8082';
 
   
     // test  live
@@ -21,7 +21,7 @@ export class AuthService {
   // private baseUrl = '//10.100.57.133:8082';
 
  
-  private baseUrl = '//localhost:8082';
+  // private baseUrl = '//localhost:8082';
 
   private apiUrl = `${this.baseUrl}/login`;
 
@@ -75,6 +75,7 @@ export class AuthService {
     localStorage.removeItem('name'); 
     localStorage.removeItem('incidentCount'); 
     localStorage.removeItem('level'); 
+    localStorage.removeItem('empCode'); 
     this.router.navigate(['/login']);
   }
 
@@ -112,6 +113,15 @@ export class AuthService {
 
   getId() {
     return localStorage.getItem('userId');
+  }
+
+    
+  setempCode(empCode: string) {
+    localStorage.setItem('empCode', empCode);
+  }
+
+  getempCode() {
+    return localStorage.getItem('empCode');
   }
 
 

@@ -39,6 +39,7 @@ export class TrackComponent {
   search_ref_div=false;
   search_box=false;
   status_dropdown=false;
+  empCode:any;
 
     // New properties for pagination
     currentPage: number = 1;
@@ -60,7 +61,7 @@ displayedCommentList: any[] = [];
   constructor(private formBuilder: FormBuilder,private authService: AuthService,private reportService:ReportService,private _snackBar: MatSnackBar,  private userService: UserService,) {
 
     this.formValue = this.formBuilder.group({
-      search_by: [''],
+      search_by: ['PE'],
       searchInput: [''],
       status: [''],
       level: [''],
@@ -78,6 +79,7 @@ displayedCommentList: any[] = [];
   
  
     this.userId = this.authService.getId();
+    this.empCode = this.authService.getempCode();
     this.getLevels();
     this. getPosts() ;
     console.log("user id : "+ this.userId);
@@ -160,7 +162,8 @@ exportToExcel() {
 
     const incidentData = {    
       status:selectedSearchType,
-      userId:this.userId
+      userId:this.userId,
+      employeeCode:this.empCode
     };
 
     console.log(incidentData);

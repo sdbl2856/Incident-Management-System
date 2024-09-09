@@ -97,8 +97,10 @@ onSubmit() {
 
       } else  if (response.code == 201){
         this.loginMessage = response.message;
+        console.log(response);
 
-      
+        this.authService.setempCode(response.user.employeeCode);
+
         this.router.navigate(['/admin/incident']);
 
         

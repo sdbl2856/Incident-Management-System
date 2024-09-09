@@ -87,7 +87,7 @@ const routes: Routes = [
       {
         path: 'track',
         component: TrackComponent,
-        canActivate: [AuthGuard],
+        // canActivate: [AuthGuard],
        
       },
       // {
