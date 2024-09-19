@@ -30,7 +30,7 @@ export class UserComponent implements OnInit {
   logged_id: any;
   showSuccessMessage: boolean = false;
   successMessage: string = '';
-
+  searchQuery: string = '';
   // New properties for pagination
   currentPage: number = 1;
   itemsPerPage: number = 6; 
@@ -454,11 +454,20 @@ updateUserDetails() {
 
   updateDisplayedData() {
     if (this.userlist) {
+      // Filter user list based on search query
+      const filteredUsers = this.userlist.filter(user => 
+        user.employeeCode.includes(this.searchQuery)
+      );
+
+      // Calculate start and end index for pagination
       const startIndex = (this.currentPage - 1) * this.itemsPerPage;
       const endIndex = startIndex + this.itemsPerPage;
-      this.displayedUserList = this.userlist.slice(startIndex, endIndex);
+
+      // Update displayed list with filtered results
+      this.displayedUserList = filteredUsers.slice(startIndex, endIndex);
     }
   }
+  
 
   getPageArray(): number[] {
     if (this.userlist && this.userlist.length > 0) {

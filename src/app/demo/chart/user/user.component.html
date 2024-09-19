@@ -12,6 +12,20 @@
           <br />
           <div class="table-responsive" style="margin-left: 5%">
             <div>
+              <div class="row">
+                <div class="col-4">
+                  <input 
+                  type="text" 
+                  placeholder="Search by Employee Code" 
+                  [(ngModel)]="searchQuery" 
+                  (input)="updateDisplayedData()"
+                  class="form-control"
+                />
+                </div>
+                <div class="col-4"></div>
+                <div class="col-4"></div>
+              </div>
+          
               <table>
                 <thead>
                   <tr>

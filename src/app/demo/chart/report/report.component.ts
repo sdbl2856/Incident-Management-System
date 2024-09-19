@@ -35,6 +35,7 @@ export class ReportComponent {
   successMessage: string = '';
   Commentmodel_obj:CommentModel = new CommentModel();
   levels: any[];
+  filteredLevels: any[];
   departmentList: any[];
   branchList: any[];
   search_ref_div=false;
@@ -85,6 +86,8 @@ displayedCommentList: any[] = [];
     this.userService.getBranches().subscribe((data: any) => {
     
       this.levels = data.usertypeList;
+      console.log(this.levels);
+      this.filteredLevels = this.levels.filter(level => level.type !== 'AD');
       this.departmentList = data.departmentList;
       console.log(this.departmentList);
       this.branchList = data.branchList;
@@ -102,7 +105,7 @@ displayedCommentList: any[] = [];
 
     console.log("inside onSearchTypeChange");
     this.nav1.select(1);
-    this.showdata = true;
+    // this.showdata = true;
     this.showform = false;
   
     const selectedSearchType = this.formValue.get('search_by').value;
@@ -156,9 +159,10 @@ exportToExcel() {
       'Potential Loss Amount': row.potential_amount,
       'Actual Amount': row.actual_amount,
       'Risk Level': row.riskLevel?.description || 'N/A',
-      'Status ': row.status || 'N/A',
-      'Branch ': row.branch?.description || 'N/A',
-      'Region ': row.region?.description || 'N/A',
+      'Status ': this.getStatusDescription(row.status)|| 'N/A',
+      'Branch ': row.branch?.description || 'Head-Office',
+      'Region ': row.region?.description || 'Head-Office',
+      'Department':row.department?.description || 'N/A',
       
     };
   });
@@ -245,7 +249,7 @@ const incidentData = {
       .subscribe((data: any) => {
         if (data.code === 200) {
           this.commentList = [];
-  
+          this.showdata=true;
           data.incidentDtoList.forEach((incident) => {
             if (incident.comment) {
               incident.comment.forEach((comment) => {
