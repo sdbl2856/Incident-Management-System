@@ -234,7 +234,7 @@ export class RiskDepartmentComponent {
     this.showdata = true;  
     this.showform = false;
     this.drop_down=true;
-   
+    this.getPosts(this.userId, 'PE');
     // Reset comment form
     this.formValue.reset();
     
@@ -474,7 +474,7 @@ export class RiskDepartmentComponent {
               this.showdata = true;
               this.showform = false;
               this.nav1.select(1);
-              this.getPosts(this.userId, this.selectedStatus);
+              this.getPosts(this.userId, 'PE');
               this.drop_down=true;
               this.formValue.controls['status'].setValue(this.row.status);
               }, 3000);  

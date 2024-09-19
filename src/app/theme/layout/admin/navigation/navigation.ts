@@ -62,7 +62,7 @@ const NavigationItems: Navigation[] = [
         type: 'item',
         url: 'incident',
         classes: 'nav-item',
-        icon: 'feather icon-home',
+        icon: 'feather icon-alert-circle',
       },
       {
         id: 'revert-incident',
@@ -70,7 +70,7 @@ const NavigationItems: Navigation[] = [
         type: 'item',
         url: 'revert-incident',
         classes: 'nav-item',
-        icon: 'feather icon-file-text',
+        icon: 'feather icon-rotate-cw',
       },
       {
         id: 'report',
@@ -78,7 +78,7 @@ const NavigationItems: Navigation[] = [
         type: 'item',
         url: 'report',
         classes: 'nav-item',
-        icon: 'feather icon-file-text',
+        icon: 'feather icon-bar-chart',
         
       },
       {
@@ -87,7 +87,7 @@ const NavigationItems: Navigation[] = [
         type: 'item',
         url: 'risk-department',
         classes: 'nav-item',
-        icon: 'feather icon-file-text',
+        icon: 'feather icon-alert-triangle',
         
       },
       {
@@ -96,7 +96,7 @@ const NavigationItems: Navigation[] = [
         type: 'item',
         url: 'track',
         classes: 'nav-item',
-        icon: 'feather icon-file-text',  
+        icon: 'feather icon-activity',  
       },
       // {
       //   id: 'approved-incident',
@@ -114,7 +114,7 @@ const NavigationItems: Navigation[] = [
         type: 'item',
         url: 'user',
         classes: 'nav-item',
-        icon: 'feather icon-pie-chart',
+        icon: 'feather icon-user',
       },
     ],
   },

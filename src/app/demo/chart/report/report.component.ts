@@ -19,7 +19,7 @@ export class ReportComponent {
 
   formValue: FormGroup;   
   selectedOption: string = ''; 
-  showdata = true;  
+  showdata = false;  
   row : any ;
   incidents:any[];
   formGroup: FormGroup;
@@ -40,6 +40,7 @@ export class ReportComponent {
   search_ref_div=false;
   search_box=false;
   status_dropdown=false;
+  incidentCount:number;
 
     // New properties for pagination
     currentPage: number = 1;
@@ -261,8 +262,8 @@ const incidentData = {
         }
   
         this.incidents = data.incidentDtoList;
-        const incidentCount = this.incidents.length;
-        console.log('Incident Count:', incidentCount);
+         this.incidentCount = this.incidents.length;
+        console.log('Incident Count:', this.incidentCount);
   
         // Check if any incident is completed
         // this.isIncidentCompleted = this.incidents.some(incident => incident.status === 'CO');

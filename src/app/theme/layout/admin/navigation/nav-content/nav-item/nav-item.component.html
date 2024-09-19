@@ -12,16 +12,20 @@
 
 
 <ng-container *ngIf="!item.hidden && (
-  (userType === 'RC' && (item.url === 'risk-department' || item.url === 'incident' || item.url === 'revert-incident' || item.url === 'track')) || 
-  (userType === 'BM' && (item.url === 'risk-department' || item.url === 'incident' || item.url === 'revert-incident' || item.url === 'track')) || 
-  (userType === 'RM' && (item.url === 'risk-department' || item.url === 'incident' || item.url === 'revert-incident' || item.url === 'track')) || 
-  (userType === 'RO' && (item.url === 'risk-department' || item.url === 'revert-incident' || item.url === 'report')) || 
-  (userType === 'ORM' && (item.url === 'risk-department' || item.url === 'report')) ||  
-  (userType === 'RRC' && (item.url === 'risk-department' || item.url === 'incident' || item.url === 'revert-incident' || item.url === 'track')) || 
-  (userType === 'DRC' && (item.url === 'risk-department' || item.url === 'incident' || item.url === 'revert-incident' || item.url === 'track')) ||
+  (userType === 'RC' || userType === 'BM' || userType === 'RM' || userType === 'RRC' || userType === 'DRC') && 
+  (item.url === 'risk-department' || item.url === 'incident' || item.url === 'revert-incident' || item.url === 'track') ||
+  
+  (userType === 'RO' && (item.url === 'risk-department' || item.url === 'revert-incident' || item.url === 'report')) ||
+  
+  (userType === 'ORM' && (item.url === 'risk-department' || item.url === 'report')) ||
+  
   (userType === 'AD' && item.url === 'user') ||
-  (userType !== 'ORM' && userType !== 'AD' && userType !== 'RO' && userType !== 'RC' && item.url === 'incident' || item.url === 'track' )
+
+  (userType !== 'ORM' && userType !== 'AD' && userType !== 'RO' && userType !== 'RC' && item.url === 'incident') || 
+  (userType !== 'ORM' && userType !== 'AD' && userType !== 'RO' && userType !== 'RC' && item.url === 'track')
 )">
+
+
 
 
 

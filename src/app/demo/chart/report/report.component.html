@@ -59,12 +59,12 @@
          
           required
         >
-          <option value="" disabled selected>Select department</option>
+          <option value="" disabled selected>Select Level</option>
           <option
-          *ngFor="let departmentList of departmentList"
-          [value]="departmentList.description"
+          *ngFor="let levels of levels"
+          [value]="levels.type"
         >
-          {{ departmentList.description }}
+          {{ levels.description }}
           
           
         </option>
@@ -197,6 +197,32 @@
                   </tbody>
                 </div>
               </table>
+
+
+<!-- test -->
+                
+
+
+<!-- test e -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
               <br />
               <!-- pagination -->
               <nav
