@@ -16,12 +16,14 @@
       >
         <option value="REF">INCIDENT REF</option>
         <option value="LEVEL">STATUS AND LEVEL</option>
+        <option value="DEP">DEPARTMENT</option>
+        <option value="BR">BRANCH & REGION</option>
       </select>
     </div>
   </form>
 </div>
 
-<div *ngIf="search_ref_div">
+<div *ngIf="search_form_div">
   <form [formGroup]="formValue">
     <div *ngIf="search_box" class="row">
       <div class="col-md-6">
@@ -35,8 +37,87 @@
       </div>
     </div>
     <br>
-    <div class="row" *ngIf="status_dropdown">
-      <div class="col-md-3">
+    <div class="row" >
+
+
+<!-- te -->
+
+
+
+
+<div class="col-md-3" *ngIf="region_dropdown">
+  <select
+    id="region"
+    formControlName="region"
+    class="form-select"
+    (change)="onRegionChange()"
+    
+    required
+  >
+  <option value="" disabled selected>Select Region</option>
+ 
+  <option *ngFor="let region of regions" [value]="region.regionId">
+    {{ region.description }}
+  </option>
+
+ 
+  </select>
+</div>
+
+
+<div class="col-md-3" *ngIf="branch_dropdown">
+  <select
+    id="branch"
+    formControlName="branch"
+    class="form-select"
+  
+    
+    required
+  >
+  <option value="" disabled selected>Select Branch</option>
+ 
+  <option
+          *ngFor="let branch of specificBranches"
+          [value]="branch.branchId"
+        >
+          {{ branch.description }}
+        </option>
+
+ 
+  </select>
+</div>
+
+
+
+
+
+<!-- te -->
+
+
+
+
+
+
+
+      <div class="col-md-3" *ngIf="dep_dropdown">
+        <select
+          id="dep"
+          formControlName="dep"
+          class="form-select"
+          
+          required
+        >
+        <option value="" disabled selected>Select Department</option>
+       
+          <option  *ngFor="let dep of departmentList" [value]="dep.departmentId">{{dep.description}}</option>
+   
+       
+        </select>
+      </div>
+
+
+
+      <div class="col-md-3" *ngIf="status_dropdown">
         <select
           id="status"
           formControlName="status"
@@ -51,7 +132,7 @@
           <option value="RE">RETURNED</option>
         </select>
       </div>
-      <div class="col-md-3">
+      <div class="col-md-3" *ngIf="level_dropdown">
         <select
           id="level"
           formControlName="level"
@@ -72,7 +153,7 @@
         </select>
         
       </div>
-      <div class="col-md-3">
+      <div class="col-md-3" *ngIf="srt_date">
         <!-- Date range picker using Angular Material Datepicker -->
         <div class="form-control">
           <label for="normalStartDate">StartDate:</label>
@@ -85,7 +166,7 @@
           />
         </div>
       </div>
-      <div class="col-md-3">
+      <div class="col-md-3" *ngIf="end_date">
         <div class="form-control">
           <label for="normalEndDate"> End Date:</label>
           <input
@@ -148,6 +229,7 @@
                 <div class="table table-hover">
                   <thead>
                     <tr>
+                      <th>#</th> <!-- New column for count -->
                       <th >ID
                       
                       </th>
@@ -174,7 +256,8 @@
 
                   <!-- Display the paged and sorted incidents -->
                   <tbody>
-                    <tr *ngFor="let row of displayedIncidentList">
+                    <tr *ngFor="let row of displayedIncidentList; let i = index">
+                      <td>{{ (currentPage - 1) * itemsPerPage + (i + 1) }}</td> 
                       <td>{{ row.incidentId }}</td>
                       <td>{{ getStatusDescription(row.status) }}</td>
                       <td>{{ row.currentLevel }}</td>
@@ -600,6 +683,26 @@
                       <strong style="font-weight: bold; color: #333">Status :</strong>
                       <span *ngIf="row.status">{{ getStatusDescription(row.status) }}</span>
                     </div>
+                  </div>
+                  
+                </div>
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="detail" *ngIf="row.department">
+                      <strong style="font-weight: bold; color: #333"
+                        >Department:</strong
+                      >
+                      <p
+                        *ngIf="row.currentLevel"
+                        style="display: inline-block"
+                        class="field-value"
+                      >
+                        {{ row.department.description }}
+                      </p>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                  
                   </div>
                   
                 </div>

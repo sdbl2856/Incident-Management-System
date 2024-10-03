@@ -399,7 +399,7 @@
   
               <div class="form-group">
                 <label for="level" class="form-label"
-                  >SELECT LEVEL
+                  >SELECT REPORTING LEVEL
                   <label style="color: red">*</label>
                 </label>
                 <select
@@ -410,8 +410,8 @@
                   required
                   (change)="onLevelChange($event)"
                 >
-                  <option value="" disabled selected>Select</option>
-                  <option value="BRANCH">BRANCH</option>
+                  <option value="" disabled >Select</option>
+                  <option value="BRANCH" selected>BRANCH</option>
                   <option value="REGION">REGION</option>
                   <option value="DEPARTMENT">DEPARTMENT</option>
                 </select>
@@ -500,7 +500,7 @@
                 >
                   <option value="" disabled selected>Select</option>
                   <option
-                    *ngFor="let departments of departments"
+                    *ngFor="let departments of filteredDepartments"
                     [value]="departments.departmentId"
                   >
                     {{ departments.description }}

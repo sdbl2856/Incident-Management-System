@@ -13,7 +13,6 @@ export class AuthService {
   // private baseUrl = '//10.100.32.41:8082';
 
   
- 
   private baseUrl = '//localhost:8082';
 
   private apiUrl = `${this.baseUrl}/login`;

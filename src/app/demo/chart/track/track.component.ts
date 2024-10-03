@@ -198,7 +198,7 @@ exportToExcel() {
         }
   
         this.incidents = data.incidentDtoList;
-        const incidentCount = this.incidents.length;
+        const incidentCount = this.incidents?.length;
         console.log('Incident Count:', incidentCount);
   
         // Check if any incident is completed

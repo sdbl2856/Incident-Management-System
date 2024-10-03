@@ -38,11 +38,20 @@ export class ReportComponent {
   filteredLevels: any[];
   departmentList: any[];
   branchList: any[];
-  search_ref_div=false;
+  search_form_div=false;
   search_box=false;
+  level_dropdown=false;
+  end_date=false;
+  srt_date=false;
   status_dropdown=false;
-  incidentCount:number;
+  dep_dropdown=false;
+  branch_dropdown=false;
+  region_dropdown=false;
 
+  incidentCount:number;
+  branches: any[];
+  regions: any[];
+  specificBranches = [];
     // New properties for pagination
     currentPage: number = 1;
     itemsPerPage: number = 5; 
@@ -69,6 +78,9 @@ displayedCommentList: any[] = [];
       level: [''],
       startDate: [''],
       endDate: [''],
+      dep: [''],
+      branch: [''],
+      region: ['']
            
     });
 
@@ -90,9 +102,10 @@ displayedCommentList: any[] = [];
       this.filteredLevels = this.levels.filter(level => level.type !== 'AD');
       this.departmentList = data.departmentList;
       console.log(this.departmentList);
-      this.branchList = data.branchList;
+      // this.branchList = data.branchList;
       
-      // this.specificBranches = this.branches;
+      this.branches = data.branchList;
+      this.regions = data.regions;
 
       // console.log(this.branches);
       // console.log(this.regions);
@@ -109,15 +122,65 @@ displayedCommentList: any[] = [];
     this.showform = false;
   
     const selectedSearchType = this.formValue.get('search_by').value;
-    if (this.search_ref_div = selectedSearchType == 'REF') {
-      this.search_ref_div = true;
+    if (this.search_form_div = selectedSearchType == 'REF') {
+      this.search_form_div = true;
       this.search_box = true;
-      this.status_dropdown = false;
-    } else if (this.search_ref_div = selectedSearchType == 'LEVEL') {
-      this.search_ref_div = true;
-      this.status_dropdown = true;
+      this.level_dropdown = false;
+      this.srt_date=false;
+      this.end_date=false;
+      this.status_dropdown=false;
+      this.dep_dropdown=false;
+
+      this.branch_dropdown=false;
+      this.region_dropdown=false;
+    } else if (this.search_form_div = selectedSearchType == 'LEVEL') {
+      this.search_form_div = true;
       this.search_box = false;
+
+
+      this.level_dropdown = true;
+      this.srt_date=true;
+      this.end_date=true;
+      this.status_dropdown=true;
+      this.dep_dropdown=false;
+
+      this.branch_dropdown=false;
+      this.region_dropdown=false;
+     
+    }else if (this.search_form_div = selectedSearchType == 'DEP') {
+      this.search_form_div = true;
+      this.search_box = false;
+
+
+      this.level_dropdown = false;
+      this.srt_date=true;
+      this.end_date=true;
+      this.dep_dropdown=true;
+      this.status_dropdown=false;
+
+      this.branch_dropdown=false;
+      this.region_dropdown=false;
+     
+    }else if (this.search_form_div = selectedSearchType == 'BR') {
+      this.search_form_div = true;
+      this.search_box = false;
+
+
+      this.level_dropdown = false;
+      this.srt_date=true;
+      this.end_date=true;
+      this.dep_dropdown=false;
+      this.status_dropdown=false;
+      this.branch_dropdown=true;
+      this.region_dropdown=true;
+     
     }
+
+
+
+
+
+    
   
     // Reset incidents array and update displayed data
     this.incidents = [];
@@ -129,7 +192,38 @@ displayedCommentList: any[] = [];
     this.formValue.get('level').setValue('');
     this.formValue.get('startDate').setValue('');
     this.formValue.get('endDate').setValue('');
+    this.formValue.get('dep').setValue('');
+    this.formValue.get('region').setValue('');
+    this.formValue.get('branch').setValue('');
+
   }
+
+
+
+  onRegionChange(): void {
+    this.specificBranches = [];
+    const selectedRegionId = this.formValue.get('region')?.value;
+  
+    for (let i = 0; i < this.branches.length; i++) {
+      if (this.branches[i].region.regionId == selectedRegionId) {
+        this.specificBranches.push(this.branches[i]);
+      }
+    }
+  
+    // Set the default branch value if it's not already set
+    const branchControl = this.formValue.get('branch');
+    if (!branchControl.value && this.specificBranches.length > 0) {
+      branchControl.setValue(this.specificBranches[0].branchId);
+    }
+  }
+
+
+
+
+
+
+
+
   
 private formatDate(date: any): string {
   // You can implement your own date formatting logic here
@@ -163,6 +257,7 @@ exportToExcel() {
       'Branch ': row.branch?.description || 'Head-Office',
       'Region ': row.region?.description || 'Head-Office',
       'Department':row.department?.description || 'N/A',
+      'Current-Level':row.currentLevel|| 'N/A'
       
     };
   });
@@ -195,18 +290,22 @@ exportToExcel() {
     const startDateString = this.formValue.get('startDate').value;
     const endDateString = this.formValue.get('endDate').value;
 
+    const dep = this.formValue.get('dep').value;
+    const branch = this.formValue.get('branch').value;
+    const region = this.formValue.get('region').value;
+
   
 
-    if (!(searchInputValue || (statusInputValue && levelInputValue && startDateString && endDateString))) {
-      // Show a toast message with a larger width
-      const config = new MatSnackBarConfig();
-      config.duration = 5000; // Set the duration for the toast message
-      config.panelClass = ['larger-width-snackbar']; // Add a custom class for styling
+    // if (!(searchInputValue || (statusInputValue && levelInputValue && startDateString && endDateString))) {
+    //   // Show a toast message with a larger width
+    //   const config = new MatSnackBarConfig();
+    //   config.duration = 5000; // Set the duration for the toast message
+    //   config.panelClass = ['larger-width-snackbar']; // Add a custom class for styling
   
-      this._snackBar.open('Please fill in either the search input or all of the other required fields', 'Close', config);
+    //   this._snackBar.open('Please fill in either the search input or all of the other required fields', 'Close', config);
   
-      return;
-    }
+    //   return;
+    // }
     
     console.log("startDateString :  "+startDateString);
     console.log("endDateString :  "+endDateString);
@@ -236,10 +335,13 @@ exportToExcel() {
 
 const incidentData = {   
   refId: searchInputValue,
+  departmentId:dep,
   status: statusInputValue,
   level: levelInputValue,
   startDate: formattedStartDate,
   endDate: formattedEndDate,
+  regionId: region,
+  branchId: branch,
   userId :this.userId
 };
 
@@ -367,6 +469,7 @@ const incidentData = {
       const startIndex = (this.currentPage - 1) * this.itemsPerPage;
       const endIndex = startIndex + this.itemsPerPage;
       this.displayedIncidentList = this.incidents.slice(startIndex, endIndex);
+      console.log('Incidents:', this.displayedIncidentList);
     }
   }
 

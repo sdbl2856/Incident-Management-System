@@ -105,6 +105,7 @@ export class UserComponent implements OnInit {
       // console.log(this.user_types);
     });
   }
+  
   onRegionChange(): void {
     this.specificBranches = [];
     const selectedRegionId = this.formValue.get('region')?.value;
@@ -452,21 +453,22 @@ updateUserDetails() {
     this.updateDisplayedData();
   }
 
-  updateDisplayedData() {
-    if (this.userlist) {
-      // Filter user list based on search query
-      const filteredUsers = this.userlist.filter(user => 
-        user.employeeCode.includes(this.searchQuery)
-      );
+  
+    updateDisplayedData() {
+      if (this.userlist) {
+    
+        const filteredUsers = this.userlist.filter(user => 
+          user.employeeCode.toLowerCase().includes(this.searchQuery.toLowerCase())
+        );
+    
+        const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+        const endIndex = startIndex + this.itemsPerPage;
+    
+        this.displayedUserList = filteredUsers.slice(startIndex, endIndex);
+      }
 
-      // Calculate start and end index for pagination
-      const startIndex = (this.currentPage - 1) * this.itemsPerPage;
-      const endIndex = startIndex + this.itemsPerPage;
-
-      // Update displayed list with filtered results
-      this.displayedUserList = filteredUsers.slice(startIndex, endIndex);
     }
-  }
+  
   
 
   getPageArray(): number[] {
