@@ -51,7 +51,8 @@ onSubmit() {
         this.loginMessage = response.message;
         this.loginMessageClass = 'login-message';
         console.log("response : "+response.user.incidentCount);
-        console.log("type : "+ response.user.userType);
+        console.log("type : "+ response.user);
+   
         this.username = '';
         this.password = '';
         // this.loading = t;
@@ -59,14 +60,13 @@ onSubmit() {
         this.authService.setId(response.user.userId);
         this.authService.setLevel(response.user.userT.type);
         this.authService.setName(response.user.fullName);
+        this.authService.setempCode(response.user.employeeCode);
+        this.authService.setEmail(response.user.email);
         this.authService.setBranch(response.user.branch);
+        this.authService.setMobile(response.user.contactNo);
         this.incidentCount = this.authService.getIncidentCount();
         this.authService.setIncidentCount(response.user.incidentCount);
         this.authService.setToken(response.token);
-
-
-
-        
 
         if(response.user.userT.type=="RC"){
           this.router.navigate(['/admin/incident']);
@@ -93,6 +93,9 @@ onSubmit() {
         }else if(response.user.userT.type=="AD"){
           this.router.navigate(['/admin/user']);
 
+        }else if(response.user.userT.type=="AU"){
+          this.router.navigate(['/admin/report']);
+
         }
 
       } else  if (response.code == 201){
@@ -100,7 +103,8 @@ onSubmit() {
         console.log(response);
 
         this.authService.setempCode(response.user.employeeCode);
-
+        this.authService.setEmail(response.user.email);
+        this.authService.setMobile(response.user.contactNo);
         this.router.navigate(['/admin/incident']);
 
         

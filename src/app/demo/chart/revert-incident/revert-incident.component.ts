@@ -8,6 +8,7 @@ import { IncidentService } from '../incident/incident.service';
 import { RiskDepartmentService } from '../risk-department/risk-department.service';
 import { NgbNav } from '@ng-bootstrap/ng-bootstrap';
 import { NgZone } from '@angular/core';
+import * as XLSX from 'xlsx';
 
 @Component({
   selector: 'app-revert-incident',
@@ -16,6 +17,7 @@ import { NgZone } from '@angular/core';
 })
 export class RevertIncidentComponent {
   @ViewChild('nav1', { static: true }) nav1: NgbNav;
+  searchQuery: string = '';
   formValue: FormGroup;
   incidents: any[];
   showform = false;
@@ -30,11 +32,11 @@ export class RevertIncidentComponent {
   riskcauses: any;
   SubCategories: any;
   riskSubTypeList: any;
-  
+  totalItems:any;
   row:any;
   selectedIncidentId: any;
   commentList: any[];
-
+  loading = true;
    // New properties for pagination
    currentPage: number = 1;
    itemsPerPage: number = 5; 
@@ -44,7 +46,7 @@ export class RevertIncidentComponent {
    currentPageComment: number = 1;
    itemsPerPageComment: number = 5; 
    displayedCommentList: any[] = [];
-   displayedColumns: string[] = ['description', 'commentedDate'];
+   displayedColumns: string[] = ['description', 'commentedDate', 'added_level', 'addedUser'];
 
   // Sorting properties
   // sortBy: string = ''; // Initialize with an empty string
@@ -78,6 +80,7 @@ export class RevertIncidentComponent {
     private riskDepartmentService :RiskDepartmentService
   ) {
     this.formValue = this.formBuilder.group({
+   
       id: [''],
       description: [''],
       oc_date: [''],
@@ -120,22 +123,23 @@ export class RevertIncidentComponent {
     // console.log('Incidents count from ngOnInit: ' + this.incidentCount);
   }
   
-  getPosts(userId: any, selectedStatus: string | undefined = undefined) {
+  getPosts(userId: any, selectedStatus: string) {
     if (this.userId) {
       console.log('Selected Incident ID:', this.selectedIncidentId);
       // Include the selectedStatus parameter in the service call
-      this.riskDepartmentService.getPosts(this.userId, selectedStatus)
+      this.riskDepartmentService.getPosts(this.userId, "RE")
         .subscribe((data: any) => {
           console.log('Service Response:', data);
           if (data.code === 200) {
             this.commentList = [];
-  
+            this.loading = false;
             data.incidentDtoList.forEach((incident) => {
-              if (incident.comment) {
-                incident.comment.forEach((comment) => {
+              if (incident.comments) {
+                incident.comments.forEach((comment) => {
                   // Only push comments for the selected incident
-                  if (comment.incident.incidentId === this.selectedIncidentId) {
+                  if (incident.incidentId == this.selectedIncidentId) {
                     this.commentList.push(comment);
+                    console.log(this.commentList);
                   }
                 });
               }
@@ -147,7 +151,8 @@ export class RevertIncidentComponent {
           }
           this.incidents = data.incidentDtoList;
           this.incidentCount = this.incidents.length;
-          console.log('Incident Count:', this.incidentCount);
+          this.totalItems = this.incidents?.length;
+          console.log('  this.totalItems :',   this.totalItems );
           console.log('Incidents:', this.incidents);
           console.log('Comments:', this.commentList);
           this.updateDisplayedData();
@@ -206,15 +211,76 @@ export class RevertIncidentComponent {
   }
 
 
+     exportToExcel() {
+        const data = this.incidents.map(row => {
+          return {
+            'Id': row.incidentId || '',
+            'Ref': row.incident_ref,
+            'Description': row.inc_description || '',
+            'Occurrence Date': this.formatDate(row.occurence_date) || '',
+            'Detected Date': this.formatDate(row.detected_date) || '',
+            'Risk Owner': row.risk_owner || '',
+            'Risk Cause Description': (row.sub_type && row.sub_type.riskCause && row.sub_type.riskCause.description) || '',
+            'Risk Sub Category': (row.sub_type && row.sub_type.riskSubCategory && row.sub_type.riskSubCategory.description) || '',
+            'Risk Sub Type': (row.sub_type && row.sub_type.description) || '',
+            'Reporting Officer': row.reporting_officer || '',
+            'Contact Number': row.contact_number || '',
+            'Incident Type': (row.incidentType && row.incidentType.description) || '',
+            'Action Taken By the Department': row.action || '',
+            'Loss Event Type': (row.lossEventType && row.lossEventType.description) || '',
+            'Business Line': (row.businessLine && row.businessLine.description) || '',
+            'Business Aria': (row.businessAria && row.businessAria.description) || '',
+            'Consequences of incident': (row.consequence && row.consequence.description) || '',
+            'Root cause analysis': row.rootCause || '',
+            'Potential Loss Amount': row.potential_amount || '',
+            'Actual Amount': row.actual_amount || '',
+            'Risk Level': (row.riskLevel && row.riskLevel.description) || '',
+            'Status ': this.getStatusDescription(row.status)|| 'N/A',
+            'Branch ': row.branch?.description || 'N/A',
+            'Region ': row.region?.description || 'N/A',
+            'Department':row.department?.description || 'N/A',
+            'Current-Level':row.currentLevel|| 'N/A'
+          };
+        });
+      
+        const ws: XLSX.WorkSheet = XLSX.utils.json_to_sheet(data);
+        const wb: XLSX.WorkBook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Incidents');
+        XLSX.writeFile(wb, 'incidents.xlsx');
+      }
+
+
+      private formatDate(date: any): string {
+        // You can implement your own date formatting logic here
+        return date ? new Date(date).toLocaleDateString() : '';
+      }
+
+  statusDescriptions: { [key: string]: string } = {
+    'CO': 'Completed',
+    'RE': 'Revert',
+    'DE': 'Declined',
+    'PE': 'Pending'
+  };
+
+  getStatusDescription(status: string): string {
+    return this.statusDescriptions[status];
+  }
+
+
   onEdit(row: any) {
     
  
-    this.moveToNextTab();
-    console.log(row);
+    if (row?.consequence) {
+      console.log('Consequence:', row.consequence);  // Log the consequence object
+      console.log('Consequence Id:', row.consequence.consequenceId);  // Log consequenceId
+    } else {
+      console.log('No consequence found in row.');
+    }
     this.selectedIncidentId = row.incidentId;
     this.getPosts(this.userId,'RE');
     this.showform = true;
     this.showtable = false;
+    this.moveToNextTab();
     if(this.currentLevel=="RO"){
       this.formValue.get('description')?.disable();
       this.formValue.get('contact_number')?.disable();
@@ -749,10 +815,18 @@ goToPage(page: number) {
 
 updateDisplayedData() {
   if (this.incidents) {
+
+    const filteredUsers = this.incidents.filter(incident => 
+      incident.incident_ref.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+      incident.incidentId.toString().toLowerCase().includes(this.searchQuery.toLowerCase())
+    );
+
     const startIndex = (this.currentPage - 1) * this.itemsPerPage;
     const endIndex = startIndex + this.itemsPerPage;
-    this.displayedIncidentList = this.incidents.slice(startIndex, endIndex);
+
+    this.displayedIncidentList = filteredUsers.slice(startIndex, endIndex);
   }
+
 }
 
 getPageArray(): number[] {

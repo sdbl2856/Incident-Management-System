@@ -6,6 +6,7 @@ import { NgbNav } from '@ng-bootstrap/ng-bootstrap';
 import { IncidentModel } from '../incident/incident-model';
 import { RevertIncidentService } from '../revert-incident/revert-incident.service';
 import * as XLSX from 'xlsx';
+import { MatTableDataSource } from '@angular/material/table';
 
 @Component({
   selector: 'app-risk-department',
@@ -15,7 +16,9 @@ import * as XLSX from 'xlsx';
 export class RiskDepartmentComponent {
 
   @ViewChild('nav1', { static: true }) nav1: NgbNav;
-
+  loading = true;
+  totalItems:number=0;
+  searchQuery: string = '';
   row:any;
   userId:any;
   commentList:any[];
@@ -86,6 +89,9 @@ export class RiskDepartmentComponent {
    
   }
 
+   displayedColumns: string[] = ['description', 'commentedDate', 'added_level', 'addedUser'];
+  
+    dataSource = new MatTableDataSource<Comment>([]); // Replace `Comment` with your data model
   ngOnInit(){
 
     this.userId = this.authService.getId();
@@ -151,7 +157,7 @@ export class RiskDepartmentComponent {
     }
   }
 
-  getPosts(userId: any, selectedStatus: string | undefined = undefined) {
+  getPosts(userId: any, selectedStatus: string ) {
     if (this.userId) {
       console.log("selected incident ID :" + this.selectedIncidentId);
   
@@ -162,11 +168,12 @@ export class RiskDepartmentComponent {
             console.log(data);
   
             data.incidentDtoList.forEach((incident) => {
-              if (incident.comment) {
-                incident.comment.forEach((comment) => {
+              if (incident.comments) {
+                incident.comments.forEach((comment) => {
                   // Only push comments for the selected incident
-                  if (comment.incident.incidentId === this.selectedIncidentId) {
+                  if (incident.incidentId == this.selectedIncidentId) {
                     this.commentList.push(comment);
+                    console.log(this.commentList);
                   }
                 });
               }
@@ -178,6 +185,8 @@ export class RiskDepartmentComponent {
   
           this.incidents = data.incidentDtoList;
           const incidentCount = this.incidents.length;
+          this.totalItems = this.incidents?.length;
+          this.loading = false;
           console.log('Incident Count:', incidentCount);
   
           // Check if any incident is completed
@@ -191,7 +200,7 @@ export class RiskDepartmentComponent {
     }
   }
   
-  statusDescriptions: { [key: string]: string } = {
+  statusDescriptions: {[key: string]: string} = {
     'CO': 'Completed',
     'RE': 'Revert',
     'DE': 'Declined',
@@ -201,7 +210,8 @@ export class RiskDepartmentComponent {
   onView(row:any){
      console.log(row);
     this.selectedIncidentId = row.incidentId;
-    this.getPosts(this.userId, this.selectedStatus);
+    console.log(this.selectedIncidentId);
+    this.getPosts(this.userId, "PE");
     this.moveToNextTab();
     this.row = row;
     this.showdata = false;
@@ -268,6 +278,9 @@ export class RiskDepartmentComponent {
         });
     }
   
+
+
+    
     sendBackDetails(row) {
 
             console.log("inside send-back");
@@ -474,7 +487,7 @@ export class RiskDepartmentComponent {
               this.showdata = true;
               this.showform = false;
               this.nav1.select(1);
-              this.getPosts(this.userId, 'PE');
+              this.getPosts(this.userId,'PE');
               this.drop_down=true;
               this.formValue.controls['status'].setValue(this.row.status);
               }, 3000);  
@@ -531,7 +544,7 @@ export class RiskDepartmentComponent {
                this.showdata = true;
                this.showform = false;
                this.nav1.select(1);
-               this.getPosts(this.userId, this.selectedStatus);
+               this.getPosts(this.userId,'PE');
                this.drop_down=true;
                this.formValue.controls['status'].setValue(this.row.status);
                }, 3000);  
@@ -597,7 +610,7 @@ if(comment == null || !comment){
             this.showdata = true;
             this.showform = false;
             this.nav1.select(1);
-            this.getPosts(this.userId);
+            this.getPosts(this.userId,'PE');
           }, 3000);
 
         },
@@ -647,7 +660,7 @@ if(comment == null || !comment){
             this.showdata = true;  
             this.showform = false;
             this.nav1.select(1);
-            this.getPosts(this.userId);
+            this.getPosts(this.userId, 'PE');
           }, 3000);
 
         
@@ -671,6 +684,7 @@ if(comment == null || !comment){
       const data = this.incidents.map(row => {
         return {
           'Id': row.incidentId || '',
+          'Ref': row.incident_ref,
           'Description': row.inc_description || '',
           'Occurrence Date': this.formatDate(row.occurence_date) || '',
           'Detected Date': this.formatDate(row.detected_date) || '',
@@ -690,10 +704,11 @@ if(comment == null || !comment){
           'Potential Loss Amount': row.potential_amount || '',
           'Actual Amount': row.actual_amount || '',
           'Risk Level': (row.riskLevel && row.riskLevel.description) || '',
-          'Status': row.status || '',
-          'Branch': (row.branch && row.branch.description) || '',
-          'Region': (row.region && row.region.description) || '',
-          'Deparmtnt': (row.department && row.department.description) || ''
+          'Status ': this.getStatusDescription(row.status)|| 'N/A',
+          'Branch ': row.branch?.description || 'N/A',
+          'Region ': row.region?.description || 'N/A',
+          'Department':row.department?.description || 'N/A',
+          'Current-Level':row.currentLevel|| 'N/A'
         };
       });
     
@@ -729,13 +744,29 @@ if(comment == null || !comment){
     this.updateDisplayedData();
   }
 
+  // updateDisplayedData() {
+  //   if (this.incidents) {
+  //     const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+  //     const endIndex = startIndex + this.itemsPerPage;
+  //     this.displayedIncidentList = this.incidents.slice(startIndex, endIndex);
+  //   }
+  // }
+
   updateDisplayedData() {
-    if (this.incidents) {
-      const startIndex = (this.currentPage - 1) * this.itemsPerPage;
-      const endIndex = startIndex + this.itemsPerPage;
-      this.displayedIncidentList = this.incidents.slice(startIndex, endIndex);
-    }
+  if (this.incidents) {
+
+    const filteredUsers = this.incidents.filter(incident => 
+      incident.incident_ref.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+      incident.incidentId.toString().toLowerCase().includes(this.searchQuery.toLowerCase())
+    );
+
+    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+    const endIndex = startIndex + this.itemsPerPage;
+
+    this.displayedIncidentList = filteredUsers.slice(startIndex, endIndex);
   }
+
+}
 
   
   getPageArray(): number[] {
@@ -791,6 +822,11 @@ getCommentPageArray(): number[] {
   } else {
     return [];
   }
+}
+
+
+getStatusDescription(status: string): string {
+  return this.statusDescriptions[status];
 }
 
     

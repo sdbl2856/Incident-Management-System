@@ -66,7 +66,7 @@ const NavigationItems: Navigation[] = [
       },
       {
         id: 'revert-incident',
-        title: 'Revert Incident',
+        title: 'Reverted Incidents',
         type: 'item',
         url: 'revert-incident',
         classes: 'nav-item',

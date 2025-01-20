@@ -10,16 +10,16 @@ import { AuthService } from 'src/app/login/auth.service';
 export class ReportService {
   userId: any;
   
-
   constructor(private http: HttpClient, private authService: AuthService) { 
     this.userId = this.authService.getId();
   }
+
   private baseUrl: string = this.authService.getBaseUrl();
  
   getPosts(data: any): Observable<any> {
 
     console.log("inside report service");
-    const apiUrl = `${this.baseUrl}/incident/search/`;
+    const apiUrl = `${this.baseUrl}/incident/track/`;
     return this.http.post<any>(apiUrl, data);
   }
 

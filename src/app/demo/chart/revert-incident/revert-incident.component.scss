@@ -1,40 +1,68 @@
-.button-container {
-  // display: flex;
-  // align-items: flex-end; /* Use flex-end to align items at the bottom of the container */
-  // justify-content: flex-end; /* Align items to the right */
-  gap: 15px;
-  margin-left: 26%;
+
+
+.textarea-field{
+  display: block;
+  width: 100%; /* Ensure textarea takes up full width of its container */
+  height: 100px; /* Adjust height as needed */
+  overflow: auto; /* Add scrollbars if content overflows */
+  resize: vertical; /* Allows vertical resizing only */
+  box-sizing: border-box; /* Ensures padding is included in the width/height */
+  padding: 10px; /* Adds padding inside the textarea */
+  border: 1px solid #ccc; /* Adds a border around the textarea */
+  border-radius: 4px; /* Rounds the corners of the textarea */
+  font-family: Arial, sans-serif; /* Sets font for readability */
+  font-size: 14px; /* Sets font size */
+  background-color: #f9f9f9; /* Sets background color for better contrast */
 }
 
 
-  .form-group{
+
+.no-data-message {
+  color: #999; /* Grey color */
+  text-align: center; /* Centered text */
+  margin-top: 20px; /* Add some margin */
+}
+
+
+
+.field-label {
     font-weight: bold;
-    gap: 10px;
-    margin-left: 20px;
+    // margin-right: 10px; 
+  }
+  
+  // .field-value {
+  //   margin-left: 10px; 
+     
+  // }
+  
+  .form-group{
+      font-weight: bold;
+      gap: 10px;
+    }
+  
+  .custom-pills .nav-link {
+    font-size: 14px;  
+    padding: 2px 5px;  
+    margin-right: 0px; 
+  }
+  
+  // .row{
+  //   margin-left: 10%;
+  // }
+  
+  .no-margin {
+    margin-left: 0;
+  }
+  
+  strong{
+    font-weight: bold;
   }
 
-  td{
-    padding-bottom: 2px;
-    // margin-bottom: 20px;
-  }
-/* Inside your component's CSS file */
-.card {
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  padding: 16px;
+
+  .export-btn {
+    margin-left: auto;
+    display: block;
 }
 
-.card-title {
-  color: #333;
-  font-size: 1rem;
-  margin-bottom: 10px;
-}
-
-.card-text {
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: #007bff; /* Bootstrap primary color */
-}
-
-
+  
+  

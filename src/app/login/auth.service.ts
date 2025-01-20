@@ -13,6 +13,10 @@ export class AuthService {
   // private baseUrl = '//10.100.32.41:8082';
 
   
+  // private baseUrl = '//10.100.31.123:8082';
+
+  // private baseUrl = '//ims.sdb.lk:8082';
+
   private baseUrl = '//localhost:8082';
 
   private apiUrl = `${this.baseUrl}/login`;
@@ -68,6 +72,9 @@ export class AuthService {
     localStorage.removeItem('incidentCount'); 
     localStorage.removeItem('level'); 
     localStorage.removeItem('empCode'); 
+    localStorage.removeItem('mobile');
+    localStorage.removeItem('branch');
+    localStorage.removeItem('email');
     this.router.navigate(['/login']);
   }
 
@@ -117,6 +124,24 @@ export class AuthService {
   }
 
 
+  setEmail(email: string) {
+    localStorage.setItem('email', email);
+  }
+
+  getEmail() {
+    return localStorage.getItem('email');
+  }
+
+  setMobile(mobile: string) {
+    localStorage.setItem('mobile', mobile);
+  }
+
+  getMobile() {
+    return localStorage.getItem('mobile');
+  }
+
+
+
   setLevel(level:any){
     localStorage.setItem('level', level);
  
@@ -142,7 +167,7 @@ export class AuthService {
     }
   
     setIncidentCount(count: number) {
-      localStorage.setItem('incidentCount', count.toString());
+      // localStorage.setItem('incidentCount', count.toString());
     }
 
 

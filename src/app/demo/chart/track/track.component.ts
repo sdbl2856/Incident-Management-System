@@ -23,7 +23,9 @@ export class TrackComponent {
   editorData: string = '';
   formValue: FormGroup;   
   selectedOption: string = ''; 
+  searchQuery: string = '';
   showdata = true;  
+  showcmt: boolean = false;
   row : any ;
   incidents:any[];
   formGroup: FormGroup;
@@ -43,6 +45,7 @@ export class TrackComponent {
   search_box=false;
   status_dropdown=false;
   empCode:any;
+  totalItems:number=0;
 
     // New properties for pagination
     currentPage: number = 1;
@@ -64,10 +67,9 @@ displayedCommentList: any[] = [];
   constructor(private formBuilder: FormBuilder,private authService: AuthService,private reportService:ReportService,private _snackBar: MatSnackBar,  private userService: UserService,) {
 
     this.formValue = this.formBuilder.group({
-      search_by: ['PE'] ,
+      search_by: [''] ,
       searchInput: [''],
       status: [''],
-      level: [''],
       startDate: [''],
       endDate: [''],
            
@@ -75,7 +77,8 @@ displayedCommentList: any[] = [];
 
   }
 
-  displayedColumns: string[] = ['description', 'commentedDate'];
+  displayedColumns: string[] = ['description', 'commentedDate', 'added_level', 'addedUser'];
+
   dataSource = new MatTableDataSource<Comment>([]); // Replace `Comment` with your data model
 
   @ViewChild(MatPaginator) paginator: MatPaginator;
@@ -126,10 +129,29 @@ private formatDate(date: any): string {
   return date ? new Date(date).toLocaleDateString() : '';
 }
 
+
+updateDisplayedData() {
+  if (this.incidents) {
+
+    const filteredUsers = this.incidents.filter(incident => 
+      incident.incident_ref.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+      incident.incidentId.toString().toLowerCase().includes(this.searchQuery.toLowerCase())
+    );
+
+    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+    const endIndex = startIndex + this.itemsPerPage;
+
+    this.displayedIncidentList = filteredUsers.slice(startIndex, endIndex);
+  }
+
+}
+
+
 exportToExcel() {
   const data = this.incidents.map(row => {
     return {
       'Id': row.incidentId,
+      'Ref': row.incident_ref,
       'Description': row.inc_description,
       'Occurrence Date': this.formatDate(row.occurence_date),
       'Detected Date': this.formatDate(row.detected_date),
@@ -140,7 +162,6 @@ exportToExcel() {
       'Reporting Officer ': row.reporting_officer,
       'Contact Number ': row.contact_number,
       'Incident Type': row.incidentType ? row.incidentType.description : 'N/A',
-
       'Action Taken By the Department': row.action,
       'Loss Event Type': row.lossEventType?.description || 'N/A',
       'Business Line': row.businessLine?.description || 'N/A',
@@ -150,9 +171,11 @@ exportToExcel() {
       'Potential Loss Amount': row.potential_amount,
       'Actual Amount': row.actual_amount,
       'Risk Level': row.riskLevel?.description || 'N/A',
-      'Status ': row.status || 'N/A',
+      'Status ': this.getStatusDescription(row.status)|| 'N/A',
       'Branch ': row.branch?.description || 'N/A',
       'Region ': row.region?.description || 'N/A',
+      'Department':row.department?.description || 'N/A',
+      'Current-Level':row.currentLevel|| 'N/A'
       
     };
   });
@@ -165,6 +188,55 @@ exportToExcel() {
 
 
   getPosts() {
+
+    const selectedSearchType = this.formValue.get('search_by').value;
+    const status = this.formValue.get('status').value;
+    const startDate = this.formValue.get('startDate').value;
+    const endDate = this.formValue.get('endDate').value;
+
+    const incidentData = {    
+      status:selectedSearchType,
+      userId:this.userId,
+      employeeCode:this.empCode,
+      startDate:startDate,
+      endDate:endDate
+    };
+
+    console.log(incidentData);
+    this.reportService.getPosts(incidentData)
+      .subscribe((data: any) => {
+        if (data.code === 200) {
+
+          console.log(data);
+          this.commentList = [];
+  
+          data.incidentDtoList.forEach((incident) => {
+            if (incident.comments) {
+              incident.comments.forEach((comment) => {
+                // Only push comments for the selected incident
+                if (incident.incidentId == this.selectedIncidentId) {
+                  this.commentList.push(comment);
+                  console.log(this.commentList);
+                }
+              });
+            }
+          });
+          
+          this.currentPageComment = 1;
+          this.updateDisplayedCommentData();
+        }
+  
+        this.incidents = data.incidentDtoList;
+        const incidentCount = this.incidents?.length;
+        this.totalItems = this.incidents?.length;
+        console.log('Incident Count:', incidentCount);
+        // Check if any incident is completed
+        // this.isIncidentCompleted = this.incidents.some(incident => incident.status === 'CO')
+        this.updateDisplayedData();
+      });
+  }
+
+  getPosts2() {
 
     const selectedSearchType = this.formValue.get('search_by').value;
 
@@ -183,31 +255,30 @@ exportToExcel() {
           this.commentList = [];
   
           data.incidentDtoList.forEach((incident) => {
-            if (incident.comment) {
-              incident.comment.forEach((comment) => {
+            if (incident.comments) {
+              incident.comments.forEach((comment) => {
                 // Only push comments for the selected incident
-                if (comment.incident.incidentId === this.selectedIncidentId) {
+                if (incident.incidentId == this.selectedIncidentId) {
                   this.commentList.push(comment);
+                  console.log(this.commentList);
                 }
               });
             }
           });
-  
+          
           this.currentPageComment = 1;
           this.updateDisplayedCommentData();
         }
   
         this.incidents = data.incidentDtoList;
         const incidentCount = this.incidents?.length;
+        this.totalItems = this.incidents?.length;
         console.log('Incident Count:', incidentCount);
-  
         // Check if any incident is completed
-        // this.isIncidentCompleted = this.incidents.some(incident => incident.status === 'CO');
-  
+        // this.isIncidentCompleted = this.incidents.some(incident => incident.status === 'CO')
         this.updateDisplayedData();
       });
   }
-
   statusDescriptions: { [key: string]: string } = {
     'CO': 'Completed',
     'RE': 'Revert',
@@ -264,35 +335,35 @@ exportToExcel() {
 
 
     // pagination start here
-  prevPage() {
-    if (this.currentPage > 1) {
-      this.currentPage--;
+    prevPage() {
+      if (this.currentPage > 1) {
+        this.currentPage--;
+        this.updateDisplayedData();
+      }
+    }
+  
+    nextPage() {
+      const totalPages = Math.ceil(this.incidents.length / this.itemsPerPage);
+      if (this.currentPage < totalPages) {
+        this.currentPage++;
+        this.updateDisplayedData();
+      }
+    }
+  
+    goToPage(page: number) {
+      this.currentPage = page;
       this.updateDisplayedData();
     }
-  }
 
-  nextPage() {
-    const totalPages = Math.ceil(this.incidents.length / this.itemsPerPage);
-    if (this.currentPage < totalPages) {
-      this.currentPage++;
-      this.updateDisplayedData();
-    }
-  }
-
-  goToPage(page: number) {
-    this.currentPage = page;
-    this.updateDisplayedData();
-  }
-
-  updateDisplayedData() {
-    console.log('Incidents:', this.incidents);
-    if (this.incidents) {
-      const startIndex = (this.currentPage - 1) * this.itemsPerPage;
-      const endIndex = startIndex + this.itemsPerPage;
-      this.displayedIncidentList = this.incidents.slice(startIndex, endIndex);
-      console.log(this.displayedIncidentList);
-    }
-  }
+  // updateDisplayedData() {
+  //   console.log('Incidents:', this.incidents);
+  //   if (this.incidents) {
+  //     const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+  //     const endIndex = startIndex + this.itemsPerPage;
+  //     this.displayedIncidentList = this.incidents.slice(startIndex, endIndex);
+  //     console.log(this.displayedIncidentList);
+  //   }
+  // }
 
   getPageArray(): number[] {
     if (this.incidents && this.incidents.length > 0) {

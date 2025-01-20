@@ -16,7 +16,7 @@ import { UserService } from '../user/user.service';
 })
 
 export class ReportComponent {
-
+  loading = true;
   formValue: FormGroup;   
   selectedOption: string = ''; 
   showdata = false;  
@@ -36,7 +36,7 @@ export class ReportComponent {
   Commentmodel_obj:CommentModel = new CommentModel();
   levels: any[];
   filteredLevels: any[];
-  departmentList: any[];
+  departmentList: any[] = [];
   branchList: any[];
   search_form_div=false;
   search_box=false;
@@ -47,7 +47,7 @@ export class ReportComponent {
   dep_dropdown=false;
   branch_dropdown=false;
   region_dropdown=false;
-
+  filteredDepartments: any[] = [];
   incidentCount:number;
   branches: any[];
   regions: any[];
@@ -102,7 +102,7 @@ displayedCommentList: any[] = [];
       this.filteredLevels = this.levels.filter(level => level.type !== 'AD');
       this.departmentList = data.departmentList;
       console.log(this.departmentList);
-      // this.branchList = data.branchList;
+      this.filterDepartments();
       
       this.branches = data.branchList;
       this.regions = data.regions;
@@ -173,6 +173,19 @@ displayedCommentList: any[] = [];
       this.status_dropdown=false;
       this.branch_dropdown=true;
       this.region_dropdown=true;
+     
+    }else if (this.search_form_div = selectedSearchType == 'ALL') {
+      this.search_form_div = true;
+      this.search_box = false;
+
+
+      this.level_dropdown = false;
+      this.srt_date=true;
+      this.end_date=true;
+      this.dep_dropdown=false;
+      this.status_dropdown=false;
+      this.branch_dropdown=false;
+      this.region_dropdown=false;
      
     }
 
@@ -257,7 +270,8 @@ exportToExcel() {
       'Branch ': row.branch?.description || 'Head-Office',
       'Region ': row.region?.description || 'Head-Office',
       'Department':row.department?.description || 'N/A',
-      'Current-Level':row.currentLevel|| 'N/A'
+      'Current-Level':row.currentLevel|| 'N/A',
+      'Ref': row.incident_ref,
       
     };
   });
@@ -275,6 +289,13 @@ exportToExcel() {
       
     }
 
+
+    filterDepartments() {
+      // Filter out the department you want to hide
+      this.filteredDepartments = this.departmentList.filter(department => department.description !== 'N/A');
+  }
+
+    
   getPosts() {
 
     let formattedStartDate="";
@@ -326,13 +347,14 @@ exportToExcel() {
     console.log("after Nan");
     // Format the dates with the desired times
    formattedStartDate = startDate.toISOString().split('T')[0] + ' 00:00:00.000';
-   formattedEndDate = endDate.toISOString().split('T')[0] + ' 11:59:59.999';
+   formattedEndDate = endDate.toISOString().split('T')[0] + ' 23:59:59.999';
 
     // Use the formatted dates in your logic
     console.log('formattedStartDate :', formattedStartDate);
     console.log('formattedEndDate :', formattedEndDate);
   }
 
+  this.loading = false;
 const incidentData = {   
   refId: searchInputValue,
   departmentId:dep,
@@ -350,6 +372,7 @@ const incidentData = {
     this.reportService.getPosts(incidentData)
       .subscribe((data: any) => {
         if (data.code === 200) {
+          this.loading = true;
           this.commentList = [];
           this.showdata=true;
           data.incidentDtoList.forEach((incident) => {
@@ -368,9 +391,9 @@ const incidentData = {
         }
   
         this.incidents = data.incidentDtoList;
-         this.incidentCount = this.incidents.length;
+         this.incidentCount = this.incidents?.length;
         console.log('Incident Count:', this.incidentCount);
-  
+        this.loading = true;
         // Check if any incident is completed
         // this.isIncidentCompleted = this.incidents.some(incident => incident.status === 'CO');
   

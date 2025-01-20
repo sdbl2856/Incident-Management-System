@@ -16,30 +16,64 @@
           [options]="false"
           blockClass="table-border-style"
         >
-          <table class="table-responsive" style="margin-left: 40px">
+
+        <div *ngIf="!loading && totalItems === 0" class="no-data-message" style="text-align: center;">
+          <p>No data to display.</p>
+        </div>
+        <div class="row">
+          <div class="col-4" *ngIf="totalItems > 0">
+            <input  
+            type="text" 
+            style="width: 80%;margin-left: 30%;"
+            placeholder="REf/ID" 
+            [(ngModel)]="searchQuery" 
+            (input)="updateDisplayedData()"
+            class="form-control"
+          />
+          
+          </div>
+      
+          <div class="col-4">
+
+          </div>
+          <div class="col-4">
+            <div class="text-end" *ngIf="!loading && totalItems > 0" >
+              <button
+                class="btn btn-success custom-btn"
+                (click)="exportToExcel()"
+              >
+                To-Excel
+              </button>
+            </div>
+          </div>
+        </div>
+        <br>
+          <table class="table-responsive" style="margin-left: 120px"  *ngIf="totalItems > 0">
+
             <div class="table table-hover">
               <thead>
                 <tr>
+                  <th>#</th>
                   <th>ID</th>
-
-                  <th>Occurance Date</th>
-                  <th>Detected Date</th>
+                  <th>Reference No</th>
+                  <th>Status</th>
+                  <th>Current Level</th>
                   <th>Reporting Date</th>
-                  <th>Risk Owner</th>
-
-                  <th>ACTION</th>
+                  <th>Reporting Officer</th>
+                  <th>Action</th>
                 </tr>
               </thead>
 
               <!-- Display the paged and sorted incidents -->
               <tbody>
-                <tr *ngFor="let row of displayedIncidentList">
+                <tr *ngFor="let row of displayedIncidentList; let i = index">
+                  <td>{{ (currentPage - 1) * itemsPerPage + (i + 1) }}</td>
                   <td>{{ row.incidentId }}</td>
-
-                  <td>{{ row.occurence_date | date: "yyyy-MM-dd" }}</td>
-                  <td>{{ row.detected_date | date: "yyyy-MM-dd" }}</td>
+                  <td>{{ row.incident_ref }}</td>
+                  <td>{{ getStatusDescription(row.status) }}</td>
+                  <td>{{ row.currentLevel }}</td>
                   <td>{{ row.reporting_date | date: "yyyy-MM-dd" }}</td>
-                  <td>{{ row.risk_owner }}</td>
+                  <td>{{ row.reporting_officer }}</td>
 
                   <td class="cell-small">
                     <button class="btn btn-primary" (click)="onEdit(row)">
@@ -52,43 +86,28 @@
           </table>
 
           <br />
-          <!-- pagination -->
-          <nav style="margin-left: 75%" aria-label="Page navigation example">
-            <ul class="pagination">
-              <li class="page-item">
-                <a
-                  class="page-link"
-                  href="javascript:"
-                  (click)="prevPage()"
-                  aria-label="Previous"
-                >
-                  <span aria-hidden="true">&laquo;</span>
-                  <span class="sr-only">Previous</span>
-                </a>
-              </li>
-
-              <li class="page-item" *ngFor="let page of getPageArray()">
-                <a
-                  class="page-link"
-                  href="javascript:"
-                  (click)="goToPage(page)"
-                  >{{ page }}</a
-                >
-              </li>
-
-              <li class="page-item">
-                <a
-                  class="page-link"
-                  href="javascript:"
-                  (click)="nextPage()"
-                  aria-label="Next"
-                >
-                  <span aria-hidden="true">&raquo;</span>
-                  <span class="sr-only">Next</span>
-                </a>
-              </li>
-            </ul>
-          </nav>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin: 20px 0;" *ngIf="totalItems > 0">
+            <h6>Total: {{ displayedIncidentList.length }} of {{ totalItems }}</h6>
+            <nav aria-label="Page navigation example" style="margin-right: 180px;">
+              <ul class="pagination">
+                <li class="page-item">
+                  <a class="page-link" href="javascript:" (click)="prevPage()" aria-label="Previous">
+                    <span aria-hidden="true">&laquo;</span>
+                    <span class="sr-only">Previous</span>
+                  </a>
+                </li>
+                <li class="page-item" *ngFor="let page of getPageArray()">
+                  <a class="page-link" href="javascript:" (click)="goToPage(page)">{{ page }}</a>
+                </li>
+                <li class="page-item">
+                  <a class="page-link" href="javascript:" (click)="nextPage()" aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                    <span class="sr-only">Next</span>
+                  </a>
+                </li>
+              </ul>
+            </nav>
+          </div>
 
           <!--  -->
         </app-card>
@@ -113,8 +132,17 @@
           blockClass="table-border-style"
         >
         
-
+        <div class="row">
+          <div class="col-md-11"></div>
+          <div class="col-md-1"> <button (click)="clickTab1()" style="width:35px;height:35px;margin-bottom: 10px; border-radius:25px;" class="btn btn-outline-danger fa fa-times" ></button>                           
+          </div>
+        </div>
           <form [formGroup]="formValue" class="form">
+
+
+            
+
+
             <!-- sec- 1-->
             <div class="row">
               <div class="col-sm-4">
@@ -123,6 +151,7 @@
                     >Reporting Officer</label
                   >
                   <input
+                    readonly
                     style="width: 70%"
                     type="text"
                     formControlName="reporting_officer"
@@ -137,6 +166,7 @@
                     >Contact Number</label
                   >
                   <input
+                    readonly
                     style="width: 70%"
                     type="number"
                     formControlName="contact_number"
@@ -275,70 +305,6 @@
             <br />
             <!-- sec-4 -->
             <div class="row">
-              <div class="col-sm-4">
-                <div class="form-group">
-                  <label for="description" class="form-label"
-                    >Description</label
-                  >
-                  <textarea
-                    style="width: 100%"
-                    class="form-control"
-                    id="description"
-                    rows="3"
-                    formControlName="description"
-                  ></textarea>
-                </div>
-              </div>
-              <div class="col-sm-4">
-                <div class="form-group">
-                  <label for="recovery_action" class="form-label"
-                    >Recovery Actions</label
-                  >
-                  <textarea
-                    style="width: 100%"
-                    class="form-control"
-                    id="recovery_action"
-                    rows="3"
-                    formControlName="recovery_action"
-                  ></textarea>
-                </div>
-              </div>
-              <div class="col-sm-4">
-                <div class="form-group">
-                  <label for="recoverd_amount" class="form-label" readonly
-                    >Recoverd Amount</label
-                  >
-                  <input
-                    style="width: 70%"
-                    type="number"
-                    formControlName="recoverd_amount"
-                    class="form-control"
-                    id="recoverd_amount"
-                  />
-                </div>
-              </div>
-            </div>
-            <br />
-            <div class="row">
-              <div class="col-sm-4">
-
-                <div class="form-group">
-                  <label for="account_number" class="form-label" readonly
-                    >Account Number</label
-                  >
-                  <input
-                    style="width: 70%"
-                    type="number"
-                    formControlName="account_number"
-                    class="form-control"
-                    id="account_number"
-                  />
-                </div>  
-              </div>
-
-
-              
-
 
               <div class="col-sm-4">
 
@@ -371,6 +337,70 @@
                 </div>
               
               </div>
+
+         
+              <div class="col-sm-4">
+                <div class="form-group">
+                  <label for="recoverd_amount" class="form-label" readonly
+                    >Recoverd Amount</label
+                  >
+                  <input
+                    style="width: 70%"
+                    type="number"
+                    formControlName="recoverd_amount"
+                    class="form-control"
+                    id="recoverd_amount"
+                  />
+                </div>
+              </div>
+            </div>
+            <br />
+            <div class="row">
+              <div class="col-sm-4">
+
+                <div class="form-group">
+                  <label for="account_number" class="form-label" readonly
+                    >Account Number</label
+                  >
+                  <input
+                    style="width: 70%"
+                    type="number"
+                    formControlName="account_number"
+                    class="form-control"
+                    id="account_number"
+                  />
+                </div>  
+              </div>
+              <div class="col-sm-4">
+                <div class="form-group">
+                  <label for="description" class="form-label"
+                    >Description</label
+                  >
+                  <textarea
+                    style="width: 100%"
+                    class="form-control"
+                    id="description"
+                    rows="3"
+                    formControlName="description"
+                  ></textarea>
+                </div>
+              </div>
+              <div class="col-sm-4">
+                <div class="form-group">
+                  <label for="recovery_action" class="form-label"
+                    >Recovery Actions</label
+                  >
+                  <textarea
+                    style="width: 100%"
+                    class="form-control"
+                    id="recovery_action"
+                    rows="3"
+                    formControlName="recovery_action"
+                  ></textarea>
+                </div>
+              </div>
+
+            
             </div>
             <div
               *ngIf="showEmtyMessage"
@@ -389,27 +419,36 @@
                 {{ emtyMessage }}
               </h4>
             </div>
-            <div
+          <div
             *ngIf="showSuccessMessage"
             class="success-message"
             style="
               background-color: whitesmoke;
               padding: 10px;
-              max-width: 400px;
+              max-width: 500px;
+              height: 200px;
               margin: 0 auto;
               display: flex;
               align-items: center;
               justify-content: center;
             "
           >
-            <h4 style="color: rgb(6, 204, 39); margin: 0">
+            <h4 style="color: rgb(6, 204, 39); margin: 0; font-size: 3em; padding: 1px;">
               {{ successMessage }}
             </h4>
+          
+          
           </div>
+          <!--  -->
+          
+          <!--  -->
             <br />
+
+
             <div class="row">
-              <div class="col-sm-4">
-                <div class="form-group">
+              
+              <div class="col-sm-4" >
+                <div class="form-group"  >
                   <label for="dropdown" class="form-label"
                     >Consequences of Incident</label
                   >
@@ -428,8 +467,10 @@
                     </option>
                   </select>
                 </div>
+
+               
               </div>
-              <div class="col-sm-4">
+              <div class="col-sm-4"  >
                 <div class="form-group">
                   <label for="dropdown" class="form-label">Risk Level</label>
                   <select
@@ -449,7 +490,7 @@
                   </select>
                 </div>
               </div>
-              <div class="col-sm-4">
+              <div class="col-sm-4"  >
                
                 <div class="form-group">
                   <label for="dropdown" class="form-label">Business Line</label>
@@ -475,7 +516,7 @@
             <br />
             <!-- extra -->
             <div class="row">
-              <div class="col-sm-4">
+              <div class="col-sm-4"  >
                
                 <div class="form-group">
                   <label for="dropdown" class="form-label">Business Aria</label>
@@ -497,7 +538,7 @@
 
 
               </div>
-              <div class="col-sm-4">
+              <div class="col-sm-4"  >
                 <div class="form-group">
                   <label for="dropdown" class="form-label">Incident Type</label>
                   <select
@@ -516,7 +557,7 @@
                   </select>
                 </div>
               </div>
-              <div class="col-sm-4">
+              <div class="col-sm-4"  >
                 <div class="form-group">
                   <label for="dropdown" class="form-label"
                     >LossEvent Type</label
@@ -541,7 +582,7 @@
             <br>
             <!-- end -->
             <div class="row">
-              <div class="col-sm-4">
+              <div class="col-sm-4" >
                 <div class="form-group">
                   <label for="action" class="form-label"
                     >Action Taken By Department</label
@@ -555,7 +596,7 @@
                   ></textarea>
                 </div>     
               </div>
-              <div class="col-sm-4">
+              <div class="col-sm-4"  >
 
                 <div class="form-group">
                   <label for="root_cause" class="form-label">Root Cause</label>
@@ -569,72 +610,106 @@
                 </div>
                
               </div>
-              <div class="col-md-4">
-                <label style="font-weight: bold" class="comment-label"
-                  >Comment</label
-                >
-                <br />
-                <textarea
-                  class="comment-input form-control"
-                  rows="3"
-                  formControlName="comment"
-                  required
-                  [(ngModel)]="comment"
-                ></textarea>
-                <label
-                  style="color: red"
-                  *ngIf="comment == null || comment == ''"
-                >
-                  Required
-                </label>
-              </div>
+          
             </div>
+
+
             <br />
+
+            <div class="row">
+              <div class="col-4"></div>
+            
+           
+              <div class="col-4">
+                <div class="col-md-12"> 
+                  <label style="font-weight: bold" class="comment-label">
+                    Comment
+                  </label>
+                  <br />
+                  <textarea
+                    style="width: 100%;"
+                    class="comment-input form-control"
+                    rows="3"
+                    formControlName="comment"
+                    required
+                    [(ngModel)]="comment"
+                  ></textarea>
+                  <label style="color: red" *ngIf="comment == null || comment == ''">
+                    Required
+                  </label>
+                </div>
+              </div>
+            
+              <div class="col-4"></div>
+            </div>
+            
+            <br>
             <div class="row">
               <div class="col-sm-4"></div>
-              <div class="col-sm-4"></div>
-              <div class="col-sm-4">
-                <button class="btn btn-danger" (click)="revertDetails(row)">
-                  REVERT
-                </button>
-                <button class="btn btn-primary" (click)="updateIncidents()">
-                FORWARD
-                </button>
+            
+              <!-- Centered column with flexbox to align buttons -->
+              <div class="col-sm-4 d-flex justify-content-center">
+                <div class="btn-group">
+                  <!-- Corrected the *ngIf condition to properly check currentLevel -->
+                  <button *ngIf="currentLevel !== 'DRC' && currentLevel !== 'RC' && currentLevel !== 'RRC'" 
+                          class="btn btn-danger" 
+                          (click)="revertDetails(row)">
+                    REVERT
+                  </button>
+            
+                  <button class="btn btn-primary" (click)="updateIncidents()" style="margin-left: 10%;">
+                    FORWARD
+                  </button>
+                </div>
               </div>
+            
+              <div class="col-sm-4"></div>
             </div>
+            
           </form>
+
+          
+        <div class="row no-margin" *ngIf="this.commentList.length > 0">
+                 
+          <mat-card-title style="text-align: center;">Comments</mat-card-title>
+        
+            <table mat-table [dataSource]="commentList" matSort class="mat-elevation-z8">
+      
+              <!-- Description Column -->
+              <ng-container matColumnDef="description">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>Description</th>
+                <td mat-cell *matCellDef="let comment">{{ comment.description }}</td>
+              </ng-container>
+      
+              <!-- Date Column -->
+              <ng-container matColumnDef="commentedDate">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>Date</th>
+                <td mat-cell *matCellDef="let comment">{{ comment.commentedDate | date: 'yyyy-MM-dd' }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="added_level">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>Added Level</th>
+                <td mat-cell *matCellDef="let comment">{{ comment.added_level}}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="addedUser">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>Added User</th>
+                <td mat-cell *matCellDef="let comment">{{ comment.addedUser}}</td>
+              </ng-container>
+      
+              <!-- Header and Row Definitions -->
+              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+            </table>
+      
+            <!-- Pagination -->
+            <mat-paginator [pageSize]="5" [pageSizeOptions]="[5, 10, 25]" aria-label="Select page"></mat-paginator>
+       
+  
+      </div>
         </app-card>
       
     
-        <!-- Comments section with pagination -->
-        <div class="row no-margin" >
-          <mat-card>
-            <mat-card-title>Comments</mat-card-title>
-            <mat-card-content>
-              <table mat-table [dataSource]="commentList" matSort class="mat-elevation-z8">
-        
-                <!-- Description Column -->
-                <ng-container matColumnDef="description">
-                  <th mat-header-cell *matHeaderCellDef mat-sort-header>Description</th>
-                  <td mat-cell *matCellDef="let comment">{{ comment.description }}</td>
-                </ng-container>
-        
-                <!-- Date Column -->
-                <ng-container matColumnDef="commentedDate">
-                  <th mat-header-cell *matHeaderCellDef mat-sort-header>Date</th>
-                  <td mat-cell *matCellDef="let comment">{{ comment.commentedDate | date: 'yyyy-MM-dd' }}</td>
-                </ng-container>
-        
-                <!-- Header and Row Definitions -->
-                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-              </table>
-        
-              <!-- Pagination -->
-              <mat-paginator [pageSize]="5" [pageSizeOptions]="[5, 10, 25]" aria-label="Select page"></mat-paginator>
-            </mat-card-content>
-          </mat-card>
-        </div>
         
       </div>
     </ng-template>

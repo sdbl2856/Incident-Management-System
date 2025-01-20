@@ -188,7 +188,9 @@ onUserTypeChange() {
 
 
   onEdit(row: any) {
-
+    this.showDepartmentDropdown=true;
+    this.showBranchDropdown=true;
+    this.showRegionDropdown=true;
     this.specificBranches = this.branches;
     this.specificBranches = [];
     for (let i = 0; i < this.branches.length; i++) {

@@ -18,6 +18,7 @@
         <option value="LEVEL">STATUS AND LEVEL</option>
         <option value="DEP">DEPARTMENT</option>
         <option value="BR">BRANCH & REGION</option>
+        <option value="ALL">ALL</option>
       </select>
     </div>
   </form>
@@ -109,7 +110,7 @@
         >
         <option value="" disabled selected>Select Department</option>
        
-          <option  *ngFor="let dep of departmentList" [value]="dep.departmentId">{{dep.description}}</option>
+          <option  *ngFor="let dep of filteredDepartments" [value]="dep.departmentId">{{dep.description}}</option>
    
        
         </select>
@@ -323,10 +324,6 @@
                 </div>
               </div>
 
-
-
-           
-
             </app-card>
           </div>
         </ng-template>
@@ -340,11 +337,11 @@
           aria-selected="true"
           >Details</a
         >
-        <ng-template ngbNavContent>
+        <ng-template ngbNavContent style="margin-left:0 ;">
           <!-- table for view data-->
 
-          <div class="form-view" *ngIf="showform">
-            <div>
+          <div class="form-view" *ngIf="showform"  >
+            <div >
               <br />
               <app-card
                 cardTitle="Incident Details"
@@ -376,334 +373,344 @@
                     {{ successMessage }}
                   </h4>
                 </div>
+                <div style="margin-left: 4%;">
 
-                <div class="row">
-                  <div class="col-md-6">
-                    <div hidden class="detail heading">
-                      <strong style="font-weight: bold; color: #333"
-                        >id:</strong
-                      >
-                      <p style="display: inline-block" class="field-value">
-                        {{ row.incidentId }}
-                      </p>
-                    </div>
-                    <div class="detail" *ngIf="row.inc_description">
-                      <strong style="font-weight: bold; color: #333"
-                        >Description :</strong
-                      >
-                      <p style="display: inline-block" class="field-value">
-                        {{ row.inc_description }}
-                      </p>
-                    </div>
-                  </div>
-                  <div class="col-md-6">
-                    <div class="detail" *ngIf="row.occurence_date">
-                      <strong style="font-weight: bold; color: #333"
-                        >Occurrence Date :</strong
-                      >
-                      <p style="display: inline-block" class="field-value">
-                        {{ row.occurence_date | date: "yyyy-MM-dd" }}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="row">
-                  <div class="col-md-6">
-                    <div class="detail" *ngIf="row.risk_owner">
-                      <strong style="font-weight: bold; color: #333"
-                        >Risk Owner :</strong
-                      >
-                      <p style="display: inline-block" class="field-value">
-                        {{ row.risk_owner }}
-                      </p>
-                    </div>
-                  </div>
-                  <div class="col-md-6">
-                    <div class="detail" *ngIf="row.detected_date">
-                      <strong style="font-weight: bold; color: #333"
-                        >Detected Date :</strong
-                      >
-                      <p style="display: inline-block" class="field-value">
-                        {{ row.detected_date | date: "yyyy-MM-dd" }}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="row">
-                  <div class="col-md-6">
-                    <div class="detail" *ngIf="row.sub_type">
-                      <strong style="font-weight: bold; color: #333"
-                        >Risk Cause :</strong
-                      >
-                      <p style="display: inline-block" class="field-value">
-                        {{ row.sub_type.riskCause.description }}
-                      </p>
-                    </div>
-                  </div>
-                  <div class="col-md-6">
-                    <div class="detail" *ngIf="row.sub_type">
-                      <strong style="font-weight: bold; color: #333"
-                        >Risk Sub Category :</strong
-                      >
-                      <p style="display: inline-block" class="field-value">
-                        {{ row.sub_type.riskSubCategory.description }}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="row">
-                  <div class="col-md-6">
-                    <div class="detail" *ngIf="row.sub_type">
-                      <strong style="font-weight: bold; color: #333"
-                        >Risk Sub Type :</strong
-                      >
-                      <p
-                        *ngIf="row.sub_type"
-                        style="display: inline-block"
-                        class="field-value"
-                      >
-                        {{ row.sub_type.description }}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div class="col-md-6">
-                    <div class="detail" *ngIf="row.lossEventType">
-                      <strong style="font-weight: bold; color: #333"
-                        >LossEvent Type :</strong
-                      >
-                      <p
-                        *ngIf="row.lossEventType"
-                        style="display: inline-block"
-                        class="field-value"
-                      >
-                        {{ row.lossEventType.description }}
-                      </p>
-                    </div>
-                  </div>
-
-
-
-                </div>
-
-                <div class="row">
-                  <div class="col-md-6">
-                    <div class="detail" *ngIf="row.businessLine">
-                      <strong style="font-weight: bold; color: #333"
-                        >Business Line :</strong
-                      >
-                      <p
-                        *ngIf="row.businessLine"
-                        style="display: inline-block"
-                        class="field-value"
-                      >
-                        {{ row.businessLine.description }}
-                      </p>
-                    </div>
-                  </div>
-                  <div class="col-md-6">
-                    <div class="detail" *ngIf="row.businessAria">
-                      <strong style="font-weight: bold; color: #333"
-                        >Business Aria :</strong
-                      >
-                      <p
-                        *ngIf="row.businessAria"
-                        style="display: inline-block"
-                        class="field-value"
-                      >
-                        {{ row.businessAria.description }}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="row">
-                  <div class="col-md-6">
-                    <div class="detail" *ngIf="row.consequence">
-                      <strong style="font-weight: bold; color: #333"
-                        >Consequence :</strong
-                      >
-                      <p
-                        *ngIf="row.consequence"
-                        style="display: inline-block"
-                        class="field-value"
-                      >
-                        {{ row.consequence.description }}
-                      </p>
-                    </div>
-                  </div>
-                  <div class="col-md-6">
-                    <div class="detail" *ngIf="row.riskLevel">
-                      <strong style="font-weight: bold; color: #333"
-                        >Risk-Level :</strong
-                      >
-                      <p
-                        *ngIf="row.riskLevel"
-                        style="display: inline-block"
-                        class="field-value"
-                      >
-                        {{ row.riskLevel.description }}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                <div class="row">
-                  <div class="col-md-6">
-                    <div class="detail" *ngIf="row.action">
-                      <strong style="font-weight: bold; color: #333"
-                        >Action :</strong
-                      >
-                      <p
-                        *ngIf="row.action"
-                        style="display: inline-block"
-                        class="field-value"
-                      >
-                        {{ row.action }}
-                      </p>
-                    </div>
-                  </div>
-                  <div class="col-md-6">
-                    <div class="detail" *ngIf="row.rootCause">
-                      <strong style="font-weight: bold; color: #333"
-                        >Root cause :</strong
-                      >
-                      <p
-                        *ngIf="row.rootCause"
-                        style="display: inline-block"
-                        class="field-value"
-                      >
-                        {{ row.rootCause }}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                <div class="row">
-                  <div class="col-md-6">
-                    <div class="detail" *ngIf="row.region">
-                      <strong style="font-weight: bold; color: #333"
-                        >Region :</strong
-                      >
-                      <p
-                        *ngIf="row.region"
-                        style="display: inline-block"
-                        class="field-value"
-                      >
-                        {{ row.region.description }}
-                      </p>
-                    </div>
-                  </div>
-                  <div class="col-md-6">
-                    <div class="detail" *ngIf="row.branch">
-                      <strong style="font-weight: bold; color: #333"
-                        >Branch :</strong
-                      >
-                      <p
-                        *ngIf="row.branch"
-                        style="display: inline-block"
-                        class="field-value"
-                      >
-                        {{ row.branch.description }}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                <div class="row">
-                  <div class="col-md-6">
+                  <div class="row">
+                    <div class="col-md-6">
+                      <div  class="detail heading">
+                        <strong style="font-weight: bold; color: #333"
+                          >id:</strong
+                        >
+                        <p style="display: inline-block" class="field-value">
+                          {{ row.incidentId }}
+                        </p>
+                      </div>
                     
-                    <div class="detail" *ngIf="row.incidentType">
-                      <strong style="font-weight: bold; color: #333"
-                        >Incident Type :</strong
-                      >
-                      <p
-                        *ngIf="row.incidentType"
-                        style="display: inline-block"
-                        class="field-value"
-                      >
-                        {{ row.incidentType.description }}
-                      </p>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="detail" *ngIf="row.occurence_date">
+                        <strong style="font-weight: bold; color: #333"
+                          >Occurrence Date :</strong
+                        >
+                        <p style="display: inline-block" class="field-value">
+                          {{ row.occurence_date | date: "yyyy-MM-dd" }}
+                        </p>
+                      </div>
                     </div>
                   </div>
-                  <div class="col-md-6">
-                    <div class="detail" *ngIf="row.actual_amount">
-                      <strong style="font-weight: bold; color: #333"
-                        >Actual Loss Amount :</strong
-                      >
-                      <p
-                        *ngIf="row.actual_amount"
-                        style="display: inline-block"
-                        class="field-value"
-                      >
-                        {{ row.actual_amount }}
-                      </p>
+  
+                  <div class="row">
+                    <div class="col-md-6">
+                      <div class="detail" *ngIf="row.risk_owner">
+                        <strong style="font-weight: bold; color: #333"
+                          >Risk Owner :</strong
+                        >
+                        <p style="display: inline-block" class="field-value">
+                          {{ row.risk_owner }}
+                        </p>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="detail" *ngIf="row.detected_date">
+                        <strong style="font-weight: bold; color: #333"
+                          >Detected Date :</strong
+                        >
+                        <p style="display: inline-block" class="field-value">
+                          {{ row.detected_date | date: "yyyy-MM-dd" }}
+                        </p>
+                      </div>
                     </div>
                   </div>
-                </div>
-                <div class="row">
+  
+                  <div class="row">
+                    <div class="col-md-6">
+                      <div class="detail" *ngIf="row.sub_type">
+                        <strong style="font-weight: bold; color: #333"
+                          >Risk Cause :</strong
+                        >
+                        <p style="display: inline-block" class="field-value">
+                          {{ row.sub_type.riskCause.description }}
+                        </p>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="detail" *ngIf="row.sub_type">
+                        <strong style="font-weight: bold; color: #333"
+                          >Risk Sub Category :</strong
+                        >
+                        <p style="display: inline-block" class="field-value">
+                          {{ row.sub_type.riskSubCategory.description }}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+  
+                  <div class="row">
+                    <div class="col-md-6">
+                      <div class="detail" *ngIf="row.sub_type">
+                        <strong style="font-weight: bold; color: #333"
+                          >Risk Sub Type :</strong
+                        >
+                        <p
+                          *ngIf="row.sub_type"
+                          style="display: inline-block"
+                          class="field-value"
+                        >
+                          {{ row.sub_type.description }}
+                        </p>
+                      </div>
+                    </div>
+  
+                    <div class="col-md-6">
+                      <div class="detail" *ngIf="row.lossEventType">
+                        <strong style="font-weight: bold; color: #333"
+                          >LossEvent Type :</strong
+                        >
+                        <p
+                          *ngIf="row.lossEventType"
+                          style="display: inline-block"
+                          class="field-value"
+                        >
+                          {{ row.lossEventType.description }}
+                        </p>
+                      </div>
+                    </div>
+  
+                  </div>
+                  <div class="row">
+                    <div class="col-md-6">
+                      <div class="detail" *ngIf="row.currentLevel">
+                        <strong style="font-weight: bold; color: #333"
+                          >current-Level:</strong
+                        >
+                        <p
+                          *ngIf="row.currentLevel"
+                          style="display: inline-block"
+                          class="field-value"
+                        >
+                          {{ row.currentLevel }}
+                        </p>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="detail" *ngIf="row.status">
+                        <strong style="font-weight: bold; color: #333">Status :</strong>
+                        <span *ngIf="row.status">{{ getStatusDescription(row.status) }}</span>
+                      </div>
+                    </div>
+                    
+                  </div>
+  
+                  <div class="row">
+                    <div class="col-md-6">
+                      <div class="detail" *ngIf="row.region">
+                        <strong style="font-weight: bold; color: #333"
+                          >Region :</strong
+                        >
+                        <p
+                          *ngIf="row.region"
+                          style="display: inline-block"
+                          class="field-value"
+                        >
+                          {{ row.region.description }}
+                        </p>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="detail" *ngIf="row.branch">
+                        <strong style="font-weight: bold; color: #333"
+                          >Branch :</strong
+                        >
+                        <p
+                          *ngIf="row.branch"
+                          style="display: inline-block"
+                          class="field-value"
+                        >
+                          {{ row.branch.description }}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+  
+                  <div class="row">
+                    <div class="col-md-6">
+                      <div class="detail" *ngIf="row.businessLine">
+                        <strong style="font-weight: bold; color: #333"
+                          >Business Line :</strong
+                        >
+                        <p
+                          *ngIf="row.businessLine"
+                          style="display: inline-block"
+                          class="field-value"
+                        >
+                          {{ row.businessLine.description }}
+                        </p>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="detail" *ngIf="row.businessAria">
+                        <strong style="font-weight: bold; color: #333"
+                          >Business Aria :</strong
+                        >
+                        <p
+                          *ngIf="row.businessAria"
+                          style="display: inline-block"
+                          class="field-value"
+                        >
+                          {{ row.businessAria.description }}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+  
+                  <div class="row">
+                    <div class="col-md-6">
+                      <div class="detail" *ngIf="row.consequence">
+                        <strong style="font-weight: bold; color: #333"
+                          >Consequence :</strong
+                        >
+                        <p
+                          *ngIf="row.consequence"
+                          style="display: inline-block"
+                          class="field-value"
+                        >
+                          {{ row.consequence.description }}
+                        </p>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="detail" *ngIf="row.riskLevel">
+                        <strong style="font-weight: bold; color: #333"
+                          >Risk-Level :</strong
+                        >
+                        <p
+                          *ngIf="row.riskLevel"
+                          style="display: inline-block"
+                          class="field-value"
+                        >
+                          {{ row.riskLevel.description }}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-md-6">
+                      <div class="detail" *ngIf="row.action">
+                        <strong style="font-weight: bold; color: #333"
+                          >Action :</strong
+                        >
+                        <p
+                          *ngIf="row.action"
+                          style="display: inline-block"
+                          class="field-value"
+                        >
+                          {{ row.action }}
+                        </p>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="detail" *ngIf="row.rootCause">
+                        <strong style="font-weight: bold; color: #333"
+                          >Root cause :</strong
+                        >
+                        <p
+                          *ngIf="row.rootCause"
+                          style="display: inline-block"
+                          class="field-value"
+                        >
+                          {{ row.rootCause }}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+               
+  
+  
+  
+  
+                  <div class="row">
+                    <div class="col-md-6">
+                      
+                      <div class="detail" *ngIf="row.incidentType">
+                        <strong style="font-weight: bold; color: #333"
+                          >Incident Type :</strong
+                        >
+                        <p
+                          *ngIf="row.incidentType"
+                          style="display: inline-block"
+                          class="field-value"
+                        >
+                          {{ row.incidentType.description }}
+                        </p>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="detail" *ngIf="row.actual_amount">
+                        <strong style="font-weight: bold; color: #333"
+                          >Actual Loss Amount :</strong
+                        >
+                        <p
+                          *ngIf="row.actual_amount"
+                          style="display: inline-block"
+                          class="field-value"
+                        >
+                          {{ row.actual_amount }}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-md-6">
+                      <div class="detail" *ngIf="row.potential_amount">
+                        <strong style="font-weight: bold; color: #333"
+                          >Potential Loss Amount :</strong
+                        >
+                        <p
+                          *ngIf="row.potential_amount"
+                          style="display: inline-block"
+                          class="field-value"
+                        >
+                          {{ row.potential_amount }}
+                        </p>
+                      </div>
+                    </div>               
+                    <div class="col-md-6"> 
+                      <div class="detail" *ngIf="row.recoverd_amount">
+                        <strong style="font-weight: bold; color: #333"
+                          > Recoverd Amount :</strong
+                        >
+                        <p
+                          *ngIf="row.recoverd_amount"
+                          style="display: inline-block"
+                          class="field-value"
+                        >
+                          {{ row.recoverd_amount }}
+                        </p>
+                      </div> 
+                    </div>
+                  </div>
+                 
+                  <div class="row">
+                    <div class="col-md-6">
+                      <div class="detail" *ngIf="row.department">
+                        <strong style="font-weight: bold; color: #333"
+                          >Department:</strong
+                        >
+                        <p
+                          *ngIf="row.currentLevel"
+                          style="display: inline-block"
+                          class="field-value"
+                        >
+                          {{ row.department.description }}
+                        </p>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                    
+                    </div>
 
-
-                  <div class="col-md-6">
-                    <div class="detail" *ngIf="row.potential_amount">
-                      <strong style="font-weight: bold; color: #333"
-                        >Potential Loss Amount :</strong
-                      >
-                      <p
-                        *ngIf="row.potential_amount"
-                        style="display: inline-block"
-                        class="field-value"
-                      >
-                        {{ row.potential_amount }}
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <div class="col-md-6">
-                  
-                  </div>
                 </div>
-                <div class="row">
-                  <div class="col-md-6">
-                    <div class="detail" *ngIf="row.currentLevel">
-                      <strong style="font-weight: bold; color: #333"
-                        >current-Level:</strong
-                      >
-                      <p
-                        *ngIf="row.currentLevel"
-                        style="display: inline-block"
-                        class="field-value"
-                      >
-                        {{ row.currentLevel }}
-                      </p>
-                    </div>
-                  </div>
-                  <div class="col-md-6">
-                    <div class="detail" *ngIf="row.status">
-                      <strong style="font-weight: bold; color: #333">Status :</strong>
-                      <span *ngIf="row.status">{{ getStatusDescription(row.status) }}</span>
-                    </div>
-                  </div>
-                  
-                </div>
-                <div class="row">
-                  <div class="col-md-6">
-                    <div class="detail" *ngIf="row.department">
-                      <strong style="font-weight: bold; color: #333"
-                        >Department:</strong
-                      >
-                      <p
-                        *ngIf="row.currentLevel"
-                        style="display: inline-block"
-                        class="field-value"
-                      >
-                        {{ row.department.description }}
-                      </p>
-                    </div>
-                  </div>
-                  <div class="col-md-6">
-                  
-                  </div>
+                
                   
                 </div>
               </app-card>
@@ -789,4 +796,8 @@
     </ul>
     <div [ngbNavOutlet]="nav1" class="mt-2"></div>
   </div>
+</div>
+
+<div *ngIf="!loading" style="display: flex; justify-content: center; align-items: center; height: 100vh; width: 100%; position: absolute; top: 0; left: 0;">
+  <img src="assets/images/loading.svg" style="width: 7%;" />
 </div>

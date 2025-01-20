@@ -1,17 +1,31 @@
-<!-- <ng-container *ngIf="!item.hidden && (
-  (userType === 'RC' && (item.url === 'risk-department' || item.url === 'incident' || item.url === 'revert-incident' || item.url === 'track')) || 
-  (userType === 'BM' && (item.url === 'risk-department' || item.url === 'incident' || item.url === 'revert-incident'|| item.url === 'track')) || 
-  (userType === 'RM' && (item.url === 'risk-department' || item.url === 'incident' || item.url === 'revert-incident' || item.url === 'track')) || 
-  (userType === 'RO' && (item.url === 'risk-department' || item.url === 'revert-incident' || item.url === 'report')) || 
-  (userType === 'ORM' && item.url === 'risk-department' || item.url === 'report') ||  
-  (userType === 'RRC' && (item.url === 'risk-department' || item.url === 'incident' || item.url === 'revert-incident')) || 
-  (userType === 'DRC' && (item.url === 'risk-department' || item.url === 'incident' || item.url === 'revert-incident' || item.url === 'track')) ||
-  (userType === 'AD' && item.url === 'user') ||
-  (userType !== 'ORM' && userType !== 'AD' && userType !== 'RO' && item.url === 'incident')  
-)"> -->
-
-
 <ng-container *ngIf="!item.hidden && (
+ 
+  ((userType === 'RC' || userType === 'BM' || userType === 'RM' || userType === 'RRC' || userType === 'DRC') && 
+   (item.url === 'risk-department' || item.url === 'incident' || item.url === 'revert-incident' || item.url === 'track')) ||
+
+
+  (userType === 'RO' && (item.url === 'risk-department' || item.url === 'revert-incident' || item.url === 'report')) ||
+
+
+  (userType === 'ORM' && (item.url === 'risk-department' || item.url === 'report')) ||
+
+
+  (userType === 'AD' && item.url === 'user') ||
+
+
+  (userType === 'AU' && item.url === 'report') ||
+
+  
+  (userType !== 'ORM' && userType !== 'AD' && userType !== 'RO' && userType !== 'RC' && userType !== 'AU' && 
+   (item.url === 'incident' || item.url === 'track'))
+)">
+
+
+ 
+
+
+
+<!-- <ng-container *ngIf="!item.hidden && (
   (userType === 'RC' || userType === 'BM' || userType === 'RM' || userType === 'RRC' || userType === 'DRC') && 
   (item.url === 'risk-department' || item.url === 'incident' || item.url === 'revert-incident' || item.url === 'track') ||
   
@@ -21,9 +35,13 @@
   
   (userType === 'AD' && item.url === 'user') ||
 
+  (userType === 'AU' && item.url === 'report') ||
+
   (userType !== 'ORM' && userType !== 'AD' && userType !== 'RO' && userType !== 'RC' && item.url === 'incident') || 
   (userType !== 'ORM' && userType !== 'AD' && userType !== 'RO' && userType !== 'RC' && item.url === 'track')
-)">
+)"> -->
+
+
 
 
 
@@ -44,7 +62,7 @@
     >
     <ng-container *ngTemplateOutlet="itemIcon"></ng-container>
 <span class="pcoded-mtext" *ngIf="item.icon; else directTitle">
-  {{ item.title === 'Revert Incident' ? (item.title + ' :' + incidentCount) : item.title }}
+  {{ item.title === 'Revert Incident' ? (item.title + '') : item.title }}
 </span>
       <ng-template #directTitle>
         {{ item.title }}

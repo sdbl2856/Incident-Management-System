@@ -36,8 +36,6 @@ import { RiskDepartmentComponent } from './demo/chart/risk-department/risk-depar
 
 import { ToastrModule } from 'ngx-toastr';
 import { ReportComponent } from './demo/chart/report/report.component';
-
-
 import { MatCardModule } from '@angular/material/card';
 import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule } from '@angular/material/paginator';
@@ -46,7 +44,8 @@ import { MatSortModule } from '@angular/material/sort';
 
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { TrackComponent } from './demo/chart/track/track.component';
-
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { MatInputModule } from '@angular/material/input';
 
 
 
@@ -97,7 +96,8 @@ import { TrackComponent } from './demo/chart/track/track.component';
      MatTableModule,
      MatPaginatorModule,
      MatSortModule,
-    // MatIconModule,
+     MatAutocompleteModule,
+    MatInputModule,
     MatSnackBarModule,
     
     ToastrModule.forRoot(), // ToastrModule added

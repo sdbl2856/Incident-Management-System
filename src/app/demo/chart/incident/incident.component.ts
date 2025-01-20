@@ -8,6 +8,7 @@ import { AbstractControl, ValidatorFn } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { UserService } from '../user/user.service';
 import { MatSnackBar, MatSnackBarConfig } from '@angular/material/snack-bar';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-incident',
@@ -37,6 +38,8 @@ export class IncidentComponent {
   reporting_date: any;
   risk_owner: any;
   currentLevel: any;
+  empCode: any;
+  email: any;
   created_level: any;
   loggedUserId: number = 0;
   branch: any;
@@ -58,7 +61,7 @@ export class IncidentComponent {
   dep_div: boolean = false;
   showSDBLError: boolean = false;
   errorMessage: string = '';
-
+  mobile:any;
   
 
   constructor(
@@ -109,15 +112,14 @@ export class IncidentComponent {
       sub_type: [''],
       // reporting_officer: ['', [Validators.required, this.sdbLValidator]],
       contact_number: [''],
-      potential_amount: ['', Validators.required],
-      recoverd_amount: [''],
-      actual_loss_amount : [''],
+      potential_amount: ['0', Validators.required],
+      recoverd_amount: ['0'],
+      actual_loss_amount : ['0'],
       account_number: [''],
       recovery_action: [''],
       level: ['', Validators.required],
       branch: ['', Validators.required],
       region: ['', Validators.required],
-      email: [''],
       dep: [''],
     });
 
@@ -129,6 +131,16 @@ export class IncidentComponent {
 
     this.currentLevel = this.authService.getLevel();
     console.log("current level : "+this.currentLevel);
+
+    this.empCode = this.authService.getempCode();
+    console.log("emp code  : "+this.empCode);
+
+    this.email = this.authService.getEmail();
+    console.log("current email : "+this.email);
+
+    this.mobile = this.authService.getMobile();
+    console.log("current Mobile : "+this.mobile);
+
     if (this.currentLevel != null) {
       this.any_user_div=false;
 
@@ -141,7 +153,7 @@ export class IncidentComponent {
 
     this.branch = this.authService.getBranch();
     this.incidentCount = this.authService.getIncidentCount();
-       this.authService.setIncidentCount(this.incidentCount);
+    this.authService.setIncidentCount(this.incidentCount);
     
 
     // console.log("branch *: "+this.branch);
@@ -163,7 +175,6 @@ export class IncidentComponent {
     // Log the selected value
     console.log('Level changed:', selectedValue);
 
-  
     // Assign the selected value to the selectedLevel variable
     this.selectedLevel = selectedValue;
     this.branch_div = this.selectedLevel === 'BRANCH';
@@ -176,6 +187,7 @@ export class IncidentComponent {
         dep: ''      // Reset department
     });
       this.created_level='BS'
+      
 
     } if(this.selectedLevel === 'REGION'){
       this.formValue.patchValue({
@@ -198,7 +210,7 @@ export class IncidentComponent {
 
   
   postDetails() {
-   
+    
     console.log("current level : " + this.currentLevel);
   
     if (this.created_level == 'DS') {
@@ -231,7 +243,7 @@ export class IncidentComponent {
       sub_category,
       sub_type,
       reporting_officer,
-      contact_number,
+      // contact_number,
       recovery_action,
       account_number,
       actual_loss_amount,
@@ -239,28 +251,27 @@ export class IncidentComponent {
       recoverd_amount,
       branch,
       region,
-      email,
       dep
     } = this.formValue.value;
   
-    const sriLankanPhoneNumberPattern = /^(?:\+94|0)?[1-9]\d{8}$/;
-    const isValidPhoneNumber = sriLankanPhoneNumberPattern.test(contact_number);
+    // const sriLankanPhoneNumberPattern = /^(?:\+94|0)?[1-9]\d{8}$/;
+    // const isValidPhoneNumber = sriLankanPhoneNumberPattern.test(contact_number);
   
 
     if (
       description !== null && description.trim() !== '' &&
-      isValidPhoneNumber &&
+    
       oc_date !== null && oc_date.trim() !== '' &&
       detected_date !== null && detected_date.trim() !== '' &&
       risk_owner !== null && risk_owner.trim() !== '' &&
       risk_cause !== null && risk_cause.trim() !== '' &&
       sub_category !== null && sub_category.trim() !== '' &&
-      sub_type !== null && sub_type.trim() !== '' &&
+      sub_type !== null && sub_type.trim() !== ''
       // reporting_officer !== null && reporting_officer.trim() !== '' &&
-      contact_number !== null && contact_number.trim() !== ''
+      // contact_number !== null && contact_number.trim() !== ''
     ){
       
-      console.log({ branch, region, dep, email });
+      console.log({ branch, region, dep});
 
       if (this.currentLevel == null) {
         console.log("inside this.currentLevel = null ");
@@ -274,14 +285,14 @@ export class IncidentComponent {
             return;
         } else if (this.formValue.value.level) {
             console.log("inside reporting level Not empty ");
-            const emailEmpty = email ==null || email.trim() == '';
+            // const emailEmpty = email ==null || email.trim() == '';
             const isBranchEmpty = branch == null || branch.trim() == '';
             const isRegionEmpty = region == null || region.trim() == '';
             const isDepEmpty = dep == null || dep.trim() == '';
 
-            console.log({ isBranchEmpty, isRegionEmpty, isDepEmpty, emailEmpty });
+            console.log({ isBranchEmpty, isRegionEmpty, isDepEmpty });
 //              t             t                 f               t
-            if (emailEmpty || (isBranchEmpty && isRegionEmpty && isDepEmpty)) {
+            if ((isBranchEmpty && isRegionEmpty && isDepEmpty)) {
                 this.not_filled = true;   
                 setTimeout(() => {
                 this.not_filled = false;
@@ -293,27 +304,34 @@ export class IncidentComponent {
     }
     
      
-    
-      const reportingOfficer = this.formValue.value.reporting_officer;
-  
       // Ensure the value starts with 'SDBL' and is followed by digits
-      const isValid = /^SDBL\d+$/.test(reportingOfficer);
+      // const isValid = /^SDBL\d+$/.test(reportingOfficer);
     
-      if (isValid) {
-        console.log("repo officer: " + reportingOfficer);
-        this.showSDBLError = false; // Hide error if valid
-      } else {
+      // if (isValid) {
+      //   console.log("repo officer: " + reportingOfficer);
+      //   this.showSDBLError = false; // Hide error if valid
+      // } else {
       
-         this.errorMessage = 'Invalid SDBL number';
-         this.showSDBLError = true; // Show error if invalid
-         return;
-      }
+      //    this.errorMessage = 'Invalid SDBL number';
+      //    this.showSDBLError = true; // Show error if invalid
+      //    return;
+      // }
       if (this.formValue.get('oc_date').hasError('futureDate') || this.formValue.get('detected_date').hasError('futureDate')) {
-        alert('detected_date and oc_date should be present or in the past.');
+        Swal.fire({
+          icon: 'error',
+          title: 'Invalid Date!',
+          text: 'Detected Date and Occurence Date should be present or in the Past.',
+          confirmButtonText: 'OK',
+        });
       } 
       else if (detected_date < oc_date) {
-        alert('Detected date should be after or equal to the occurrence date!');
-      } 
+        Swal.fire({
+          icon: 'error',
+          title: 'Date Error!',
+          text: 'Detected date should be after or equal to the occurrence date!',
+          confirmButtonText: 'OK',
+        });
+      }
 
       else {
         console.log("inside assign ");
@@ -328,21 +346,21 @@ export class IncidentComponent {
         this.incidentmodel_obj.created_Level = this.created_level;
         this.incidentmodel_obj.next_level = this.next_level;
         this.incidentmodel_obj.createdBy = this.loggedUserId;
-        this.incidentmodel_obj.reporting_officer = reporting_officer;
-        this.incidentmodel_obj.contact_number = contact_number;
+        this.incidentmodel_obj.reporting_officer = this.empCode;
+        this.incidentmodel_obj.contact_number = this.mobile;
         this.incidentmodel_obj.recovery_action = recovery_action;
         this.incidentmodel_obj.account_number = account_number;
         this.incidentmodel_obj.actual_amount = actual_loss_amount;
         this.incidentmodel_obj.potential_amount = potential_amount;
         this.incidentmodel_obj.recoverd_amount = recoverd_amount;
         this.incidentmodel_obj.level = this.selectedLevel;
-        this.incidentmodel_obj.branchId = branch;
-        this.incidentmodel_obj.regionId = region;
+        this.incidentmodel_obj.branchId = branch || 999;
+        this.incidentmodel_obj.regionId = region || 11;
         this.incidentmodel_obj.depId = dep;
-        this.incidentmodel_obj.email = email;
+        this.incidentmodel_obj.email = this.email;
   
         console.log("sending object : "+JSON.stringify(this.incidentmodel_obj));
-  
+        this.loading = false;
         this.incidentService
           .postIncidents(this.loggedUserId, this.incidentmodel_obj)
           .subscribe(
@@ -499,7 +517,7 @@ export class IncidentComponent {
 
   filterDepartments() {
     // Filter out the department you want to hide
-    this.filteredDepartments = this.departments.filter(department => department.description !== 'No Dept');
+    this.filteredDepartments = this.departments.filter(department => department.description !== 'N/A');
 }
 
   hideSuccess() {
