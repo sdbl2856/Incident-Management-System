@@ -17,7 +17,7 @@ export class TrackService {
   private baseUrl: string = this.authService.getBaseUrl();
  
   getPosts(data: any): Observable<any> {
-    const apiUrl = `${this.baseUrl}/incident/search/`;
+    const apiUrl = `${this.baseUrl}/incident/track/`;
     return this.http.post<any>(apiUrl, data);
   }
 

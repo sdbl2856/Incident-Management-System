@@ -10,7 +10,7 @@ import * as XLSX from 'xlsx';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
-
+import { TrackService } from './track.service';
 
 
 
@@ -64,7 +64,9 @@ displayedCommentList: any[] = [];
   current_level : any ;
   
 
-  constructor(private formBuilder: FormBuilder,private authService: AuthService,private reportService:ReportService,private _snackBar: MatSnackBar,  private userService: UserService,) {
+  constructor(private formBuilder: FormBuilder,private authService: AuthService,private reportService:ReportService,private _snackBar: MatSnackBar,  private userService: UserService,
+    private trackService:TrackService,
+  ) {
 
     this.formValue = this.formBuilder.group({
       search_by: [''] ,
@@ -92,7 +94,7 @@ displayedCommentList: any[] = [];
     this.userId = this.authService.getId();
     this.empCode = this.authService.getempCode();
     this.getLevels();
-    this. getPosts() ;
+    this.getPosts() ;
     console.log("user id : "+ this.userId);
     this.current_level = this.authService.getLevel();
   }
@@ -203,7 +205,7 @@ exportToExcel() {
     };
 
     console.log(incidentData);
-    this.reportService.getPosts(incidentData)
+    this.trackService.getPosts(incidentData)
       .subscribe((data: any) => {
         if (data.code === 200) {
 

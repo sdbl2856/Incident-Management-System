@@ -81,7 +81,7 @@ const routes: Routes = [
       {
         path: 'revert-incident',
         component: RevertIncidentComponent,
-        canActivate: [AuthGuard],
+        // canActivate: [AuthGuard],
        
       },
       {
