@@ -151,7 +151,6 @@ export class RiskDepartmentComponent {
   
     if (this.userId ) {
       this.getPosts(this.userId, this.selectedStatus);
-    
     } else {
       console.error('userId is undefined');
     }
@@ -160,13 +159,11 @@ export class RiskDepartmentComponent {
   getPosts(userId: any, selectedStatus: string ) {
     if (this.userId) {
       console.log("selected incident ID :" + this.selectedIncidentId);
-  
       this.riskDepartmentService.getPosts(this.userId, selectedStatus)
         .subscribe((data: any) => {
           if (data.code === 200) {
             this.commentList = [];
             console.log(data);
-  
             data.incidentDtoList.forEach((incident) => {
               if (incident.comments) {
                 incident.comments.forEach((comment) => {
@@ -823,6 +820,8 @@ getCommentPageArray(): number[] {
     return [];
   }
 }
+
+
 
 
 getStatusDescription(status: string): string {

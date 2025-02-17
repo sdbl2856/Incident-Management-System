@@ -9,6 +9,7 @@ import { RiskDepartmentService } from '../risk-department/risk-department.servic
 import { NgbNav } from '@ng-bootstrap/ng-bootstrap';
 import { NgZone } from '@angular/core';
 import * as XLSX from 'xlsx';
+import { TrackService } from '../track/track.service';
 
 @Component({
   selector: 'app-revert-incident',
@@ -70,14 +71,15 @@ export class RevertIncidentComponent {
   showEmtyMessage: boolean;
   emtyMessage: string;
   incidentCount:number=0;
-
+  empCode:any;
   constructor(
     private revertIncidentService: RevertIncidentService,
     private formBuilder: FormBuilder,
     private authService: AuthService,
     private datePipe: DatePipe,
     private incidentService: IncidentService,
-    private riskDepartmentService :RiskDepartmentService
+    private riskDepartmentService :RiskDepartmentService,
+    private trackService:TrackService
   ) {
     this.formValue = this.formBuilder.group({
    
@@ -115,9 +117,20 @@ export class RevertIncidentComponent {
   ngOnInit() {
     
     this.userId = this.authService.getId();
+    console.log(this.userId);
+    this.empCode = this.authService.getempCode();
     this.currentLevel = this.authService.getLevel();
     this.getRiskCauses();
-    this.getPosts(this.userId, 'RE');
+
+    if(this.userId == null){
+      console.log(" normal user  ");
+      this.getPosts2();     
+    }else if (this.userId != null){
+      console.log("db user ");
+      this.getPosts(this.userId, 'RE');  
+    }
+
+  
     this.updateIncidentCount();
    
     // console.log('Incidents count from ngOnInit: ' + this.incidentCount);
@@ -164,6 +177,55 @@ export class RevertIncidentComponent {
     
   }
   
+
+
+
+  getPosts2() {
+
+    const incidentData = {    
+      status:'RE',
+      userId:this.userId,
+      employeeCode:this.empCode
+     
+    };
+
+    console.log(incidentData);
+    this.trackService.getPosts(incidentData)
+      .subscribe((data: any) => {
+        if (data.code === 200) {
+
+          console.log(data);
+          this.commentList = [];
+  
+          data.incidentDtoList.forEach((incident) => {
+            if (incident.comments) {
+              incident.comments.forEach((comment) => {
+                // Only push comments for the selected incident
+                if (incident.incidentId == this.selectedIncidentId) {
+                  this.commentList.push(comment);
+                  console.log(this.commentList);
+                }
+              });
+            }
+          });
+          
+          this.currentPageComment = 1;
+          this.updateDisplayedCommentData();
+        }
+  
+        this.incidents = data.incidentDtoList;
+        const incidentCount = this.incidents?.length;
+        this.totalItems = this.incidents?.length;
+        console.log('Incident Count:', incidentCount);
+        // Check if any incident is completed
+        // this.isIncidentCompleted = this.incidents.some(incident => incident.status === 'CO')
+        this.updateDisplayedData();
+      });
+  }
+
+
+
+
   updateIncidentCount() {
     if (!this.incidents) {
       console.log('Incidents array is not defined.');
@@ -283,7 +345,7 @@ export class RevertIncidentComponent {
     this.moveToNextTab();
     if(this.currentLevel=="RO"){
       this.formValue.get('description')?.disable();
-      this.formValue.get('contact_number')?.disable();
+      // this.formValue.get('contact_number')?.disable();
       this.formValue.get('reporting_officer')?.disable();
       this.formValue.get('oc_date')?.disable();
       this.formValue.get('detected_date')?.disable();
@@ -307,7 +369,7 @@ export class RevertIncidentComponent {
       this.formValue.get('business_aria')?.disable();
       this.formValue.get('consequence')?.disable();
       this.formValue.get('risk_level')?.disable();
-      this.formValue.get('root_cause')?.disable();
+      // this.formValue.get('root_cause')?.disable();
       // this.formValue.get('potential_amount')?.disable();
       // this.formValue.get('actual_amount')?.disable();
 
@@ -421,7 +483,7 @@ export class RevertIncidentComponent {
           }
   
           this.formValue.get('description')?.enable();
-          this.formValue.get('contact_number')?.enable();
+          // this.formValue.get('contact_number')?.enable();
           this.formValue.get('reporting_officer')?.enable();
           this.formValue.get('oc_date')?.enable();
           this.formValue.get('detected_date')?.enable();
@@ -521,15 +583,15 @@ export class RevertIncidentComponent {
                 this.showSuccessMessage = true;
                 // Store the success message from the backend
                 this.successMessage = res.message;
-
+                this.getPosts(this.userId,'RE');
                 setTimeout(() => {
                   this.hideSuccess();
                   this.showform = false;
                   this.showtable = true;
                   this.nav1.select(1);
-                  this.getPosts(this.userId,'RE');
+                  
                 }, 3000);
-                this.updateIncidentCount();
+                
               },
               (err) => {
                 console.log(err.message);
@@ -557,7 +619,8 @@ export class RevertIncidentComponent {
        
 
          this.formValue.get('description')?.enable();
-         this.formValue.get('contact_number')?.enable();
+        //  this.formValue.get('contact_number')?.enable();
+
          this.formValue.get('reporting_officer')?.enable();
          this.formValue.get('oc_date')?.enable();
          this.formValue.get('detected_date')?.enable();
@@ -650,7 +713,7 @@ export class RevertIncidentComponent {
               this.formValue.reset();
                this.showSuccessMessage = true;
                this.successMessage = res.message;
-
+               this.getPosts(this.userId,'RE');
                setTimeout(() => {
                  this.hideSuccess();
                  // Additional code to execute after the setTimeout
@@ -658,7 +721,7 @@ export class RevertIncidentComponent {
                  this.showform = false;
                  this.showtable = true;
                  this.nav1.select(1);
-                 this.getPosts(this.userId,'RE');
+               
                }, 3000);
                this.updateIncidentCount();
              
@@ -682,7 +745,7 @@ export class RevertIncidentComponent {
             'description', 'oc_date', 'detected_date', 'reporting_date', 'risk_owner',
             'risk_cause', 'comment', 'incident_type','subcat','subtype',
             'loss_event_type', 'business_line', 'business_aria', 'consequence',
-            'risk_level', 'root_cause', 'action','recovery_action'
+            'risk_level','action','recovery_action'
           ];
 
           // 'actual_amount', 'potential_amount','account_number'

@@ -238,49 +238,7 @@ exportToExcel() {
       });
   }
 
-  getPosts2() {
-
-    const selectedSearchType = this.formValue.get('search_by').value;
-
-    const incidentData = {    
-      status:selectedSearchType,
-      userId:this.userId,
-      employeeCode:this.empCode
-    };
-
-    console.log(incidentData);
-    this.reportService.getPosts(incidentData)
-      .subscribe((data: any) => {
-        if (data.code === 200) {
-
-          console.log(data);
-          this.commentList = [];
-  
-          data.incidentDtoList.forEach((incident) => {
-            if (incident.comments) {
-              incident.comments.forEach((comment) => {
-                // Only push comments for the selected incident
-                if (incident.incidentId == this.selectedIncidentId) {
-                  this.commentList.push(comment);
-                  console.log(this.commentList);
-                }
-              });
-            }
-          });
-          
-          this.currentPageComment = 1;
-          this.updateDisplayedCommentData();
-        }
-  
-        this.incidents = data.incidentDtoList;
-        const incidentCount = this.incidents?.length;
-        this.totalItems = this.incidents?.length;
-        console.log('Incident Count:', incidentCount);
-        // Check if any incident is completed
-        // this.isIncidentCompleted = this.incidents.some(incident => incident.status === 'CO')
-        this.updateDisplayedData();
-      });
-  }
+ 
   statusDescriptions: { [key: string]: string } = {
     'CO': 'Completed',
     'RE': 'Revert',

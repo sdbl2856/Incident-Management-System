@@ -85,8 +85,9 @@
                     <tr>
                       <th>#</th>
                       <th>ID</th>
-                      <th>Occurance Date</th>
-                      <th>Detected Date</th>
+                      <th>Reference No</th>
+                      <th>Status</th>
+                      <th>Current Level</th>
                       <th>Reporting Date</th>
                       <th>Reporting Officer</th>
 
@@ -99,9 +100,9 @@
                     <tr *ngFor="let row of displayedIncidentList; let i = index">
                       <td>{{ (currentPage - 1) * itemsPerPage + (i + 1) }}</td>
                       <td>{{ row.incidentId }}</td>
-
-                      <td>{{ row.occurence_date | date: "yyyy-MM-dd" }}</td>
-                      <td>{{ row.detected_date | date: "yyyy-MM-dd" }}</td>
+                      <td>{{ row.incident_ref}}</td>
+                      <td>{{ getStatusDescription(row.status) }}</td>
+                      <td>{{ row.currentLevel }}</td>
                       <td>{{ row.reporting_date | date: "yyyy-MM-dd" }}</td>
                       <td>{{ row.reporting_officer }}</td>
 

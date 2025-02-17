@@ -8,6 +8,9 @@ import { Title } from '@angular/platform-browser';
   styleUrls: ['./app.component.scss'],
 })
 export class AppComponent implements OnInit {
+  title(title: any) {
+    throw new Error('Method not implemented.');
+  }
   // title = 'datta-able';
 
   constructor(private router: Router,private titleService: Title) {}
