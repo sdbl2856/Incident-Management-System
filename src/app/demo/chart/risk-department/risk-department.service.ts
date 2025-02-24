@@ -100,6 +100,7 @@ export class RiskDepartmentService {
         return res;
       }));
   }
+  
   forwardIncident(incidentId: number, data: any): Observable<any> {
     const apiUrl = `${this.baseUrl}/incident/forward/${incidentId}`;
     return this.http.post<any>(apiUrl, data)

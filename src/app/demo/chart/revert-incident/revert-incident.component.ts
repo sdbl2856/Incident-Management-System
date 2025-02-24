@@ -10,6 +10,7 @@ import { NgbNav } from '@ng-bootstrap/ng-bootstrap';
 import { NgZone } from '@angular/core';
 import * as XLSX from 'xlsx';
 import { TrackService } from '../track/track.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-revert-incident',
@@ -26,14 +27,14 @@ export class RevertIncidentComponent {
   incidentmodel_obj: IncidentModel = new IncidentModel();
   userId: any;
   currentLevel:any;
-  next_level:any;
+  // next_level:any;
   showSuccessMessage: boolean = false;
   successMessage: string = '';
   comment: any;
   riskcauses: any;
   SubCategories: any;
   riskSubTypeList: any;
-  totalItems:any;
+  totalItems:number=0;
   row:any;
   selectedIncidentId: any;
   commentList: any[];
@@ -48,6 +49,8 @@ export class RevertIncidentComponent {
    itemsPerPageComment: number = 5; 
    displayedCommentList: any[] = [];
    displayedColumns: string[] = ['description', 'commentedDate', 'added_level', 'addedUser'];
+
+
 
   // Sorting properties
   // sortBy: string = ''; // Initialize with an empty string
@@ -165,14 +168,14 @@ export class RevertIncidentComponent {
           this.incidents = data.incidentDtoList;
           this.incidentCount = this.incidents.length;
           this.totalItems = this.incidents?.length;
-          console.log('  this.totalItems :',   this.totalItems );
+          console.log(' this.totalItems :',   this.totalItems );
           console.log('Incidents:', this.incidents);
           console.log('Comments:', this.commentList);
           this.updateDisplayedData();
           this.authService.setIncidentCount(this.incidentCount);
         });
     } else {
-      console.error('userId is undefined');
+      console.log('userId is undefined');
     }
     
   }
@@ -194,9 +197,9 @@ export class RevertIncidentComponent {
       .subscribe((data: any) => {
         if (data.code === 200) {
 
-          console.log(data);
+          console.log(data.incidentDtoList);
           this.commentList = [];
-  
+   
           data.incidentDtoList.forEach((incident) => {
             if (incident.comments) {
               incident.comments.forEach((comment) => {
@@ -245,7 +248,13 @@ export class RevertIncidentComponent {
     this.nav1.select(1);
     this.showtable=true;
     this.showform=false;
-    this.getPosts(this.userId,'RE');
+    if(this.userId == null){
+      console.log(" normal user  ");
+      this.getPosts2();     
+    }else if (this.userId != null){
+      console.log("db user ");
+      this.getPosts(this.userId, 'RE');  
+    }
     // this.showform = false;
     // this.drop_down=true;
    
@@ -339,7 +348,14 @@ export class RevertIncidentComponent {
       console.log('No consequence found in row.');
     }
     this.selectedIncidentId = row.incidentId;
-    this.getPosts(this.userId,'RE');
+    console.log(this.selectedIncidentId);
+    if(this.userId == null){
+      console.log(" normal user  ");
+      this.getPosts2();     
+    }else if (this.userId != null){
+      console.log("db user ");
+      this.getPosts(this.userId, 'RE');  
+    }
     this.showform = true;
     this.showtable = false;
     this.moveToNextTab();
@@ -452,7 +468,7 @@ export class RevertIncidentComponent {
       }
     }
   
-    console.log('Specific sub Types:', this.specificSubTypes);
+    // console.log('Specific sub Types:', this.specificSubTypes);
   }
   
 
@@ -535,7 +551,7 @@ export class RevertIncidentComponent {
           const potential_amount = this.formValue.value.potential_amount;
           if(comment == null || !comment ){
             // Display an error message to the user
-         alert("fill all")
+        this.alertWithError(" fill the fields ");
          
          }else{
           console.log(action_taken);
@@ -569,10 +585,9 @@ export class RevertIncidentComponent {
             actual_amount:actual_amount,
             potential_amount:potential_amount,
             riskDepStatusId:risk_dep_status,
-            next_level:this.next_level,
+            // next_level:this.next_level,
     
           };
-
 
           console.log('model sent ' + incidentData);
           this.revertIncidentService
@@ -580,30 +595,61 @@ export class RevertIncidentComponent {
             .subscribe(
               (res) => {
                 this.formValue.reset();
-                this.showSuccessMessage = true;
-                // Store the success message from the backend
-                this.successMessage = res.message;
-                this.getPosts(this.userId,'RE');
                 setTimeout(() => {
-                  this.hideSuccess();
-                  this.showform = false;
-                  this.showtable = true;
-                  this.nav1.select(1);
-                  
-                }, 3000);
-                
-              },
+                }, 3000);  
+                this.alertWithSuccess(); 
+                this.showform = false;
+                this.showtable = true;
+                this.nav1.select(1); 
+                if(this.userId == null){
+                  console.log(" normal user  ");
+                  this.getPosts2();     
+                }else if (this.userId != null){
+                  console.log("db user ");
+                  this.getPosts(this.userId, 'RE');  
+                }
+             
+               },
               (err) => {
-                console.log(err.message);
-                this.showSuccessMessage = true;
-                this.successMessage = err.message;
-                setTimeout(() => {
-                  this.hideSuccess();
-                }, 3000);
+                this.alertWithError(err.message); 
               },
             );
         }
+    }
+
+
+
+  alertWithSuccess() {
+    Swal.fire({
+      icon: 'success',
+      title: 'Success...',
+      text: 'Successfully Done',
+      confirmButtonColor: "#03c9d7",
+      showClass: {
+        popup: 'animate__animated animate__fadeInDown' 
+      },
+      hideClass: {
+        popup: 'animate__animated animate__fadeOutUp' 
+      }
+    });
   }
+  
+
+  alertWithError(msg: any){
+    Swal.fire({
+      icon: 'error',
+      title: 'Error...',
+      text: msg,
+      confirmButtonColor: "#03c9d7",
+      showClass: {
+        popup: 'animate__animated animate__fadeInDown' 
+      },
+      hideClass: {
+        popup: 'animate__animated animate__fadeOutUp' 
+      }
+    });  
+  }
+
 
       revertDetails(row:any) {
 
@@ -711,33 +757,31 @@ export class RevertIncidentComponent {
            .subscribe(
              (res) => {
               this.formValue.reset();
-               this.showSuccessMessage = true;
-               this.successMessage = res.message;
-               this.getPosts(this.userId,'RE');
+              setTimeout(() => {
+              }, 3000); 
+              this.alertWithSuccess(); 
+              if(this.userId == null){
+                console.log(" normal user  ");
+                this.getPosts2();     
+              }else if (this.userId != null){
+                console.log("db user ");
+                this.getPosts(this.userId, 'RE');  
+              }
                setTimeout(() => {
-                 this.hideSuccess();
-                 // Additional code to execute after the setTimeout
-                 
                  this.showform = false;
                  this.showtable = true;
                  this.nav1.select(1);
-               
-               }, 3000);
-               this.updateIncidentCount();
-             
+               },3000);
+               this.updateIncidentCount();    
              },
              (err) => {
-              console.log('inside err');
-               console.log(err.message);
-               this.showSuccessMessage = true;
-               this.successMessage = err.message;
-               setTimeout(() => {
-                 this.hideSuccess();
-               }, 3000);
+              this.alertWithError(err.message); 
              },
            );
        }
      }
+
+
 
 
         validateFields(): boolean {

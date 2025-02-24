@@ -52,6 +52,7 @@ export class IncidentComponent {
   successMessage: string = '';
   branches: any[];
   regions: any[];
+  user_types: any[] = [];
   departments: any[] = []; // Initialize as an empty array
   filteredDepartments: any[] = []; // Initialize as an empty array
   selectedLevel: string = '';
@@ -141,7 +142,7 @@ export class IncidentComponent {
     this.mobile = this.authService.getMobile();
     console.log("current Mobile : "+this.mobile);
 
-    if (this.currentLevel != null) {
+    if (this.currentLevel != 'NU') {
       this.any_user_div=false;
 
     }
@@ -164,6 +165,7 @@ export class IncidentComponent {
   disableDate() {
     return false;
   }
+
 
 
   onLevelChange(event: any) {
@@ -213,26 +215,36 @@ export class IncidentComponent {
     
     console.log("current level : " + this.currentLevel);
   
-    if (this.created_level == 'DS') {
-      this.next_level = 'DRC';
+    if(this.currentLevel == 'NU'){
+
+      if (this.created_level == 'DS') {
+        this.next_level = 'DRC';
+      }
+      else if (this.created_level == 'BS') {
+        this.next_level = 'RC';
+      }
+      else if (this.created_level == 'RS') {
+        this.next_level = 'RRC';
+      }
+    }else{
+       if (this.currentLevel == 'RC') {
+        this.next_level = 'BM';
+      } else if (this.currentLevel == 'BM' || this.currentLevel == 'RM') {
+        this.next_level = 'RO';
+      } else if (this.currentLevel == 'RO') {
+        this.next_level = 'ORM';
+      } else if (this.currentLevel == 'RRC') {
+        this.next_level = 'RM';
+      } else if (this.currentLevel == 'DRC') {
+        this.next_level = 'RO';
+      } else if (this.currentLevel == 'AU') {
+        this.next_level = 'DRC';
+        this.created_level = 'DS'
+      }
+
     }
-    else if (this.created_level == 'BS') {
-      this.next_level = 'RC';
-    }
-    else if (this.created_level == 'RS') {
-      this.next_level = 'RRC';
-    }
-    else if (this.currentLevel == 'RC') {
-      this.next_level = 'BM';
-    } else if (this.currentLevel == 'BM' || this.currentLevel == 'RM') {
-      this.next_level = 'RO';
-    } else if (this.currentLevel == 'RO') {
-      this.next_level = 'ORM';
-    } else if (this.currentLevel == 'RRC') {
-      this.next_level = 'RM';
-    } else if (this.currentLevel == 'DRC') {
-      this.next_level = 'RO';
-    }
+
+ 
   
     const {
       description,
@@ -254,8 +266,7 @@ export class IncidentComponent {
       dep
     } = this.formValue.value;
   
-    // const sriLankanPhoneNumberPattern = /^(?:\+94|0)?[1-9]\d{8}$/;
-    // const isValidPhoneNumber = sriLankanPhoneNumberPattern.test(contact_number);
+   
   
 
     if (
@@ -273,8 +284,8 @@ export class IncidentComponent {
       
       console.log({ branch, region, dep});
 
-      if (this.currentLevel == null) {
-        console.log("inside this.currentLevel = null ");
+      if (this.currentLevel == 'NU') {
+        console.log("inside this.currentLevel = NU ");
         
         if (this.formValue.value.level === '' || this.formValue.value.level == null) {
             console.log("inside reporting level empty ");
@@ -304,18 +315,6 @@ export class IncidentComponent {
     }
     
      
-      // Ensure the value starts with 'SDBL' and is followed by digits
-      // const isValid = /^SDBL\d+$/.test(reportingOfficer);
-    
-      // if (isValid) {
-      //   console.log("repo officer: " + reportingOfficer);
-      //   this.showSDBLError = false; // Hide error if valid
-      // } else {
-      
-      //    this.errorMessage = 'Invalid SDBL number';
-      //    this.showSDBLError = true; // Show error if invalid
-      //    return;
-      // }
       if (this.formValue.get('oc_date').hasError('futureDate') || this.formValue.get('detected_date').hasError('futureDate')) {
         Swal.fire({
           icon: 'error',
@@ -342,7 +341,7 @@ export class IncidentComponent {
         this.incidentmodel_obj.risk_cause = risk_cause;
         this.incidentmodel_obj.sub_category = sub_category;
         this.incidentmodel_obj.sub_type = { riskSubTypeId: sub_type };
-        this.incidentmodel_obj.currentLevel = this.currentLevel;
+        // this.incidentmodel_obj.currentLevel = this.currentLevel;
         this.incidentmodel_obj.created_Level = this.created_level;
         this.incidentmodel_obj.next_level = this.next_level;
         this.incidentmodel_obj.createdBy = this.loggedUserId;
@@ -361,38 +360,25 @@ export class IncidentComponent {
   
         console.log("sending object : "+JSON.stringify(this.incidentmodel_obj));
         this.loading = false;
-        this.incidentService
-          .postIncidents(this.loggedUserId, this.incidentmodel_obj)
-          .subscribe(
-            (res) => {
-              this.loading = true;  
-              console.log(res);
-              this.formValue.reset();
-              this.errorMessage = '';
-              this.showSDBLError = false;
-              this.showSuccessMessage = true;
-              this.successMessage = res.message;
-              this.branch_div=false;
-              this.dep_div=false;
-              this.region_div=false;
-              this.selectedOption = null;
-            
-              setTimeout(() => {
-                this.hideSuccess();   
-              }, 3000);  
-            },
-            (err) => {
-              this.loading = true;  
-              this.showSuccessMessage = true;
-              this.successMessage = err.message;
+        this.incidentService.postIncidents(this.loggedUserId, this.incidentmodel_obj).subscribe((response:any) => {
+          if(response['code'] == 200){             
+            this.loading = true;  
+            this.alertWithSuccess(); 
+            this.formValue.reset();
+            this.branch_div=false;
+            this.dep_div=false;
+            this.region_div=false;
+            this.selectedOption = null;      
         
-              // setTimeout(() => {
-              //   this.hideSuccess();
-              // }, 3000);
+          }else{         
+            this.loading = true;        
+            this.alertWithError(response['error']);      
+          }
             },
           );
       }
     } else {
+
       this.loading = true;  
       console.log('inside else');
       this.not_filled = true;
@@ -405,7 +391,35 @@ export class IncidentComponent {
   }
 
 
+  alertWithSuccess() {
+    Swal.fire({
+      icon: 'success',
+      title: 'Success...',
+      text: 'Successfully Done',
+      confirmButtonColor: "#238df7",
+      showClass: {
+        popup: 'animate__animated animate__fadeInDown' 
+      },
+      hideClass: {
+        popup: 'animate__animated animate__fadeOutUp' 
+      }
+    });
+  } 
 
+  alertWithError(msg: any){
+    Swal.fire({
+      icon: 'error',
+      title: 'Error...',
+      text: msg,
+      confirmButtonColor: "#03c9d7",
+      showClass: {
+        popup: 'animate__animated animate__fadeInDown' 
+      },
+      hideClass: {
+        popup: 'animate__animated animate__fadeOutUp' 
+      }
+    });  
+  }
 
   getRiskCauses() {
     this.incidentService.getRiskCauses().subscribe((data: any) => {
@@ -483,6 +497,7 @@ export class IncidentComponent {
       this.branches = data.branchList;
       this.regions = data.regions;
       this.departments = data.departmentList;
+      this.user_types = data.usertypeList;             
       console.log(this.departments);
       this.filterDepartments();
 

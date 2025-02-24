@@ -3,6 +3,7 @@ import { NgbDropdownConfig } from '@ng-bootstrap/ng-bootstrap';
 import { animate, style, transition, trigger } from '@angular/animations';
 import { AuthService } from '../../../../../login/auth.service';
 import { Router } from '@angular/router';
+import { UserService } from 'src/app/demo/chart/user/user.service';
 
 @Component({
   selector: 'app-nav-right',
@@ -36,8 +37,10 @@ export class NavRightComponent {
   friendId: boolean;
   name : any ;
   level:any;
+  user_types:any[];
+  description:any;
 
-  constructor(config: NgbDropdownConfig,private router: Router, private authService: AuthService) {
+  constructor(config: NgbDropdownConfig,private router: Router, private authService: AuthService,private userService:UserService) {
     config.placement = 'bottom-right';
     this.visibleUserList = false;
     this.chatMessage = false;
@@ -53,11 +56,40 @@ export class NavRightComponent {
     this.authService.logout();
   }
 
-  ngOnInit(){
+  ngOnInit() {
     this.name = this.authService.getName();
     this.level=this.authService.getLevel();
 
+    this.getBranches();
+
   }
+
+
+
+ getBranches() {
+  this.userService.getBranches().subscribe((data: any) => {
+    this.user_types = data.usertypeList;             
+    console.log(this.user_types);
+
+    // Find the user type with the same level as the type
+    const userType = this.user_types.find((user) => user.type === this.level);
+
+    if (userType) {
+      // If a match is found, set the description
+      if (userType.type === 'NU') {
+        // If type is 'NU' (Created User), set description to 'Normal User'
+        this.description = 'Normal User';
+      } else {
+        // Otherwise, use the description from the userType object
+        this.description = userType.description;
+      }
+    } else {
+      // Handle case when no match is found
+      this.description = 'Normal User';
+    }
+  });
+}
+
 
 
 }

@@ -157,7 +157,7 @@ exportToExcel() {
       'Description': row.inc_description,
       'Occurrence Date': this.formatDate(row.occurence_date),
       'Detected Date': this.formatDate(row.detected_date),
-      'Risk Owner': row.risk_owner,
+      'Responsible Person': row.risk_owner,
       'Risk Cause Description': row.sub_type.riskCause.description,
       'Risk Sub Category ': row.sub_type.riskSubCategory.description,
       'Risk Sub Type ': row.sub_type.description,

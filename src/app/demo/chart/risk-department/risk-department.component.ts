@@ -7,6 +7,7 @@ import { IncidentModel } from '../incident/incident-model';
 import { RevertIncidentService } from '../revert-incident/revert-incident.service';
 import * as XLSX from 'xlsx';
 import { MatTableDataSource } from '@angular/material/table';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-risk-department',
@@ -159,9 +160,11 @@ export class RiskDepartmentComponent {
   getPosts(userId: any, selectedStatus: string ) {
     if (this.userId) {
       console.log("selected incident ID :" + this.selectedIncidentId);
+      this.loading=true;
       this.riskDepartmentService.getPosts(this.userId, selectedStatus)
         .subscribe((data: any) => {
           if (data.code === 200) {
+            this.loading=false;
             this.commentList = [];
             console.log(data);
             data.incidentDtoList.forEach((incident) => {
@@ -179,7 +182,7 @@ export class RiskDepartmentComponent {
             this.currentPageComment = 1;
             this.updateDisplayedCommentData();
           }
-  
+          this.loading=false;
           this.incidents = data.incidentDtoList;
           const incidentCount = this.incidents.length;
           this.totalItems = this.incidents?.length;
@@ -193,6 +196,7 @@ export class RiskDepartmentComponent {
         });
   
     } else {
+      this.loading=false;
       console.error('userId is undefined');
     }
   }
@@ -355,29 +359,24 @@ export class RiskDepartmentComponent {
         };
         this.riskDepartmentService.revertDetails(dataToSend).subscribe(
           (res) => {
-            console.log(res);
-            this.showSuccessMessage = true;
-            this.successMessage = res.message;
-            this.getPosts(this.userId, "PE");
             setTimeout(() => {
+            }, 3000);
+            this.alertWithSuccess();   
+            this.getPosts(this.userId, "PE");
               this.hideSuccess();
               this.formValue.reset();
               this.showdata = true;  
               this.showform = false;
               this.nav1.select(1);
-              // this.getPosts(this.userId, this.selectedStatus);
               this.drop_down=true;
               this.formValue.controls['status'].setValue(this.row.status);
-            }, 3000);  
           },
           (err) => {
             console.log(err.message);
-
-            this.showSuccessMessage = true;
-            this.successMessage = err.message;
+            this.alertWithError(err.message);
             setTimeout(() => {
-              this.hideSuccess();
             }, 3000);
+            this.alertWithError(err.message);
 
           }
         );
@@ -385,6 +384,37 @@ export class RiskDepartmentComponent {
       }      
    }
 
+
+   alertWithSuccess() {
+    Swal.fire({
+      icon: 'success',
+      title: 'Success...',
+      text: 'Successfully Done',
+      confirmButtonColor: "#03c9d7",
+      showClass: {
+        popup: 'animate__animated animate__fadeInDown' 
+      },
+      hideClass: {
+        popup: 'animate__animated animate__fadeOutUp' 
+      }
+    });
+  }
+  
+
+  alertWithError(msg: any){
+    Swal.fire({
+      icon: 'error',
+      title: 'Error...',
+      text: msg,
+      confirmButtonColor: "#03c9d7",
+      showClass: {
+        popup: 'animate__animated animate__fadeInDown' 
+      },
+      hideClass: {
+        popup: 'animate__animated animate__fadeOutUp' 
+      }
+    });  
+  }
   // by RO
     updateIncidents() {
       console.log("inside ro update");
@@ -474,9 +504,8 @@ export class RiskDepartmentComponent {
         .updateIncidents(incidentId,incidentData)
         .subscribe(
           (res) => {  
-           this.showSuccessMessage = true;
-          // Store the success message from the backend
-           this.successMessage = res.message;
+            
+            this.alertWithSuccess();
             setTimeout(() => {
               this.hideSuccess();
                 // Additional code to execute after the setTimeout
@@ -490,9 +519,7 @@ export class RiskDepartmentComponent {
               }, 3000);  
           },
           (err) => {
-            console.log(err.message);
-            this.showSuccessMessage = true;
-            this.successMessage = err.message;
+            this.alertWithError(err.message);
             setTimeout(() => {
               this.hideSuccess();
             }, 3000);
@@ -531,30 +558,26 @@ export class RiskDepartmentComponent {
          .updateStatus(incidentId,incidentData)
          .subscribe(
            (res) => {  
-            this.showSuccessMessage = true;
-           // Store the success message from the backend
-            this.successMessage = res.message;
-             setTimeout(() => {
-               this.hideSuccess();
-             // Additional code to execute after the setTimeout
+
+            setTimeout(() => {
+              this.hideSuccess();
+            }, 3000);
+             this.alertWithSuccess();
                this.formValue.reset();
                this.showdata = true;
                this.showform = false;
                this.nav1.select(1);
-               this.getPosts(this.userId,'PE');
-               this.drop_down=true;
-               this.formValue.controls['status'].setValue(this.row.status);
-               }, 3000);  
+             this.getPosts(this.userId,'PE');
+             this.drop_down=true;
+             this.formValue.controls['status'].setValue(this.row.status); 
            },
            (err) => {
-             console.log(err.message);
-             this.showSuccessMessage = true;
-             this.successMessage = err.message;
+            this.alertWithError(err.message);
              setTimeout(() => {
                this.hideSuccess();
              }, 3000);
            },
-         );   
+       );   
   }
 
   forward(row) {
@@ -597,24 +620,18 @@ if(comment == null || !comment){
       console.log(this.userId);
       this.riskDepartmentService.forwardIncident(incidentId,dataToSend).subscribe(
         (res) => {
-          // console.log(res);
           this.formValue.reset();
-          this.showSuccessMessage = true;
-          this.successMessage = res.message;
+          this.alertWithSuccess();
           setTimeout(() => {
             this.hideSuccess();
-         
             this.showdata = true;
             this.showform = false;
             this.nav1.select(1);
             this.getPosts(this.userId,'PE');
           }, 3000);
-
         },
         (err) => {
-          alert(err.message);
-          this.showSuccessMessage = true;
-          this.successMessage = err.message;
+          this.alertWithError(err.message);
           setTimeout(() => {
             this.hideSuccess();
           }, 3000);
@@ -647,29 +664,24 @@ if(comment == null || !comment){
 
       this.riskDepartmentService.sendBackIncident(incidentId,dataToSend).subscribe(
         (res) => {
-          console.log(res);
 
-          this.showSuccessMessage = true;
-          this.successMessage = res.message;
           setTimeout(() => {
+          }, 3000);
+          this.alertWithSuccess();
+      
             this.hideSuccess();
             this.formValue.reset();
             this.showdata = true;  
             this.showform = false;
             this.nav1.select(1);
-            this.getPosts(this.userId, 'PE');
-          }, 3000);
+            this.getPosts(this.userId,'PE');
+      
 
-        
         },
         (err) => {
-          console.log(err.message);
 
-          this.showSuccessMessage = true;
-          this.successMessage = err.message;
-          setTimeout(() => {
+            this.alertWithError(err.message);
             this.hideSuccess();
-          }, 3000);
 
         }
       );
@@ -685,7 +697,7 @@ if(comment == null || !comment){
           'Description': row.inc_description || '',
           'Occurrence Date': this.formatDate(row.occurence_date) || '',
           'Detected Date': this.formatDate(row.detected_date) || '',
-          'Risk Owner': row.risk_owner || '',
+          'Responsible Person': row.risk_owner || '',
           'Risk Cause Description': (row.sub_type && row.sub_type.riskCause && row.sub_type.riskCause.description) || '',
           'Risk Sub Category': (row.sub_type && row.sub_type.riskSubCategory && row.sub_type.riskSubCategory.description) || '',
           'Risk Sub Type': (row.sub_type && row.sub_type.description) || '',
@@ -700,6 +712,7 @@ if(comment == null || !comment){
           'Root cause analysis': row.rootCause || '',
           'Potential Loss Amount': row.potential_amount || '',
           'Actual Amount': row.actual_amount || '',
+          'Recoverd Amount':row.actual_amount || '',
           'Risk Level': (row.riskLevel && row.riskLevel.description) || '',
           'Status ': this.getStatusDescription(row.status)|| 'N/A',
           'Branch ': row.branch?.description || 'N/A',

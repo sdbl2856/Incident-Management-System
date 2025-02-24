@@ -13,7 +13,7 @@
   (userType === 'AD' && item.url === 'user') ||
 
 
-  (userType === 'AU' && item.url === 'report') ||
+  (userType === 'AU' && (item.url === 'incident' || item.url === 'revert-incident' || item.url === 'report' || item.url === 'track' )) ||
 
   
   (userType !== 'ORM' && userType !== 'AD' && userType !== 'RO' && userType !== 'RC' && userType !== 'AU' && 

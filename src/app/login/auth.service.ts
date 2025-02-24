@@ -12,7 +12,6 @@ export class AuthService {
   // live
   // private baseUrl = '//10.100.32.41:8082';
 
-  
   // private baseUrl = '//10.100.31.123:8082';
 
   // private baseUrl = '//ims.sdb.lk:8082';

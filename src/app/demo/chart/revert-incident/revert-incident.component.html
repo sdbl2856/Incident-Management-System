@@ -1,4 +1,7 @@
 <ul class="nav nav-pills mb-3" ngbNav #nav1="ngbNav">
+  
+  
+  
   <li class="nav-item" [ngbNavItem]="1">
     <a
       (click)="clickTab1()"
@@ -17,9 +20,10 @@
           blockClass="table-border-style"
         >
 
-        <div *ngIf="!loading && totalItems === 0" class="no-data-message" style="text-align: center;">
+        <div *ngIf="totalItems === 0" class="no-data-message" style="text-align: center;">
           <p>No data to display.</p>
         </div>
+
         <div class="row">
           <div class="col-4" *ngIf="totalItems > 0">
             <input  
@@ -117,6 +121,7 @@
 
   <li class="nav-item" [ngbNavItem]="2">
     <a
+    
       class="nav-link"
       ngbNavLink
       aria-controls="pills-home"
@@ -177,7 +182,7 @@
               </div>
               <div class="col-sm-4">
                 <div class="form-group">
-                  <label for="risk_owner" class="form-label">Risk Owner</label>
+                  <label for="risk_owner" class="form-label">Responsible Person</label>
                   <input
                     style="width: 70%"
                     type="text"
@@ -650,16 +655,17 @@
               <!-- Centered column with flexbox to align buttons -->
               <div class="col-sm-4 d-flex justify-content-center">
                 <div class="btn-group">
-                  <!-- Corrected the *ngIf condition to properly check currentLevel -->
-                  <button *ngIf="currentLevel !== 'DRC' && currentLevel !== 'RC' && currentLevel !== 'RRC'" 
+              
+                  <button *ngIf="currentLevel !== 'DRC' && currentLevel !== 'RC' && currentLevel !== 'RRC' && currentLevel !== 'NU' " 
                           class="btn btn-danger" 
                           (click)="revertDetails(row)">
                     REVERT
                   </button>
             
                   <button class="btn btn-primary" (click)="updateIncidents()" style="margin-left: 10%;">
-                    FORWARD
+                    SUBMIT
                   </button>
+
                 </div>
               </div>
             
@@ -669,7 +675,7 @@
           </form>
 
           
-        <div class="row no-margin" *ngIf="this.commentList.length > 0">
+        <div class="row no-margin" >
                  
           <mat-card-title style="text-align: center;">Comments</mat-card-title>
         
@@ -709,10 +715,9 @@
       </div>
         </app-card>
       
-    
-        
       </div>
     </ng-template>
   </li>
 </ul>
 <div [ngbNavOutlet]="nav1" class="mt-2"></div>
+

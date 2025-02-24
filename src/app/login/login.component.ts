@@ -105,6 +105,7 @@ onSubmit() {
         this.authService.setempCode(response.user.employeeCode);
         this.authService.setEmail(response.user.email);
         this.authService.setMobile(response.user.contactNo);
+        this.authService.setLevel(response?.user?.userType);
         this.router.navigate(['/admin/incident']);
 
         

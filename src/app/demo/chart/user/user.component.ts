@@ -5,6 +5,7 @@ import { UserModel } from './user-model';
 import { AuthService } from 'src/app/login/auth.service';
 import { ToastrService } from 'ngx-toastr';
 import { MatSnackBar, MatSnackBarConfig } from '@angular/material/snack-bar';
+import Swal from 'sweetalert2';
 @Component({
   selector: 'app-user',
   templateUrl: './user.component.html',
@@ -87,7 +88,9 @@ export class UserComponent implements OnInit {
       this.updateDisplayedData(); 
       // this.applySearch();
     });
+    
   }
+
 
   getBranches() {
     this.userService.getBranches().subscribe((data: any) => {
@@ -312,21 +315,17 @@ if (!fullName || fullName.trim() === '' || !employeeCode || employeeCode.trim() 
     // console.log("dep id : "+this.usermodel_obj.depId );
     this.userService.postUser(this.usermodel_obj).subscribe(
       (res) => {
-        this.showSuccessMessage = true;
-        this.successMessage = res.message;
+       this.alertWithSuccess();
         setTimeout(() => {
           this.hideSuccess();
           this.formValue.reset();
           this.getPosts();
           this.showContent = true;
           this.showForm = false;
-        }, 3000);
-
-       
+        }, 3000); 
       },
       (err) => {
-        
-        this.successMessage = err.message;
+        this.alertWithError(err.message);
         setTimeout(() => {
          this.hideSuccess();
        }, 3000); 
@@ -397,21 +396,17 @@ updateUserDetails() {
         console.log(res);
     
 
-        this.showSuccessMessage = true;
-        this.successMessage = res.message;
+        this.alertWithSuccess();
         setTimeout(() => {
         this.hideSuccess();
         this.formValue.reset();
         this.showForm = false;
         this.showContent = true;
-
         this.getPosts();
         }, 3000);
-      
       },
       (err) => {
-       
-        this.successMessage = err.message;
+        this.alertWithError(err.message);
         setTimeout(() => {
          this.hideSuccess();
        }, 3000); 
@@ -495,6 +490,37 @@ updateUserDetails() {
   }
   // pagination close here 
   
+  alertWithSuccess() {
+    Swal.fire({
+      icon: 'success',
+      title: 'Success...',
+      text: 'Successfully Done',
+      confirmButtonColor: "#03c9d7",
+      showClass: {
+        popup: 'animate__animated animate__fadeInDown' 
+      },
+      hideClass: {
+        popup: 'animate__animated animate__fadeOutUp' 
+      }
+    });
+  }
+  
+
+  alertWithError(msg: any){
+    Swal.fire({
+      icon: 'error',
+      title: 'Error...',
+      text: msg,
+      confirmButtonColor: "#03c9d7",
+      showClass: {
+        popup: 'animate__animated animate__fadeInDown' 
+      },
+      hideClass: {
+        popup: 'animate__animated animate__fadeOutUp' 
+      }
+    });  
+  }
+
   
 
 

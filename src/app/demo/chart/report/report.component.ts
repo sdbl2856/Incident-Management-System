@@ -7,6 +7,7 @@ import { ReportService } from './report.service';
 import * as XLSX from 'xlsx';
 import { MatSnackBar, MatSnackBarConfig } from '@angular/material/snack-bar';
 import { UserService } from '../user/user.service';
+import { MatTableDataSource } from '@angular/material/table';
 
 
 @Component({
@@ -52,6 +53,7 @@ export class ReportComponent {
   branches: any[];
   regions: any[];
   specificBranches = [];
+  totalItems:number=0;
     // New properties for pagination
     currentPage: number = 1;
     itemsPerPage: number = 5; 
@@ -62,8 +64,8 @@ currentPageComment: number = 1;
 itemsPerPageComment: number = 5; // or any desired number
 displayedCommentList: any[] = [];
   
-  
-
+displayedColumns: string[] = ['description', 'commentedDate', 'added_level', 'addedUser'];
+ dataSource = new MatTableDataSource<Comment>([]);
   @ViewChild('nav1', { static: true }) nav1: NgbNav;
 
   current_level : any ;
@@ -249,7 +251,7 @@ exportToExcel() {
       'Description': row.inc_description,
       'Occurrence Date': this.formatDate(row.occurence_date),
       'Detected Date': this.formatDate(row.detected_date),
-      'Risk Owner': row.risk_owner,
+      'Responsoble Person': row.risk_owner,
       'Risk Cause Description': row.sub_type.riskCause.description,
       'Risk Sub Category ': row.sub_type.riskSubCategory.description,
       'Risk Sub Type ': row.sub_type.description,
@@ -376,11 +378,12 @@ const incidentData = {
           this.commentList = [];
           this.showdata=true;
           data.incidentDtoList.forEach((incident) => {
-            if (incident.comment) {
-              incident.comment.forEach((comment) => {
+            if (incident.comments) {
+              incident.comments.forEach((comment) => {
                 // Only push comments for the selected incident
-                if (comment.incident.incidentId === this.selectedIncidentId) {
+                if (incident.incidentId == this.selectedIncidentId) {
                   this.commentList.push(comment);
+                  console.log(this.commentList);
                 }
               });
             }
@@ -392,6 +395,7 @@ const incidentData = {
   
         this.incidents = data.incidentDtoList;
          this.incidentCount = this.incidents?.length;
+         this.totalItems = this.incidents?.length;
         console.log('Incident Count:', this.incidentCount);
         this.loading = true;
         // Check if any incident is completed
@@ -447,22 +451,20 @@ const incidentData = {
     // this.commentList = [];
   }
  
- onView(row:any){
+
+
+   onView(row:any){
       
-      console.log(row);
-      this.selectedIncidentId = row.incidentId;
-      console.log(this.selectedIncidentId);
-      this.getPosts();
-      this.moveToNextTab();
-      this.row = row;
-      this.showdata = false;
-      this.showform = true;
-      // this.formValue.controls['level'].setValue(row.currentLevel);
-      // this.formValue.controls['status'].setValue(row.status);
-      // this.formValue.controls['startDate'].setValue(row.actual_amount);
-      // this.formValue.controls['endDate'].setValue(row.status)
- 
-   }
+    console.log(row);
+    this.selectedIncidentId = row.incidentId;
+    console.log(this.selectedIncidentId);
+    this.getPosts();
+    this.moveToNextTab();
+    this.row = row;
+    this.showdata = false;
+    this.showform = true;
+    
+ }
 
 
     // pagination start here
