@@ -10,12 +10,13 @@ import { Router } from '@angular/router';
 export class AuthService {
 
   // live
-  // private baseUrl = '//10.100.32.41:8082';
-
-  // private baseUrl = '//10.100.31.123:8082';
 
   // private baseUrl = '//ims.sdb.lk:8082';
 
+  // Uat
+  //  private baseUrl = '//10.100.57.125:8084';
+
+  //  local
   private baseUrl = '//localhost:8082';
 
   private apiUrl = `${this.baseUrl}/login`;

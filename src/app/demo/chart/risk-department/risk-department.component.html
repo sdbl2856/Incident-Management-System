@@ -174,188 +174,273 @@
               </div>
                 <h4 class="text-center">CREATION LEVEL DETAILS</h4>
                 <br />
-                <div class="row" style="margin-left: 4%;">
-                  <div class="col-md-6">
-                    <div class="detail">
-                      <strong>ID :</strong>
-                      <p style="display: inline-block" class="field-value">
-                        {{ row.incidentId }}
-                      </p>
-                    </div>
-                  </div>
-                  <div class="col-md-6">
-                    <div class="detail">
-                      <strong>Occurrence Date:</strong>
-                      <p style="display: inline-block" class="field-value">
-                        {{ row.occurence_date | date: "yyyy-MM-dd" }}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                <div class="row" style="margin-left: 4%;">
-                  <div class="col-md-6">
-                    <div class="detail">
-                      <strong>Risk Owner:</strong>
-                      <p style="display: inline-block" class="field-value">
-                        {{ row.risk_owner }}
-                      </p>
-                    </div>
-                  </div>
-                  <div class="col-md-6">
-                    <div class="detail">
-                      <strong>Detected Date:</strong>
-                      <p style="display: inline-block" class="field-value">
-                        {{ row.detected_date | date: "yyyy-MM-dd" }}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                <div class="row" style="margin-left: 4%;">
-                  <div class="col-md-6">
-                    <div class="detail">
-                      <strong>Reporting Date:</strong>
-                      <p style="display: inline-block" class="field-value">
-                        {{ row.reporting_date | date: "yyyy-MM-dd" }}
-                      </p>
-                    </div>
-                  </div>
-                  <div class="col-md-6">
-                    <div class="detail">
-                      <strong>Risk Cause :</strong>
-                      <p style="display: inline-block" class="field-value">
-                        {{ row.sub_type.riskCause.description }}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                <div class="row" style="margin-left: 4%;">
-                  <div class="col-md-6">
-                    <div class="detail">
-                      <strong>Sub Category:</strong>
-                      <p style="display: inline-block" class="field-value">
-                        {{ row.sub_type.riskSubCategory.description }}
-                      </p>
-                    </div>
-                  </div>
-                  <div class="col-md-6">
-                    <div class="detail">
-                      <strong>Sub Type :</strong>
-                      <p style="display: inline-block" class="field-value">
-                        {{ row.sub_type.description }}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                <div class="row" style="margin-left: 4%;">
-                  <div class="col-md-6">
-                    <div class="detail">
-                      <strong>Reporting Officer:</strong>
-                      <p style="display: inline-block" class="field-value">
-                        {{ row.reporting_officer }}
-                      </p>
-                    </div>
-                  </div>
-                  <div class="col-md-6">
-                    <div class="detail">
-                      <strong>Contact Number :</strong>
-                      <p style="display: inline-block" class="field-value">
-                        {{ row.contact_number }}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                <div class="row" style="margin-left: 4%;">
-                  <div class="col-md-6">
-                    <div class="detail">
-                      <strong>Recoverd Amount:</strong>
-                      <p style="display: inline-block" class="field-value">
-                        {{ row.recoverd_amount }}
-                      </p>
-                    </div>
-                  </div>
-                  <div class="col-md-6">
-                    <div class="detail">
-                      <strong>Account Number :</strong>
-                      <p style="display: inline-block" class="field-value">
-                        {{ row.account_number }}
-                      </p>
-                    </div>
-                  </div>
-                </div>
+                <div class="container">                   
 
-                <div class="row" style="margin-left: 4%;">
-                  <div class="col-md-6">
-                    <div class="detail">
-                      <strong>Potential Loss Amount :</strong>
-                      <p style="display: inline-block" class="field-value">
-                        {{ row.potential_amount }}
-                      </p>
+                  <div class="row mb-4">
+                    <div class="col-md-6" *ngIf="row.incidentId">
+                      <strong><i ></i> ID:</strong>
+                      <div class="detail heading" >
+                       
+                        <p class="field-value"  >{{ row.incidentId || "N/A"}}</p>
+                      </div>
                     </div>
-                  </div>
-
-                  <div class="col-md-6">
-                    <div class="detail">
-                      <strong>Actual Loss Amount :</strong>
-                      <p style="display: inline-block" class="field-value">
-                        {{ row.actual_amount }}
-                      </p>
+                    <div class="col-md-6" *ngIf="row.incident_ref">
+                      <strong><i ></i>Reference Number :</strong>
+                      <div class="detail">
+                        
+                        <p class="field-value">{{ row.incident_ref }}</p>
+                      </div>
                     </div>
-                  </div>
-                </div>
-
-                <div class="row" style="margin-left: 4%;">
-                  <div class="col-md-6" *ngIf="row.branch?.description">
-                    <div class="detail">
-                      <strong>Branch :</strong>
-                      <p style="display: inline-block" class="field-value">
-                        {{ row.branch?.description }}
-                      </p>
-                    </div>
-                  </div>
-                  <div class="col-md-6" *ngIf="row.region?.description">
-                    <div class="detail">
-                      <strong>Region:</strong>
-                      <p style="display: inline-block" class="field-value">
-                        {{ row.region?.description }}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                
-
-                <div class="row" style="margin-left: 4%;">
                  
-                   <div class="col-md-6" *ngIf="row.department?.description">
-                    <div class="detail">
-                      <strong>Department :</strong>
-                      <p style="display: inline-block" class="field-value">
-                        {{ row.department?.description }}
-                      </p>
-                    </div>
                   </div>
-                  <div class="col-md-6" *ngIf="row?.incident_ref">
-                    <div class="detail">
-                      <strong>Reference No :</strong>
-                      <p style="display: inline-block" class="field-value">
-                        {{ row.incident_ref }}
-                      </p>
+
+                  <div class="row mb-4">
+                    <div class="col-md-6" *ngIf="row.status">
+                      <strong><i ></i>Status :</strong>
+                      <div class="detail">
+                       
+                        <p class="field-value"> {{ getStatusDescription(row.status) }}</p>
+                      </div>
                     </div>
+                 
+                    <div class="col-md-6" *ngIf="row.currentLevel">
+                      <strong><i ></i> Current Level :</strong>
+                      <div class="detail" >
+                       
+                        <p class="field-value">{{ row.currentLevel }}</p>
+                      </div>
+                    </div>
+                  </div>  
+                  <div class="row mb-4">
+                    <div class="col-md-6" *ngIf="row.region">
+                      <strong><i ></i>Region :</strong>
+                      <div class="detail" >
+                       
+                        <p class="field-value">{{ row.region.description }}</p>
+                      </div>
+                    </div>
+                    <div class="col-md-6" *ngIf="row.branch">
+                      <strong><i ></i> Branch :</strong>
+                      <div class="detail" >
+                      
+                        <p class="field-value">{{ row.branch.description }}</p>
+                      </div>
+                    </div>
+                  </div>              
+                  <div class="row mb-4">
+                    <div class="col-md-6" *ngIf="row.risk_owner">
+                      <strong><i ></i> Responsible Person:</strong>
+                      <div class="detail">
+                       
+                        <p class="field-value">{{ row.risk_owner }}</p>
+                      </div>
+                    </div>
+                    <div class="col-md-6" *ngIf="row.inc_description">
+                      <strong><i ></i>Description :</strong>
+                      <div class="detail" >
+                       
+                        <p class="field-value"> {{ row.inc_description }}</p>
+                      </div>
+                    </div>
+                   
                   </div>
-                </div>
                 
-                <div class="row" style="margin-left: 4%;">
-                  <div class="col-md-6">
-                    <div class="detail">
-                      <strong>Description:</strong>
-                      <textarea class="field-value textarea-field" readonly>{{ row.inc_description }}</textarea>
+                 
+                                 
+                  <div class="row mb-4">
+                    <div class="col-md-6" *ngIf="row.sub_type">
+                      <strong><i ></i> Risk Cause :</strong>
+                      <div class="detail">
+                      
+                        <p class="field-value">{{ row.sub_type.riskCause.description }}</p>
+                      </div>
+                    </div>
+                    <div class="col-md-6" *ngIf="row.sub_type">
+                      <strong><i ></i> Risk Sub Category :</strong>
+                      <div class="detail">
+                      
+                        <p class="field-value">{{ row.sub_type.riskSubCategory.description }}</p>
+                      </div>
                     </div>
                   </div>
-                  <div class="col-md-6">
-                    <div class="detail" *ngIf="row.recovery_action">
-                      <strong>Recovery Action :</strong>
-                      <textarea class="field-value textarea-field" readonly>{{ row.recovery_action }}</textarea>
+                  <div class="row mb-4">
+                  
+                    <div class="col-md-6" *ngIf="row.sub_type">
+                      <strong><i ></i> Risk Sub Type :</strong>
+                      <div class="detail" >
+                      
+                        <p class="field-value">{{ row.sub_type.description }}</p>
+                      </div>
+                    </div>
+                    <div class="col-md-6" *ngIf="row.reporting_officer">
+                      <strong><i ></i>Reporting Officer :</strong>
+                      <div class="detail">
+                       
+                        <p class="field-value">{{ row.reporting_officer }}</p>
+                      </div>
+                    </div>
+                 
+                  </div>
+
+
+                  <div class="row mb-4">
+
+                    <div class="col-md-6" *ngIf="row.detected_date">
+                      <strong><i ></i> Occurence Date:</strong>
+                      <div class="detail">
+                    
+                        <p class="field-value">{{ row.occurence_date | date: 'yyyy-MM-dd' }}</p>
+                      </div>
+                    </div>
+                
+                   
+                    <div class="col-md-6" *ngIf="row.detected_date">
+                      <strong><i ></i> Detected Date:</strong>
+                      <div class="detail">
+                    
+                        <p class="field-value">{{ row.detected_date | date: 'yyyy-MM-dd' }}</p>
+                      </div>
                     </div>
                   </div>
+
+                  <div class="row mb-4">
+                  
+
+                    <div class="col-md-6" *ngIf="row.reporting_date">
+                      <strong><i></i>Reporting Date :</strong>
+                      <div class="detail">
+                        
+                        <p class="field-value">{{ row.reporting_date | date: 'yyyy-MM-dd' }}</p>
+                      </div>
+                    </div>
+
+
+
+                    <div class="col-md-6" *ngIf="row.actual_amount">
+                      <strong><i></i>Actual Loss Amount :</strong>
+                      <div class="detail">
+                        
+                        <p class="field-value">{{ row.actual_amount }}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="row mb-4">
+
+
+                    <div class="col-md-6" *ngIf="row.recoverd_amount">
+                      <strong><i ></i>Recovered Amount :</strong>
+                      <div class="detail">
+                     
+                        <p class="field-value">{{ row.recoverd_amount }}</p>
+                      </div>
+                    </div>
+
+                    <div class="col-md-6" *ngIf="row.potential_amount">
+                      <strong><i ></i>Potential Loss Amount :</strong>
+                      <div class="detail">
+                     
+                        <p class="field-value">{{ row.potential_amount}}</p>
+                      </div>
+                    </div>
+
+                
+                
+                 
+                   
+                  </div>
+
+                  <div class="row mb-4">
+                               
+                    <div class="col-md-6" *ngIf="row.department">
+                      <strong><i ></i>Department :</strong>
+                      <div class="detail">
+                     
+                        <p class="field-value">{{ row.department.description}}</p>
+                      </div>
+                    </div>
+                    <div class="col-md-6" *ngIf="row.recovery_action">
+                      <strong><i ></i>Recovery Action :</strong>
+                      <div class="detail">
+                     
+                        <p class="field-value">{{ row.recovery_action }}</p>
+                      </div>
+                    </div>
+
+
+  
+                  </div>
+
+
+
+
+
+                  <!-- risk Department Deatails -->
+
+                  <div class="row mb-4">
+                    <div class="col-md-6" *ngIf="row.businessLine">
+                      <strong><i ></i> Business Line :</strong>
+                      <div class="detail">
+                        
+                        <p class="field-value">{{ row.businessLine.description }}</p>
+                      </div>
+                    </div>
+                    <div class="col-md-6" *ngIf="row.businessAria">
+                      <strong><i ></i> Business Aria :</strong>
+                      <div class="detail">
+                     
+                        <p class="field-value">{{ row.businessAria.description }}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row mb-4">
+                    <div class="col-md-6" *ngIf="row.consequence">
+                      <strong><i ></i> Consequence :</strong>
+                      <div class="detail">
+                       
+                        <p class="field-value">{{ row.consequence.description }}</p>
+                      </div>
+                    </div>
+                    <div class="col-md-6" *ngIf="row.riskLevel">
+                      <strong><i ></i> Risk-Level :</strong>
+                      <div class="detail">
+                     
+                        <p class="field-value">{{ row.riskLevel.description }}</p>
+                      </div>
+                    </div>
+                  </div>
+                 
+                  <div class="row mb-4">
+                    <div class="col-md-6" *ngIf="row.lossEventType">
+                      <strong><i ></i>LossEvent Type :</strong>
+                      <div class="detail">
+                        
+                        <p class="field-value"> {{ row.lossEventType.description }}</p>
+                      </div>
+                    </div>
+                    <div class="col-md-6" *ngIf="row.rootCause">
+                      <strong><i ></i>Root cause :</strong>
+                      <div class="detail" >
+                      
+                        <p class="field-value">{{ row.rootCause  }}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row mb-4">
+                   
+
+                    <div class="col-md-6" *ngIf="row.action">
+                      <strong><i ></i>Action Taken By the Department :</strong>
+                      <div class="detail" >
+                       
+                        <p class="field-value">{{ row.action  }}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Show the Comments -->
+         
+                
                 </div>
                 
                 <br>
