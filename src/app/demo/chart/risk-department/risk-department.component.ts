@@ -54,7 +54,7 @@ export class RiskDepartmentComponent {
   status_fill=false;
   drop_down=true;
   export_btn=false;
-
+  docList: any[];
    // New properties for pagination
    currentPage: number = 1;
    itemsPerPage: number = 5; 
@@ -157,6 +157,23 @@ export class RiskDepartmentComponent {
     }
   }
 
+  viewFile(event: Event) {
+    console.log("Inside viewFile method", event);
+  
+    const target = event.target as HTMLSelectElement;
+    const docPath = target.value;
+  
+    if (docPath !== "se") {
+      let basePath = "http://localhost/"
+      console.log("Original docPath:", docPath);
+      let formattedPath = docPath.replace(/^[/\\]+/, "").replace(/\\/g, "/"); 
+      let fullPath = `${basePath}${formattedPath}`;
+  
+      console.log("Opening file at:", fullPath);
+      window.open(fullPath, "_blank");
+    }
+  }
+
   getPosts(userId: any, selectedStatus: string ) {
     if (this.userId) {
       console.log("selected incident ID :" + this.selectedIncidentId);
@@ -210,6 +227,16 @@ export class RiskDepartmentComponent {
 
   onView(row:any){
      console.log(row);
+     this.row = row;
+
+     // Ensure row and documents exist before accessing them
+     if (row.documents && Array.isArray(row.documents)) {
+       this.docList = this.row.documents;
+     } else {
+       console.error('this.row.documents is undefined or not an array');
+       this.docList = []; 
+     }
+   
     this.selectedIncidentId = row.incidentId;
     console.log(this.selectedIncidentId);
     this.getPosts(this.userId, "PE");

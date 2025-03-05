@@ -294,6 +294,7 @@
                         <p class="field-value">{{ row.actual_amount }}</p>
                       </div>
                     </div>
+
                   </div>
 
                   <div class="row mb-4">
@@ -321,46 +322,57 @@
                    
                   </div>
 
-                  <div class="row mb-4">
-                               
+                  <div class="row mb-4">              
                     <div class="col-md-6" *ngIf="row.department">
                       <strong><i ></i>Department :</strong>
-                      <div class="detail">
-                     
+                      <div class="detail">             
                         <p class="field-value">{{ row.department.description}}</p>
                       </div>
                     </div>
                     <div class="col-md-6" *ngIf="row.recovery_action">
                       <strong><i ></i>Recovery Action :</strong>
                       <div class="detail">
-                     
                         <p class="field-value">{{ row.recovery_action }}</p>
                       </div>
                     </div>
-
-
-  
                   </div>
 
 
+                  <div class="row mb-4">            
+                    <div class="col-md-6" >
+                      <span style="font-weight: bold;color: red;">View Documents</span>
+                      <select
+                      style="width: 70%;"
+                      id="doc"
+                      name="doc"
+                      class="form-select"
+                      (change)="viewFile($event)"
+                       >
+                      <option selected value="se" disabled>Select docs to view</option>
+                      <option *ngFor="let doc of docList" [value]="doc.docPath">
+                        {{ doc.status }} - {{ doc.docType }}
+                      </option>
+                      </select>                
+                    </div>
+                   </div>
 
 
 
                   <!-- risk Department Deatails -->
 
                   <div class="row mb-4">
-                    <div class="col-md-6" *ngIf="row.businessLine">
+                    <div class="col-md-6" *ngIf="row?.businessLine">
                       <strong><i ></i> Business Line :</strong>
                       <div class="detail">
                         
-                        <p class="field-value">{{ row.businessLine.description }}</p>
+                        <p class="field-value">{{ row?.businessLine?.description }}</p>
                       </div>
                     </div>
                     <div class="col-md-6" *ngIf="row.businessAria">
                       <strong><i ></i> Business Aria :</strong>
                       <div class="detail">
                      
-                        <p class="field-value">{{ row.businessAria.description }}</p>
+                        <p class="field-value">{{ row?.businessAria?.description }}</p>
                       </div>
                     </div>
                   </div>
@@ -369,14 +381,14 @@
                       <strong><i ></i> Consequence :</strong>
                       <div class="detail">
                        
-                        <p class="field-value">{{ row.consequence.description }}</p>
+                        <p class="field-value">{{ row?.consequence?.description }}</p>
                       </div>
                     </div>
                     <div class="col-md-6" *ngIf="row.riskLevel">
                       <strong><i ></i> Risk-Level :</strong>
                       <div class="detail">
                      
-                        <p class="field-value">{{ row.riskLevel.description }}</p>
+                        <p class="field-value">{{ row?.riskLevel?.description }}</p>
                       </div>
                     </div>
                   </div>
@@ -386,14 +398,14 @@
                       <strong><i ></i>LossEvent Type :</strong>
                       <div class="detail">
                         
-                        <p class="field-value"> {{ row.lossEventType.description }}</p>
+                        <p class="field-value"> {{ row?.lossEventType?.description }}</p>
                       </div>
                     </div>
                     <div class="col-md-6" *ngIf="row.rootCause">
                       <strong><i ></i>Root cause :</strong>
                       <div class="detail" >
                       
-                        <p class="field-value">{{ row.rootCause  }}</p>
+                        <p class="field-value">{{ row?.rootCause  }}</p>
                       </div>
                     </div>
                   </div>
@@ -404,7 +416,7 @@
                       <strong><i ></i>Action Taken By the Department :</strong>
                       <div class="detail" >
                        
-                        <p class="field-value">{{ row.action  }}</p>
+                        <p class="field-value">{{ row?.action  }}</p>
                       </div>
                     </div>
                   </div>

@@ -21,6 +21,7 @@ export class AuthService {
 
   private apiUrl = `${this.baseUrl}/login`;
 
+  private RESOURCE_URL:string = "http://localhost:3000/";
 
   constructor(private http: HttpClient, private router: Router) {}
 
@@ -36,10 +37,19 @@ export class AuthService {
 
   httpOptions2 = {
     headers: new HttpHeaders({
-      'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin'   :'*',
+      'Access-Control-Allow-Origin': '*',
+    }),
+    withCredentials: false,
+  };
+  
+
+  httpOptions3 = {
+    headers: new HttpHeaders({
+      'Content-Type': 'multipart/form-data',
+      // 'Access-Control-Allow-Origin'   :'*',
       
-      'Authorization'                 : 'Bearer ' + this.getToken()
+      'Access-Control-Allow-Origin'   : '*',
+     
     }),
     withCredentials : false,
   };
@@ -170,6 +180,10 @@ export class AuthService {
       // localStorage.setItem('incidentCount', count.toString());
     }
 
+    getResourceUrl():string{
+
+      return this.RESOURCE_URL;
+   } 
 
   
 }

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component,AfterViewInit } from '@angular/core';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { IncidentModel } from './incident-model';
 import { IncidentService } from './incident.service';
@@ -10,20 +10,34 @@ import { UserService } from '../user/user.service';
 import { MatSnackBar, MatSnackBarConfig } from '@angular/material/snack-bar';
 import Swal from 'sweetalert2';
 
+declare var $: any; // Import jQuery globally
+
 @Component({
   selector: 'app-incident',
   templateUrl: './incident.component.html',
   styleUrls: ['./incident.component.scss'],
 })
-export class IncidentComponent {
+export class IncidentComponent implements AfterViewInit {
+
+  ngAfterViewInit(): void {
+    $("#input-folder-3").fileinput({
+      theme: 'fas',  
+      browseLabel: 'Select File...',
+      showUpload: false, 
+      showRemove: true,
+      allowedFileExtensions: ['jpg', 'png', 'pdf', 'docx'],
+      previewFileType: 'any',
+      // uploadUrl: "/file-upload-batch/2",
+      hideThumbnailContent: true 
+    });
+  }
+  
   risk_causes: any[];
   sub_category: any[];
   sub_types: any[];
   loading = true;
   specificSubCategory = [];
-  
   specificSubTypes = [];
-
   formValue: FormGroup;
   selectedOption: string = '';
   incidentmodel_obj: IncidentModel = new IncidentModel();
@@ -63,7 +77,8 @@ export class IncidentComponent {
   showSDBLError: boolean = false;
   errorMessage: string = '';
   mobile:any;
-  
+  uploadedFiles: File[] = []; // Initialize as an empty array
+
 
   constructor(
     private userService: UserService,
@@ -122,6 +137,7 @@ export class IncidentComponent {
       branch: ['', Validators.required],
       region: ['', Validators.required],
       dep: [''],
+      uploadedFiles: [''],
     });
 
     this.getBranches();
@@ -168,6 +184,10 @@ export class IncidentComponent {
 
 
 
+  
+  
+  
+
   onLevelChange(event: any) {
     // Access the selected value from the event
     const selectedValue = event.target.value;
@@ -210,10 +230,44 @@ export class IncidentComponent {
 
   }
 
+
+
+  onFileChange(event: any) {
+    const files: FileList = event.target.files;
+    this.uploadedFiles = Array.from(files); // Convert FileList to Array
+  
+    console.log("Selected Files:", this.uploadedFiles);
+  
+    let formData = new FormData();
+    if (this.uploadedFiles.length > 0) {
+      this.uploadedFiles.forEach(file => {
+        formData.append('files', file, file.name);
+      });
+    } else {
+      formData.append('files', null);
+    }
+  }
+
   
   postDetails() {
     
     console.log("current level : " + this.currentLevel);
+
+    let formData = new FormData();
+    if (this.uploadedFiles && this.uploadedFiles.length > 0) {
+      this.uploadedFiles.forEach((file, index) => {
+        formData.append(`files`, file, file.name); // 
+      });
+    } else {
+      formData.append('files', null); // Append null if no file selected
+    }
+  
+    
+    formData.forEach((value, key) => {
+      console.log(key, value); 
+    });
+    
+  
   
     if(this.currentLevel == 'NU'){
 
@@ -245,7 +299,6 @@ export class IncidentComponent {
     }
 
  
-  
     const {
       description,
       oc_date,
@@ -267,7 +320,6 @@ export class IncidentComponent {
     } = this.formValue.value;
   
    
-  
 
     if (
       description !== null && description.trim() !== '' &&
@@ -334,33 +386,68 @@ export class IncidentComponent {
 
       else {
         console.log("inside assign ");
-        this.incidentmodel_obj.inc_description = description;
-        this.incidentmodel_obj.occurence_date = oc_date;
-        this.incidentmodel_obj.detected_date = detected_date;
-        this.incidentmodel_obj.risk_owner = risk_owner;
-        this.incidentmodel_obj.risk_cause = risk_cause;
-        this.incidentmodel_obj.sub_category = sub_category;
-        this.incidentmodel_obj.sub_type = { riskSubTypeId: sub_type };
-        // this.incidentmodel_obj.currentLevel = this.currentLevel;
-        this.incidentmodel_obj.created_Level = this.created_level;
-        this.incidentmodel_obj.next_level = this.next_level;
-        this.incidentmodel_obj.createdBy = this.loggedUserId;
-        this.incidentmodel_obj.reporting_officer = this.empCode;
-        this.incidentmodel_obj.contact_number = this.mobile;
-        this.incidentmodel_obj.recovery_action = recovery_action;
-        this.incidentmodel_obj.account_number = account_number;
-        this.incidentmodel_obj.actual_amount = actual_loss_amount;
-        this.incidentmodel_obj.potential_amount = potential_amount;
-        this.incidentmodel_obj.recoverd_amount = recoverd_amount;
-        this.incidentmodel_obj.level = this.selectedLevel;
-        this.incidentmodel_obj.branchId = branch || 999;
-        this.incidentmodel_obj.regionId = region || 11;
-        this.incidentmodel_obj.depId = dep;
-        this.incidentmodel_obj.email = this.email;
+        let data:any;
+
+        data= {
+
+            inc_description : description,
+            occurence_date : oc_date,
+            detected_date : detected_date,
+            risk_owner :risk_owner,
+            // riskCause :risk_cause,
+            // riskSubCategory :sub_category,
+            sub_type : { riskSubTypeId: sub_type },
+            created_Level : this.created_level,
+            next_level : this.next_level,
+            createdBy : this.loggedUserId,
+            reporting_officer : this.empCode,
+            contact_number : this.mobile,
+            recovery_action : recovery_action,
+            account_number :account_number,
+            actual_amount : actual_loss_amount,
+            potential_amount : potential_amount,
+            recoverd_amount : recoverd_amount,
+            level : this.selectedLevel,
+            branchId : branch || 999,
+            regionId :region || 11,
+            depId : dep,
+            email :this.email
+
+        }
+        // this.incidentmodel_obj.inc_description = description;
+        // this.incidentmodel_obj.occurence_date = oc_date;
+        // this.incidentmodel_obj.detected_date = detected_date;
+        // this.incidentmodel_obj.risk_owner = risk_owner;
+        // // this.incidentmodel_obj.risk_cause = risk_cause;
+        // // this.incidentmodel_obj.sub_category = sub_category;
+        // this.incidentmodel_obj.sub_type = { riskSubTypeId: sub_type };
+        // // this.incidentmodel_obj.currentLevel = this.currentLevel;
+        // this.incidentmodel_obj.created_Level = this.created_level;
+        // this.incidentmodel_obj.next_level = this.next_level;
+        // this.incidentmodel_obj.createdBy = this.loggedUserId;
+        // this.incidentmodel_obj.reporting_officer = this.empCode;
+        // this.incidentmodel_obj.contact_number = this.mobile;
+        // this.incidentmodel_obj.recovery_action = recovery_action;
+        // this.incidentmodel_obj.account_number = account_number;
+        // this.incidentmodel_obj.actual_amount = actual_loss_amount;
+        // this.incidentmodel_obj.potential_amount = potential_amount;
+        // this.incidentmodel_obj.recoverd_amount = recoverd_amount;
+        // this.incidentmodel_obj.level = this.selectedLevel;
+        // this.incidentmodel_obj.branchId = branch || 999;
+        // this.incidentmodel_obj.regionId = region || 11;
+        // this.incidentmodel_obj.depId = dep;
+        // this.incidentmodel_obj.email = this.email;
   
-        console.log("sending object : "+JSON.stringify(this.incidentmodel_obj));
-        this.loading = false;
-        this.incidentService.postIncidents(this.loggedUserId, this.incidentmodel_obj).subscribe((response:any) => {
+        formData.append('incidentDTO', JSON.stringify(data));
+
+        // console.log("sending object : "+JSON.stringify(this.incidentmodel_obj));
+        // this.loading = false;
+        console.log("FormData content:");
+        formData.forEach((value, key) => {
+            console.log(`${key}: ${value}`);
+        });
+
+        this.incidentService.postIncidents(this.loggedUserId, formData).subscribe((response:any) => {
           if(response['code'] == 200){             
             this.loading = true;  
             this.alertWithSuccess(); 
@@ -368,8 +455,9 @@ export class IncidentComponent {
             this.branch_div=false;
             this.dep_div=false;
             this.region_div=false;
-            this.selectedOption = null;      
-        
+            this.selectedOption = null; 
+            $("#input-folder-3").fileinput('clear'); 
+    
           }else{         
             this.loading = true;        
             this.alertWithError(response['error']);      

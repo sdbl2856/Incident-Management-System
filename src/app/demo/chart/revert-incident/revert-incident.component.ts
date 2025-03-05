@@ -1,4 +1,4 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, ViewChild,AfterViewInit } from '@angular/core';
 import { RevertIncidentService } from './revert-incident.service';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { IncidentModel } from '../incident/incident-model';
@@ -11,13 +11,31 @@ import { NgZone } from '@angular/core';
 import * as XLSX from 'xlsx';
 import { TrackService } from '../track/track.service';
 import Swal from 'sweetalert2';
+import { ViewEncapsulation } from '@angular/core';
+declare var $: any; // Import jQuery globally
 
 @Component({
   selector: 'app-revert-incident',
   templateUrl: './revert-incident.component.html',
   styleUrls: ['./revert-incident.component.scss'],
+  encapsulation: ViewEncapsulation.None
 })
-export class RevertIncidentComponent {
+export class RevertIncidentComponent implements AfterViewInit{
+
+  ngAfterViewInit(): void {
+
+      $("#input-folder-3").fileinput({
+        theme: 'fas',
+        browseLabel: 'Select File...',
+        showUpload: false,
+        showRemove: true,
+        allowedFileExtensions: ['jpg', 'png', 'pdf', 'docx'],
+        previewFileType: 'any',
+        hideThumbnailContent: true
+      });
+  
+  }
+
   @ViewChild('nav1', { static: true }) nav1: NgbNav;
   searchQuery: string = '';
   formValue: FormGroup;
@@ -39,12 +57,13 @@ export class RevertIncidentComponent {
   selectedIncidentId: any;
   commentList: any[];
   loading = true;
+  docList: any[];
    // New properties for pagination
    currentPage: number = 1;
    itemsPerPage: number = 5; 
    displayedIncidentList: any[] = [];
 
-
+   uploadedFiles: File[] = []; 
    currentPageComment: number = 1;
    itemsPerPageComment: number = 5; 
    displayedCommentList: any[] = [];
@@ -112,13 +131,28 @@ export class RevertIncidentComponent {
       recovery_action: ['null'],
       recoverd_amount: ['0'],
       account_number: ['123456'],
+      uploadedFiles: [''],
     });
   
   }
 
 
   ngOnInit() {
-    
+    console.log("start ");
+
+
+      $("#input-folder-3").fileinput({
+        theme: 'fas',
+        browseLabel: 'Select File...',
+        showUpload: false,
+        showRemove: true,
+        allowedFileExtensions: ['jpg', 'png', 'pdf', 'docx'],
+        previewFileType: 'any',
+        hideThumbnailContent: true
+      });
+  
+    console.log("finish ");
+
     this.userId = this.authService.getId();
     console.log(this.userId);
     this.empCode = this.authService.getempCode();
@@ -137,6 +171,23 @@ export class RevertIncidentComponent {
     this.updateIncidentCount();
    
     // console.log('Incidents count from ngOnInit: ' + this.incidentCount);
+  }
+
+  viewFile(event: Event) {
+    console.log("Inside viewFile method", event);
+  
+    const target = event.target as HTMLSelectElement;
+    const docPath = target.value;
+  
+    if (docPath !== "se") {
+      let basePath = "http://localhost/"
+      console.log("Original docPath:", docPath);
+      let formattedPath = docPath.replace(/^[/\\]+/, "").replace(/\\/g, "/"); 
+      let fullPath = `${basePath}${formattedPath}`;
+  
+      console.log("Opening file at:", fullPath);
+      window.open(fullPath, "_blank");
+    }
   }
   
   getPosts(userId: any, selectedStatus: string) {
@@ -338,8 +389,31 @@ export class RevertIncidentComponent {
   }
 
 
+  onFileChange(event: any) {
+    const files: FileList = event.target.files;
+    this.uploadedFiles = Array.from(files); // Convert FileList to Array
+  
+    console.log("Selected Files:", this.uploadedFiles);
+  
+    let formData = new FormData();
+    if (this.uploadedFiles.length > 0) {
+      this.uploadedFiles.forEach(file => {
+        formData.append('files', file, file.name);
+      });
+    } else {
+      formData.append('files', null);
+    }
+  }
+
   onEdit(row: any) {
-    
+  
+    console.log(row);
+  if (row.documents && Array.isArray(row.documents)) {
+    this.docList = row.documents;
+  } else {
+    console.error('this.row.documents is undefined or not an array');
+    this.docList = []; 
+  }
  
     if (row?.consequence) {
       console.log('Consequence:', row.consequence);  // Log the consequence object
@@ -492,6 +566,16 @@ export class RevertIncidentComponent {
 
    updateIncidents() {
 
+
+        let formData = new FormData();
+        if (this.uploadedFiles && this.uploadedFiles.length > 0) {
+          this.uploadedFiles.forEach((file, index) => {
+            formData.append(`files`, file, file.name); // 
+          });
+        } else {
+          formData.append('files', null); // Append null if no file selected
+        }
+
         console.log('inside update incidents function');
          // Validate fields before proceeding
           if (!this.validateFields()) {
@@ -563,8 +647,8 @@ export class RevertIncidentComponent {
             detected_date : detected_date,
             reporting_date : reporting_date,
             risk_owner :risk_owner,
-            risk_cause : risk_cause,
-            sub_category : sub_category,
+            // risk_cause : risk_cause,
+            // sub_category : sub_category,
             sub_type : { riskSubTypeId: sub_type },
             updatedBy : this.userId,
             recovery_action:recovery_action,
@@ -589,9 +673,17 @@ export class RevertIncidentComponent {
     
           };
 
-          console.log('model sent ' + incidentData);
+          formData.append('incidentDTO', JSON.stringify(incidentData));
+
+          // console.log("sending object : "+JSON.stringify(this.incidentmodel_obj));
+          // this.loading = false;
+          console.log("FormData content:");
+          formData.forEach((value, key) => {
+              console.log(`${key}: ${value}`);
+          });
+
           this.revertIncidentService
-            .updateIncidents(incidentData)
+            .updateIncidents(formData)
             .subscribe(
               (res) => {
                 this.formValue.reset();
@@ -789,7 +881,7 @@ export class RevertIncidentComponent {
             'description', 'oc_date', 'detected_date', 'reporting_date', 'risk_owner',
             'risk_cause', 'comment', 'incident_type','subcat','subtype',
             'loss_event_type', 'business_line', 'business_aria', 'consequence',
-            'risk_level','action','recovery_action'
+            'risk_level','action'
           ];
 
           // 'actual_amount', 'potential_amount','account_number'

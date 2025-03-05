@@ -7,8 +7,8 @@ export class IncidentModel{
     detected_date: string='';
     reporting_date:string='';
     risk_owner:string='';
-    risk_cause: string='';
-    sub_category: string='';
+    // risk_cause: string='';
+    // sub_category: string='';
     sub_type: any;
     branch: any;
     region: any;

@@ -30,11 +30,16 @@
             "styles": [
               "@angular/material/prebuilt-themes/indigo-pink.css",
               "node_modules/bootstrap/scss/bootstrap.scss",
-              "src/styles.scss"
+              "src/styles.scss",
+              "node_modules/bootstrap-fileinput/css/fileinput.min.css"
             ],
             "scripts": [
-              "node_modules/apexcharts/dist/apexcharts.min.js"
+              "node_modules/apexcharts/dist/apexcharts.min.js",
+                "node_modules/jquery/dist/jquery.min.js",
+              "node_modules/bootstrap-fileinput/js/fileinput.min.js"
             ]
+
+            
           },
           "configurations": {
             "production": {

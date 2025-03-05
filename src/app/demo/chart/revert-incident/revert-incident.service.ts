@@ -25,13 +25,13 @@ export class RevertIncidentService {
     );
   }
 
-  updateIncidents(data: any): Observable<any> {
-    if (!data) {
+  updateIncidents(formData: any): Observable<any> {
+    if (!formData) {
       // Handle the case where data is null
       console.log('data is null');
     }
     const apiUrl = `${this.baseUrl}/incident/update/`;
-    return this.http.post<any>(apiUrl, data).pipe(
+    return this.http.post<any>(apiUrl, formData).pipe(
       map((res: any) => {
         return res;
       })
