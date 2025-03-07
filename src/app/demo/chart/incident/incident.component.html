@@ -270,7 +270,7 @@
           <div class="col-sm-4">
             <div class="form-group">
               <label for="recovery_action" class="form-label"
-                >Recovery Actions
+                >Root Cause & Recovery Actions
                 <!-- <label style="color: red">*</label> -->
               </label>
               <textarea
@@ -326,6 +326,85 @@
         </div>
         <br />
 
+
+            <!-- Single Row any user -->
+            <div class="row">
+              <!-- Column 1 -->
+            
+      
+                <div class="col-sm-4" *ngIf="any_user_div">
+                  <div class="form-group">
+                    <label for="level" class="form-label"
+                      > REPORTING FROM
+                      <label style="color: red">*</label>
+                    </label>
+                    <select
+                      style="width: 80%"
+                      id="level"
+                      formControlName="level"
+                      class="form-select"
+                      required
+                      (change)="onLevelChange($event)"
+                      >
+                      <option value="" disabled >Select</option>
+                      <option value="BRANCH" selected>BRANCH</option>
+                      <!-- <option value="REGION">REGION</option> -->
+                      <option value="DEPARTMENT">DEPARTMENT</option>
+                    </select>
+                    <div *ngIf="formValue.get('level').invalid && formValue.get('level').touched" class="text-danger">
+                      Please select a level
+                    </div>
+                  </div>
+                </div>
+    
+                <div class="col-sm-4" *ngIf="branch_div">
+                  <div class="form-group">
+                    <label for="branch" class="form-label">YOUR BRANCH <label style="color: red">*</label></label>
+                    <select style="width: 80%" id="branch" formControlName="branch" class="form-select" required>
+                      <option value="" disabled selected>Select</option>
+                      <option *ngFor="let branch of branches" [value]="branch.branchId" [disabled]="branch.branchId === 999">
+                        {{ branch.description }}
+                      </option>
+                    </select>
+                  </div>
+                </div>
+                <div class="col-sm-4" *ngIf="region_div">
+                    <div class="form-group">
+                      <label for="region" class="form-label">YOUR REGION <label style="color: red">*</label></label>
+                      <select style="width: 80%" id="region" formControlName="region" class="form-select" required>
+                        <option value="" disabled selected>Select</option>
+                        <option *ngFor="let region of regions" [value]="region.regionId" [disabled]="region.regionId === 11">
+                          {{ region.description }}
+                        </option>
+                      </select>
+                    </div>
+                </div>
+                <div class="col-sm-4" *ngIf="dep_div">
+                  <div class="form-group">
+                    <label for="dep" class="form-label"
+                      > YOUR DEPARTMENT
+                      <label style="color: red">*</label>
+                    </label>
+                    <select
+                      style="width: 80%"
+                      id="dep"
+                      formControlName="dep"
+                      class="form-select"
+                      required
+                    >
+                      <option value="" disabled selected>Select</option>
+                      <option
+                        *ngFor="let departments of filteredDepartments"
+                        [value]="departments.departmentId"
+                      >
+                        {{ departments.description }}
+                      </option>
+                    </select>
+                  </div>
+                </div>
+            </div>
+            <br>
+
         <div class="row" style="margin-right: 15%;">
           <label for="input-folder-3">Select files/folders</label>
           <div>
@@ -334,82 +413,7 @@
         </div>
         <br />
 
-        <!-- Single Row any user -->
-        <div class="row">
-          <!-- Column 1 -->
-        
-  
-            <div class="col-sm-4" *ngIf="any_user_div">
-              <div class="form-group">
-                <label for="level" class="form-label"
-                  > REPORTING FROM
-                  <label style="color: red">*</label>
-                </label>
-                <select
-                  style="width: 80%"
-                  id="level"
-                  formControlName="level"
-                  class="form-select"
-                  required
-                  (change)="onLevelChange($event)"
-                >
-                  <option value="" disabled >Select</option>
-                  <option value="BRANCH" selected>BRANCH</option>
-                  <!-- <option value="REGION">REGION</option> -->
-                  <option value="DEPARTMENT">DEPARTMENT</option>
-                </select>
-                <div *ngIf="formValue.get('level').invalid && formValue.get('level').touched" class="text-danger">
-                  Please select a level.
-              </div>
-              </div>
-            </div>
-            <div class="col-sm-4" *ngIf="branch_div">
-              <div class="form-group">
-                <label for="branch" class="form-label">BRANCH <label style="color: red">*</label></label>
-                <select style="width: 80%" id="branch" formControlName="branch" class="form-select" required>
-                  <option value="" disabled selected>Select</option>
-                  <option *ngFor="let branch of branches" [value]="branch.branchId" [disabled]="branch.branchId === 999">
-                    {{ branch.description }}
-                  </option>
-                </select>
-              </div>
-            </div>
-            <div class="col-sm-4" *ngIf="region_div">
-                <div class="form-group">
-                  <label for="region" class="form-label">REGION <label style="color: red">*</label></label>
-                  <select style="width: 80%" id="region" formControlName="region" class="form-select" required>
-                    <option value="" disabled selected>Select</option>
-                    <option *ngFor="let region of regions" [value]="region.regionId" [disabled]="region.regionId === 11">
-                      {{ region.description }}
-                    </option>
-                  </select>
-                </div>
-            </div>
-            <div class="col-sm-4" *ngIf="dep_div">
-              <div class="form-group">
-                <label for="dep" class="form-label"
-                  >DEPARTMENT
-                  <label style="color: red">*</label>
-                </label>
-                <select
-                  style="width: 80%"
-                  id="dep"
-                  formControlName="dep"
-                  class="form-select"
-                  required
-                >
-                  <option value="" disabled selected>Select</option>
-                  <option
-                    *ngFor="let departments of filteredDepartments"
-                    [value]="departments.departmentId"
-                  >
-                    {{ departments.description }}
-                  </option>
-                </select>
-              </div>
-            </div>
-        </div>
-        <br>
+    
 
         <div class="row align-items-center">
 

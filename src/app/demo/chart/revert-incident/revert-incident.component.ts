@@ -164,7 +164,7 @@ export class RevertIncidentComponent implements AfterViewInit{
       this.getPosts2();     
     }else if (this.userId != null){
       console.log("db user ");
-      this.getPosts(this.userId, 'RE');  
+      this.getPosts(this.userId,'RE');  
     }
 
   

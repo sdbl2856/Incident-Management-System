@@ -161,6 +161,7 @@ exportToExcel() {
       'Risk Cause Description': row.sub_type.riskCause.description,
       'Risk Sub Category ': row.sub_type.riskSubCategory.description,
       'Risk Sub Type ': row.sub_type.description,
+      'Root Cause & Recovery Actions':row.recovery_action,
       'Reporting Officer ': row.reporting_officer,
       'Contact Number ': row.contact_number,
       'Incident Type': row.incidentType ? row.incidentType.description : 'N/A',

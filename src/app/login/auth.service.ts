@@ -35,6 +35,7 @@ export class AuthService {
     withCredentials : false,
   };
 
+  
   httpOptions2 = {
     headers: new HttpHeaders({
       'Access-Control-Allow-Origin': '*',

@@ -53,7 +53,7 @@
               <div class="col-4" *ngIf="totalItems > 0">
                 <input  
                 type="text" 
-                style="width: 80%;margin-left: 30%;"
+                style="width: 70%;margin-left: 30%;"
                 placeholder="REf/ID" 
                 [(ngModel)]="searchQuery" 
                 (input)="updateDisplayedData()"
@@ -62,8 +62,14 @@
               </div>
           
               <div class="col-4">
-
+                <!-- <div class="col-sm-1 mb-2" style="width:20px;">
+                  <div class="flag-container">
+                    <i class="material-icons" style="font-size: 30px;">flag</i>
+                  </div>
+                </div> -->
               </div>
+              
+              
               <div class="col-4">
                 <div class="text-end" *ngIf="!loading && totalItems > 0" >
                   <button
@@ -90,22 +96,26 @@
                       <th>Current Level</th>
                       <th>Reporting Date</th>
                       <th>Reporting Officer</th>
-
+                     
                       <th>Action</th>
                     </tr>
                   </thead>
 
                
                   <tbody>
-                    <tr *ngFor="let row of displayedIncidentList; let i = index">
-                      <td>{{ (currentPage - 1) * itemsPerPage + (i + 1) }}</td>
-                      <td>{{ row.incidentId }}</td>
+                  
+                    <tr *ngFor="let row of displayedIncidentList; let i = index"
+                    [ngClass]="{ 'green-row': row.justification != 0 }">
+                
+
+                      <td  >{{ (currentPage - 1) * itemsPerPage + (i + 1) }}</td>
+                      <td >{{ row.incidentId }}</td>
                       <td>{{ row.incident_ref}}</td>
                       <td>{{ getStatusDescription(row.status) }}</td>
                       <td>{{ row.currentLevel }}</td>
                       <td>{{ row.reporting_date | date: "yyyy-MM-dd" }}</td>
                       <td>{{ row.reporting_officer }}</td>
-
+                     
                       <td>
                         <button class="btn btn-primary" (click)="onView(row)">
                           View
@@ -114,6 +124,8 @@
                       </td>
                     </tr>
                   </tbody>
+
+
                 </div>
               </table>
               <br />
@@ -339,7 +351,8 @@
                   <div class="row mb-4">
                                
                     <div class="col-md-6" *ngIf="row.department">
-                      <strong><i ></i>Department :</strong>
+                      <strong ><i ></i>Department :</strong>
+                   
                       <div class="detail">
                      
                         <p class="field-value">{{ row.department.description}}</p>
@@ -429,7 +442,7 @@
                   <div class="row mb-4">                 
 
                     <div class="col-md-6" *ngIf="row.action">
-                      <strong><i ></i>Action Taken By the Department :</strong>
+                      <strong><i ></i>Action Taken By the Risk Department :</strong>
                       <div class="detail" >
                        
                         <p class="field-value">{{ row.action  }}</p>
@@ -537,7 +550,7 @@
                   <div class="row" style="margin-left: 4%;">
                     <div class="col-md-6">
                       <div class="detail">
-                        <strong>Action Taken By the Department :</strong>
+                        <strong>Action Taken By the Risk Department :</strong>
                         <!-- <p style="display: inline-block" class="field-value">
                           {{ row.action }}
                         </p> -->
@@ -556,45 +569,9 @@
                   </div>
                 </div>
                 <br>
-                <div
-                *ngIf="showEmtyMessage"
-                class="emty-message"
-                style="
-                  background-color: whitesmoke;
-                  padding: 10px;
-                  max-width: 400px;
-                  margin: 0 auto;
-                  display: flex;
-                  align-items: center;
-                  justify-content: center;
-                "
-              >
-                <h4 style="color: rgb(6, 204, 39); margin: 0">
-                  {{ emtyMessage }}
-                </h4>
-              </div>
-           <div
-              *ngIf="showSuccessMessage"
-              class="success-message"
-              style="
-                background-color: whitesmoke;
-                padding: 10px;
-                max-width: 500px;
-                height: 200px;
-                margin: 0 auto;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-              "
-            >
-              <h4 style="color: rgb(6, 204, 39); margin: 0; font-size: 3em; padding: 1px;">
-                {{ successMessage }}
-              </h4>
             
-            
-            </div>
+      
 
-              
                 <!-- RO filling Form Start  -->
                 <form
                   [formGroup]="formValue"
@@ -617,7 +594,7 @@
                     </div>
                     <div class="col-md-6">
                       <label style="font-weight: bold" class="comment-label"
-                        >Action taken by Department</label
+                        >Action taken by Risk  Department</label
                       ><label style="color: red"> * </label>
                       <br />
                       <textarea
@@ -815,7 +792,22 @@
                   </div>
 
                   <div class="row align-items-center">
-                    <div class="col-md-4"></div>
+
+                    <div class="col-md-4">
+                      <!-- Example single danger button -->
+                      <div class="btn-group">
+                        <button type="button" class="btn btn-warning dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                          Justification from Department
+                        </button>
+                        <ul class="dropdown-menu">
+                          <li *ngFor="let dep of filteredDepartment">
+                            <button class="dropdown-item" (click)="alertWithConfirm($event)"  [value]="dep.departmentId">
+                              {{ dep.description }}
+                            </button>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
 
                     <div class="col-md-4">
                       <button
@@ -830,12 +822,29 @@
                       >
                         APPROVE
                       </button>
+                     
                     </div>
                   </div>
                 </form>
 
                 <!-- Form End -->
-
+                <div
+                *ngIf="showEmtyMessage"
+                class="emty-message"
+                style="
+                  background-color: whitesmoke;
+                  padding: 10px;
+                  max-width: 400px;
+                  margin: 0 auto;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                "
+              >
+                <h4 style="color: rgb(6, 204, 39); margin: 0">
+                  {{ emtyMessage }}
+                </h4>
+                </div>
                 <!-- other form srt -->
                 <div class="form-container d-flex justify-content-center">
                   <form [formGroup]="formValue" *ngIf="form_decide" class="col-md-8 mx-auto">
@@ -853,8 +862,12 @@
                     </div>   
                     <div class="text-md-end">
                       <div class="d-flex justify-content-center">
-                        <button  class="btn btn-danger" (click)="sendBack(row)">SendBack</button>
+                        <button  class="btn btn-danger" (click)="sendBack(row)" *ngIf="row.justification == 0">SendBack</button>
                         <button class="btn btn-primary" (click)="forward(row)">SUBMIT</button>
+
+      
+
+                        
                       </div>
                     </div>
                   </form>

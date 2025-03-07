@@ -28,6 +28,18 @@ export class IncidentService {
         'Authorization'                 : 'Bearer '
     })
 };
+
+
+
+    httpOptions = {
+      headers: new HttpHeaders({
+          'Content-Type'                  : 'application/json',
+          'Access-Control-Allow-Origin'   : '*',
+          'Authorization'                 : 'Bearer '
+      })
+    };
+
+
   private baseUrl: string = this.authService.getBaseUrl();
 
   // postIncidents(userId: number, data: any): Observable<any> {
@@ -58,6 +70,7 @@ export class IncidentService {
     return throwError('Something bad happened; please try again later.');
   }
 
+
   getRiskCauses(): Observable<any[]> {
     const apiUrl = `${this.baseUrl}/incident/all`;
     return this.http.get<any[]>(apiUrl,this.authService.httpOptions2).pipe(
@@ -65,6 +78,12 @@ export class IncidentService {
         // console.log('riskcauses:', data);
       })
     );
+  }
+
+
+  getName(epf: any): Observable<any> {
+    const url = `${this.baseUrl}/incident/hr/${epf}`;
+    return this.http.get<any>(url, this.httpOptions);
   }
 
   

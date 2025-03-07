@@ -8,6 +8,8 @@ import { RevertIncidentService } from '../revert-incident/revert-incident.servic
 import * as XLSX from 'xlsx';
 import { MatTableDataSource } from '@angular/material/table';
 import Swal from 'sweetalert2';
+import { UserService } from '../user/user.service';
+
 
 @Component({
   selector: 'app-risk-department',
@@ -46,6 +48,8 @@ export class RiskDepartmentComponent {
   specificSubTypes= [];
   selectedStatus:string;
   next_level:any;
+  departments: any[] = []; // Initialize as an empty array
+  filteredDepartment: any[] = []; // Initialize as an empty array
   incidentmodel_obj: IncidentModel = new IncidentModel();
 
   ro_data=false;
@@ -63,10 +67,11 @@ export class RiskDepartmentComponent {
    currentPageComment: number = 1;
    itemsPerPageComment: number = 5; // or any desired number
    displayedCommentList: any[] = [];
-
    isIncidentCompleted = false;
+   selectedDepartmentId: any = null;
+   justification=false;
 
-  constructor(private formBuilder: FormBuilder,private riskDepartmentService:RiskDepartmentService,private authService: AuthService,private revertIncidentService:RevertIncidentService ){
+  constructor(private formBuilder: FormBuilder,private riskDepartmentService:RiskDepartmentService,private authService: AuthService,private revertIncidentService:RevertIncidentService,private userService :UserService ){
     this.formValue = this.formBuilder.group({
       comment: ['', Validators.required], 
       action_taken: [''],
@@ -84,6 +89,7 @@ export class RiskDepartmentComponent {
       recovery_action: ['null'],
       recoverd_amount: ['0'],
       account_number: ['0'],
+      just:['']
     });
 
    
@@ -136,16 +142,65 @@ export class RiskDepartmentComponent {
       this.form_decide=true;
       this.status_fill=false;
     }
-    // this.getPosts(this.userId,'PE');
+ 
     this.getTypes();
    
-    
+    this.getBranches();
     this.getPosts(this.userId, 'PE');
     
 
   
 
   }
+
+
+ 
+  
+
+  filterDepartments() {
+    // Filter out the department you want to hide
+    this.filteredDepartment = this.departments.filter(department => department.description !== 'N/A');
+  }
+
+  getBranches() {
+    this.userService.getBranches().subscribe((data: any) => {
+      // console.log(data);
+      // this.branches = data.branchList;
+      // this.regions = data.regions;
+      this.departments = data.departmentList;
+      this.filterDepartments();             
+      console.log(this.departments);
+    
+    });
+  }
+
+  
+  alertWithConfirm(event: Event) {
+    this.selectedDepartmentId = (event.target as HTMLSelectElement).value; 
+    console.log("Selected Department ID:", this.selectedDepartmentId);
+  
+    const selectedDepartment = this.filteredDepartment.find(dep => dep.departmentId == this.selectedDepartmentId);
+    console.log("Selected Department Object:", selectedDepartment);
+  
+    Swal.fire({
+      icon: 'info',
+      title: "Are you sure?",
+      text: "You want to make these changes!",
+      showDenyButton: false,
+      showCancelButton: true,
+      cancelButtonText: "No",
+      confirmButtonText: "Yes",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.justification=true;
+        console.log("Confirmed DepartmentId :", this.selectedDepartmentId);
+        console.log("justification :", this.justification);
+        this.updateIncidents();
+
+      } 
+    });
+}
+  
 
   onChangeStatus() {
      this.selectedStatus = this.formValue.value.status;
@@ -184,6 +239,7 @@ export class RiskDepartmentComponent {
             this.loading=false;
             this.commentList = [];
             console.log(data);
+           
             data.incidentDtoList.forEach((incident) => {
               if (incident.comments) {
                 incident.comments.forEach((comment) => {
@@ -345,7 +401,7 @@ export class RiskDepartmentComponent {
       if(comment == null || !comment){
          // Display an error message to the user
         this.showEmtyMessage = true;
-        this.emtyMessage = 'Please fill in all required fields.';
+        this.emtyMessage = 'Please fill the Comment Field.';
 
         // Hide the error message after 3 seconds
         setTimeout(() => {
@@ -479,32 +535,42 @@ export class RiskDepartmentComponent {
       const action_taken = this.formValue.value.action_taken;
       const actual_amount = this.formValue.value.actual_amount;
       const potential_amount = this.formValue.value.potential_amount;
-      console.log(action_taken);
+      // console.log(action_taken);
       // Check for null or empty values
-  if (
-    !comment ||
-    !IncidentTypeId ||
-    !loss_event_typeId  ||
-    !business_lineId ||
-    !business_ariaId ||
-    !consequenceId ||
-    !risk_levelId ||
-    !root_cause||
-    !action_taken 
 
-  ){
-    
-   // Display an error message to the user
-   this.showEmtyMessage = true;
-   this.emtyMessage = 'Please fill in all required fields.';
+      if(this.justification != true){
+        if (!comment || !IncidentTypeId || !loss_event_typeId  || !business_lineId || !business_ariaId || !consequenceId || !risk_levelId || !root_cause|| !action_taken){
+          
+            // Display an error message to the user
+            this.showEmtyMessage = true;
+            this.emtyMessage = 'Please fill in all required fields.';
+      
+              // Hide the error message after 3 seconds
+              setTimeout(() => {
+                this.showEmtyMessage = false;
+                this.emtyMessage = '';
+              }, 3000);
+              return;
+          }
+        
+       }else if(this.justification == true){
 
-   // Hide the error message after 3 seconds
-   setTimeout(() => {
-     this.showEmtyMessage = false;
-     this.emtyMessage = '';
-   }, 3000);
-   return;
-  }
+          if(comment == null || !comment){
+            // Display an error message to the user
+          this.showEmtyMessage = true;
+          this.emtyMessage = 'Please fill the Comment Field.';
+  
+          // Hide the error message after 3 seconds
+          setTimeout(() => {
+            this.showEmtyMessage = false;
+            this.emtyMessage = '';
+          }, 3000);
+          return;
+                  
+         }
+
+       }
+
       
   // console.log('IncidentTypeId ' + IncidentTypeId);
       const incidentData = {
@@ -523,10 +589,12 @@ export class RiskDepartmentComponent {
         potential_amount:potential_amount,
         riskDepStatusId:risk_dep_status,
         current_level:this.next_level,
+        selectedDepartmentId:this.selectedDepartmentId,
+        justification:this.justification
 
       };
      
-      // console.log('model sent ' + incidentData);
+      console.log('model sent ' + incidentData);
       this.riskDepartmentService
         .updateIncidents(incidentId,incidentData)
         .subscribe(
@@ -728,6 +796,7 @@ if(comment == null || !comment){
           'Risk Cause Description': (row.sub_type && row.sub_type.riskCause && row.sub_type.riskCause.description) || '',
           'Risk Sub Category': (row.sub_type && row.sub_type.riskSubCategory && row.sub_type.riskSubCategory.description) || '',
           'Risk Sub Type': (row.sub_type && row.sub_type.description) || '',
+          'Root Cause & Recovery Actions':row.recovery_action || '',
           'Reporting Officer': row.reporting_officer || '',
           'Contact Number': row.contact_number || '',
           'Incident Type': (row.incidentType && row.incidentType.description) || '',
@@ -867,6 +936,9 @@ getCommentPageArray(): number[] {
 getStatusDescription(status: string): string {
   return this.statusDescriptions[status];
 }
+
+
+
 
     
 }

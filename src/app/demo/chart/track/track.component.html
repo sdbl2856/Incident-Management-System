@@ -67,7 +67,8 @@
                       </tr>
                     </thead>
                     <tbody>
-                      <tr *ngFor="let row of displayedIncidentList; let i = index">
+                      <tr *ngFor="let row of displayedIncidentList; let i = index" 
+                      [ngClass]="{ 'green-row': row.justification === 1 }">
                         <td>{{ (currentPage - 1) * itemsPerPage + (i + 1) }}</td>
                         <td>{{ row.incidentId }}</td>
                         <td>{{ row.incident_ref }}</td>
@@ -330,7 +331,7 @@
                       </div>
                     </div>
                     <div class="col-md-6" *ngIf="row.recovery_action">
-                      <strong><i ></i>Recovery Action :</strong>
+                      <strong><i ></i>Root Cause & Recovery Actions :</strong>
                       <div class="detail">
                         <p class="field-value">{{ row.recovery_action }}</p>
                       </div>

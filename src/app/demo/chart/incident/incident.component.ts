@@ -42,7 +42,7 @@ export class IncidentComponent implements AfterViewInit {
   selectedOption: string = '';
   incidentmodel_obj: IncidentModel = new IncidentModel();
   showform = true;
-
+  userData:any;
   reporting_officer: any; // Add this line
   contact_number: any; // Add this line
   id: number = 1;
@@ -78,7 +78,7 @@ export class IncidentComponent implements AfterViewInit {
   errorMessage: string = '';
   mobile:any;
   uploadedFiles: File[] = []; // Initialize as an empty array
-
+  branchCode:any;
 
   constructor(
     private userService: UserService,
@@ -92,14 +92,14 @@ export class IncidentComponent implements AfterViewInit {
     
   }
 
-  sdbLValidator(control: any) {
-    const value = control.value;
-    const isValid = /^SDBL\d+$/.test(value);
-    if (!isValid && value !== '') {
-      return { 'invalidSDBL': true };
-    }
-    return null;
-  }
+  // sdbLValidator(control: any) {
+  //   const value = control.value;
+  //   const isValid = /^SDBL\d+$/.test(value);
+  //   if (!isValid && value !== '') {
+  //     return { 'invalidSDBL': true };
+  //   }
+  //   return null;
+  // }
 
   pastDateValidator(): ValidatorFn {
     
@@ -152,18 +152,28 @@ export class IncidentComponent implements AfterViewInit {
     this.empCode = this.authService.getempCode();
     console.log("emp code  : "+this.empCode);
 
+    let employeeCode = this.empCode;
+    if (employeeCode.toLowerCase().startsWith("sdbl")) {
+      employeeCode = employeeCode.substring(4);
+    }
+    console.log(employeeCode);
+    
+    
+  
+
     this.email = this.authService.getEmail();
     console.log("current email : "+this.email);
 
     this.mobile = this.authService.getMobile();
     console.log("current Mobile : "+this.mobile);
 
+    console.log(this.branchCode);
     if (this.currentLevel != 'NU') {
       this.any_user_div=false;
-
+      
+    }else if(this.currentLevel == 'NU'){
+      this.getName(employeeCode);
     }
-
-    
 
     this.loggedUserId = Number(this.authService.getId());
     // console.log("logged user id: "+this.loggedUserId);
@@ -184,9 +194,6 @@ export class IncidentComponent implements AfterViewInit {
 
 
 
-  
-  
-  
 
   onLevelChange(event: any) {
     // Access the selected value from the event
@@ -351,7 +358,8 @@ export class IncidentComponent implements AfterViewInit {
             // const emailEmpty = email ==null || email.trim() == '';
             const isBranchEmpty = branch == null || branch.trim() == '';
             const isRegionEmpty = region == null || region.trim() == '';
-            const isDepEmpty = dep == null || dep.trim() == '';
+            const isDepEmpty = dep == null || (typeof dep === 'string' && dep.trim() === '');
+
 
             console.log({ isBranchEmpty, isRegionEmpty, isDepEmpty });
 //              t             t                 f               t
@@ -447,23 +455,23 @@ export class IncidentComponent implements AfterViewInit {
             console.log(`${key}: ${value}`);
         });
 
-        this.incidentService.postIncidents(this.loggedUserId, formData).subscribe((response:any) => {
-          if(response['code'] == 200){             
-            this.loading = true;  
-            this.alertWithSuccess(); 
-            this.formValue.reset();
-            this.branch_div=false;
-            this.dep_div=false;
-            this.region_div=false;
-            this.selectedOption = null; 
-            $("#input-folder-3").fileinput('clear'); 
+        // this.incidentService.postIncidents(this.loggedUserId, formData).subscribe((response:any) => {
+        //   if(response['code'] == 200){             
+        //     this.loading = true;  
+        //     this.alertWithSuccess(); 
+        //     this.formValue.reset();
+        //     this.branch_div=false;
+        //     this.dep_div=false;
+        //     this.region_div=false;
+        //     this.selectedOption = null; 
+        //     $("#input-folder-3").fileinput('clear'); 
     
-          }else{         
-            this.loading = true;        
-            this.alertWithError(response['error']);      
-          }
-            },
-          );
+        //   }else{         
+        //     this.loading = true;        
+        //     this.alertWithError(response['error']);      
+        //   }
+        //     },
+        //   );
       }
     } else {
 
@@ -479,35 +487,7 @@ export class IncidentComponent implements AfterViewInit {
   }
 
 
-  alertWithSuccess() {
-    Swal.fire({
-      icon: 'success',
-      title: 'Success...',
-      text: 'Successfully Done',
-      confirmButtonColor: "#238df7",
-      showClass: {
-        popup: 'animate__animated animate__fadeInDown' 
-      },
-      hideClass: {
-        popup: 'animate__animated animate__fadeOutUp' 
-      }
-    });
-  } 
 
-  alertWithError(msg: any){
-    Swal.fire({
-      icon: 'error',
-      title: 'Error...',
-      text: msg,
-      confirmButtonColor: "#03c9d7",
-      showClass: {
-        popup: 'animate__animated animate__fadeInDown' 
-      },
-      hideClass: {
-        popup: 'animate__animated animate__fadeOutUp' 
-      }
-    });  
-  }
 
   getRiskCauses() {
     this.incidentService.getRiskCauses().subscribe((data: any) => {
@@ -586,7 +566,7 @@ export class IncidentComponent implements AfterViewInit {
       this.regions = data.regions;
       this.departments = data.departmentList;
       this.user_types = data.usertypeList;             
-      console.log(this.departments);
+      console.log(this.branches);
       this.filterDepartments();
 
       // console.log(this.branches);
@@ -632,6 +612,125 @@ export class IncidentComponent implements AfterViewInit {
     this.formValue.reset();
     // this.router.navigate(['/login']);
   }
+
+
+
+  alertWithSuccess() {
+    Swal.fire({
+      icon: 'success',
+      title: 'Success...',
+      text: 'Successfully Done',
+      confirmButtonColor: "#238df7",
+      showClass: {
+        popup: 'animate__animated animate__fadeInDown' 
+      },
+      hideClass: {
+        popup: 'animate__animated animate__fadeOutUp' 
+      }
+    });
+  } 
+
+  alertWithError(msg: any){
+    Swal.fire({
+      icon: 'error',
+      title: 'Error...',
+      text: msg,
+      confirmButtonColor: "#03c9d7",
+      showClass: {
+        popup: 'animate__animated animate__fadeInDown' 
+      },
+      hideClass: {
+        popup: 'animate__animated animate__fadeOutUp' 
+      }
+    });  
+  }
+
+
+
+
+
+   getName(event: any) {
+
+    const value = event; 
+    console.log("Entered value:", value);
+    this.branchCode;
+   
+
+    if(value != '' || value !=0 || value !=1){
+         // Call your service to get the data
+    this.incidentService.getName(value).subscribe(
+      (data: any) => {
+        this.userData = data.hr; 
+        console.log("Received", this.userData);
+        if (this.userData && this.userData) {
+          try {
+            const parsedResponse = JSON.parse(this.userData);  
+            this.branchCode = parsedResponse.data ? parsedResponse.data.emp_branch_code : null;  
+            this.email = parsedResponse.data ? parsedResponse.data.emp_email : null;  
+            this.mobile = parsedResponse.data ? parsedResponse.data.emp_mob1 : null;  
+            console.log("branchCode:",this.branchCode);  
+            if (this.branchCode) {
+
+                if(this.branchCode == 123){
+                  this.any_user_div=false;
+                const DBCode = this.departments.find((item: any) => item.hrCode == this.branchCode);
+                console.log(DBCode?.departmentId);
+                this.formValue.get("level").setValue("DEPARTMENT");
+                this.selectedLevel='DEPARTMENT';
+                this.formValue.get("dep").setValue(DBCode?.departmentId);
+                this.created_level='DS'
+                }else if(this.branchCode != 123){
+              
+                // Filter out the department you want to hide
+                    this.filteredDepartments = this.departments.filter(department => department.description !== 'N/A' && department.description !== 'IT Division');
+                  
+
+                }
+
+              // if(branchCode > 95){
+              //   const DBCode = this.departments.find((item: any) => item.hrCode == branchCode);
+              //   console.log(DBCode?.departmentId);
+              //   this.formValue.get("level").setValue("DEPARTMENT");
+              //   this.selectedLevel='DEPARTMENT';
+              //   this.formValue.get("dep").setValue(DBCode?.departmentId);
+              //   this.created_level='DS'
+
+              // }else if(branchCode <= 95){
+              //   const DBCode = this.branches.find((item: any) => item.hrCode == branchCode);
+              //   console.log(DBCode?.branchId);
+              //   this.formValue.get("level").setValue("BRANCH");
+              //   this.selectedLevel='BRANCH';
+              //   this.formValue.get("branch").setValue(DBCode?.branchId);
+              //   this.formValue.get("dep").setValue(0);
+              //   this.created_level='BS'
+              // }
+
+            } else { 
+
+              console.log("branchCode not found in the response.");
+            }
+        
+          } catch (error) {
+            console.log("Error parsing the response JSON:", error);
+          }
+        } else {
+   
+          console.log("Response or data not available.");
+        }
+      },
+      (error: any) => {
+        console.error("Error occurred", error);
+      }
+    );
+
+    }if(value == ''){
+      console.log("inside else");
+     
+    }
+  
+ 
+  }
+
 
 
 
