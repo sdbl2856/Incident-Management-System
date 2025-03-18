@@ -12,6 +12,10 @@ import * as XLSX from 'xlsx';
 import { TrackService } from '../track/track.service';
 import Swal from 'sweetalert2';
 import { ViewEncapsulation } from '@angular/core';
+import { UserService } from '../user/user.service';
+import { MatTableDataSource } from '@angular/material/table';
+import { MatPaginator } from '@angular/material/paginator';
+import { MatSort } from '@angular/material/sort';
 declare var $: any; // Import jQuery globally
 
 @Component({
@@ -22,19 +26,7 @@ declare var $: any; // Import jQuery globally
 })
 export class RevertIncidentComponent implements AfterViewInit{
 
-  ngAfterViewInit(): void {
 
-      $("#input-folder-3").fileinput({
-        theme: 'fas',
-        browseLabel: 'Select File...',
-        showUpload: false,
-        showRemove: true,
-        allowedFileExtensions: ['jpg', 'png', 'pdf', 'docx'],
-        previewFileType: 'any',
-        hideThumbnailContent: true
-      });
-  
-  }
 
   @ViewChild('nav1', { static: true }) nav1: NgbNav;
   searchQuery: string = '';
@@ -55,7 +47,7 @@ export class RevertIncidentComponent implements AfterViewInit{
   totalItems:number=0;
   row:any;
   selectedIncidentId: any;
-  commentList: any[];
+  // commentList: any[];
   loading = true;
   docList: any[];
    // New properties for pagination
@@ -67,10 +59,19 @@ export class RevertIncidentComponent implements AfterViewInit{
    currentPageComment: number = 1;
    itemsPerPageComment: number = 5; 
    displayedCommentList: any[] = [];
-   displayedColumns: string[] = ['description', 'commentedDate', 'added_level', 'addedUser'];
 
 
 
+   created_level: any;
+   branch_div: boolean = false;
+   region_div: boolean = false;
+   selectedLevel: string = '';
+   any_user_div=true;
+   branches: any[];
+   regions: any[];
+  dep_div: boolean = false;
+  departments: any[] = []; // Initialize as an empty array
+  filteredDepartments: any[] = []; // Initialize as an empty array
   // Sorting properties
   // sortBy: string = ''; // Initialize with an empty string
   // sortDirection: string = 'asc'; // Default sorting direction
@@ -101,7 +102,8 @@ export class RevertIncidentComponent implements AfterViewInit{
     private datePipe: DatePipe,
     private incidentService: IncidentService,
     private riskDepartmentService :RiskDepartmentService,
-    private trackService:TrackService
+    private trackService:TrackService,
+    private userService:UserService
   ) {
     this.formValue = this.formBuilder.group({
    
@@ -132,26 +134,37 @@ export class RevertIncidentComponent implements AfterViewInit{
       recoverd_amount: ['0'],
       account_number: ['123456'],
       uploadedFiles: [''],
+      level:[''],
+      branch:[''],
+      region:[''],
+      dep:['']
     });
   
   }
 
+    displayedColumns: string[] = ['description', 'commentedDate', 'added_level', 'addedUser'];
+    dataSource = new MatTableDataSource<Comment>([]);
+    commentList: Comment[] = [];
+  
+    @ViewChild(MatPaginator) paginator: MatPaginator;
+    @ViewChild(MatSort) sort: MatSort;
+  
 
   ngOnInit() {
-    console.log("start ");
 
+    // console.log("start ");
 
-      $("#input-folder-3").fileinput({
-        theme: 'fas',
-        browseLabel: 'Select File...',
-        showUpload: false,
-        showRemove: true,
-        allowedFileExtensions: ['jpg', 'png', 'pdf', 'docx'],
-        previewFileType: 'any',
-        hideThumbnailContent: true
-      });
+    //   $("#input-folder-3").fileinput({
+    //     theme: 'fas',
+    //     browseLabel: 'Select File...',
+    //     showUpload: false,
+    //     showRemove: true,
+    //     allowedFileExtensions: ['jpg', 'png', 'pdf', 'docx'],
+    //     previewFileType: 'any',
+    //     hideThumbnailContent: true
+    //   });
   
-    console.log("finish ");
+    // console.log("finish ");
 
     this.userId = this.authService.getId();
     console.log(this.userId);
@@ -169,9 +182,92 @@ export class RevertIncidentComponent implements AfterViewInit{
 
   
     this.updateIncidentCount();
-   
+    this.getBranches();
     // console.log('Incidents count from ngOnInit: ' + this.incidentCount);
   }
+
+
+   ngAfterViewInit() {
+
+    this.dataSource.paginator = this.paginator;
+    this.dataSource.sort = this.sort;
+
+    $("#input-folder-3").fileinput({
+      theme: 'fas',
+      browseLabel: 'Select File...',
+      showUpload: false,
+      showRemove: true,
+      allowedFileExtensions: ['jpg', 'png', 'pdf', 'docx'],
+      previewFileType: 'any',
+      hideThumbnailContent: true
+    });
+
+  }
+
+  getBranches() {
+    this.userService.getBranches().subscribe((data: any) => {
+      // console.log(data);
+      this.branches = data.branchList;
+      this.regions = data.regions;
+      this.departments = data.departmentList;
+      // this.user_types = data.usertypeList;             
+      console.log(this.branches);
+      this.filterDepartments();
+
+      // console.log(this.branches);
+      // console.log(this.regions);
+      // console.log(this.user_types);
+    });
+  }
+  
+  filterDepartments() {
+    // Filter out the department you want to hide
+    this.filteredDepartments = this.departments.filter(department => department.description !== 'N/A');
+ }
+
+  onLevelChange(event: any) {
+    // Access the selected value from the event
+    const selectedValue = event.target.value;
+    this.formValue.value.dep='';
+    this.formValue.value.region='';
+    this.formValue.value.branch='';
+    // Log the selected value
+    console.log('Level changed:', selectedValue);
+
+    // Assign the selected value to the selectedLevel variable
+    this.selectedLevel = selectedValue;
+    this.branch_div = this.selectedLevel === 'BRANCH';
+    this.region_div = this.selectedLevel === 'REGION';
+    this.dep_div = this.selectedLevel === 'DEPARTMENT';
+
+    if(this.selectedLevel === 'BRANCH'){
+      this.formValue.patchValue({
+        region: '',  // Reset region
+        dep: ''      // Reset department
+    });
+      this.created_level='BS'
+      
+
+    } if(this.selectedLevel === 'REGION'){
+      this.formValue.patchValue({
+        branch: '',  // Reset branch
+        dep: ''      // Reset department
+    });
+      this.created_level='RS'
+    } else if (this.selectedLevel === 'DEPARTMENT') {
+      this.formValue.patchValue({
+        branch: '',  // Reset branch
+        region: ''   // Reset region
+    });
+      this.dep_div = true;
+      // this.currentLevel = 'DS'; 
+      this.created_level = 'DS';
+    }
+
+
+  }
+
+
 
   viewFile(event: Event) {
     console.log("Inside viewFile method", event);
@@ -207,13 +303,18 @@ export class RevertIncidentComponent implements AfterViewInit{
                   if (incident.incidentId == this.selectedIncidentId) {
                     this.commentList.push(comment);
                     console.log(this.commentList);
+                    this.dataSource.data = this.commentList;
                   }
                 });
               }
             });
   
-            this.currentPageComment = 1;
-            this.updateDisplayedCommentData();
+            setTimeout(() => {
+              if (this.paginator && this.sort) {
+                this.dataSource.paginator = this.paginator;
+                this.dataSource.sort = this.sort;
+              }
+            });
   
           }
           this.incidents = data.incidentDtoList;
@@ -236,11 +337,10 @@ export class RevertIncidentComponent implements AfterViewInit{
 
   getPosts2() {
 
-    const incidentData = {    
+    const incidentData = {
       status:'RE',
       userId:this.userId,
       employeeCode:this.empCode
-     
     };
 
     console.log(incidentData);
@@ -258,13 +358,19 @@ export class RevertIncidentComponent implements AfterViewInit{
                 if (incident.incidentId == this.selectedIncidentId) {
                   this.commentList.push(comment);
                   console.log(this.commentList);
+                  this.dataSource.data = this.commentList;
                 }
               });
             }
           });
-          
-          this.currentPageComment = 1;
-          this.updateDisplayedCommentData();
+
+          setTimeout(() => {
+            if (this.paginator && this.sort) {
+              this.dataSource.paginator = this.paginator;
+              this.dataSource.sort = this.sort;
+            }
+          });
+    
         }
   
         this.incidents = data.incidentDtoList;
@@ -408,6 +514,7 @@ export class RevertIncidentComponent implements AfterViewInit{
   onEdit(row: any) {
   
     console.log(row);
+ 
   if (row.documents && Array.isArray(row.documents)) {
     this.docList = row.documents;
   } else {
@@ -474,6 +581,19 @@ export class RevertIncidentComponent implements AfterViewInit{
     this.formValue.controls['recovery_action'].setValue(row.recovery_action);
 
 
+  
+    this.formValue.controls['branch'].setValue(row?.branch?.branchId);
+    this.formValue.controls['region'].setValue(row?.region?.regionId);
+    this.formValue.controls['dep'].setValue(row?.department?.departmentId);
+
+    if(row?.department.departmentId !=0 || row?.department.departmentId != null){
+      this.formValue.controls['level'].setValue('DEPARTMENT');
+      this.dep_div=true;
+
+    }else{
+      this.formValue.controls['level'].setValue('BRANCH');
+      this.branch_div=true;
+    }
 
     this.formValue.controls['oc_date'].setValue(
       this.datePipe.transform(row.occurence_date, 'yyyy-MM-dd'),
@@ -618,7 +738,10 @@ export class RevertIncidentComponent implements AfterViewInit{
           const recovery_action = this.formValue.value.recovery_action;
           const recoverd_amount = this.formValue.value.recoverd_amount;
           const account_number = this.formValue.value.account_number;
-
+          const dep =   this.formValue.value.dep
+          const branch =   this.formValue.value.branch
+          const region =   this.formValue.value.region
+          const level =this.formValue.value.level
           // risk part
          
           const comment = this.formValue.value.comment;
@@ -654,7 +777,9 @@ export class RevertIncidentComponent implements AfterViewInit{
             recovery_action:recovery_action,
             recoverd_amount:recoverd_amount,
             account_number:account_number,
-
+            depId:dep,
+            branchId :branch,
+            regionId:region,
 // risk part
             description: comment,
             commentedBy:userId,
@@ -669,7 +794,7 @@ export class RevertIncidentComponent implements AfterViewInit{
             actual_amount:actual_amount,
             potential_amount:potential_amount,
             riskDepStatusId:risk_dep_status,
-            // next_level:this.next_level,
+            level:level,
     
           };
 
@@ -753,7 +878,7 @@ export class RevertIncidentComponent implements AfterViewInit{
            return;
          }
 
-         console.log('inside risk send -back');
+         console.log('inside rever ');
        
 
          this.formValue.get('description')?.enable();
@@ -1041,46 +1166,46 @@ getPageArray(): number[] {
 // pagination close here 
 
 //  methods to your component class for comment pagination
-prevCommentPage() {
-  if (this.currentPageComment > 1) {
-    this.currentPageComment--;
-    this.updateDisplayedCommentData();
-    console.log('Previous Comment Page:', this.currentPageComment);
-  }
-}
+// prevCommentPage() {
+//   if (this.currentPageComment > 1) {
+//     this.currentPageComment--;
+//     this.updateDisplayedCommentData();
+//     console.log('Previous Comment Page:', this.currentPageComment);
+//   }
+// }
 
-nextCommentPage() {
-  const totalPages = Math.ceil(this.commentList.length / this.itemsPerPageComment);
-  if (this.currentPageComment < totalPages) {
-    this.currentPageComment++;
-    this.updateDisplayedCommentData();
-    console.log('Next Comment Page:', this.currentPageComment);
-  }
-}
+// nextCommentPage() {
+//   const totalPages = Math.ceil(this.commentList.length / this.itemsPerPageComment);
+//   if (this.currentPageComment < totalPages) {
+//     this.currentPageComment++;
+//     this.updateDisplayedCommentData();
+//     console.log('Next Comment Page:', this.currentPageComment);
+//   }
+// }
 
-goToCommentPage(page: number) {
-  this.currentPageComment = page;
-  this.updateDisplayedCommentData();
-}
+// goToCommentPage(page: number) {
+//   this.currentPageComment = page;
+//   this.updateDisplayedCommentData();
+// }
 
-updateDisplayedCommentData() {
-  if (this.commentList) {
-    const startIndex = (this.currentPageComment - 1) * this.itemsPerPageComment;
-    const endIndex = startIndex + this.itemsPerPageComment;
-    this.displayedCommentList = this.commentList.slice(startIndex, endIndex);
-  }
-}
+// updateDisplayedCommentData() {
+//   if (this.commentList) {
+//     const startIndex = (this.currentPageComment - 1) * this.itemsPerPageComment;
+//     const endIndex = startIndex + this.itemsPerPageComment;
+//     this.displayedCommentList = this.commentList.slice(startIndex, endIndex);
+//   }
+// }
 
-getCommentPageArray(): number[] {
-  if (this.commentList && this.commentList.length > 0) {
-    const totalPages = Math.ceil(this.commentList.length / this.itemsPerPageComment);
+// getCommentPageArray(): number[] {
+//   if (this.commentList && this.commentList.length > 0) {
+//     const totalPages = Math.ceil(this.commentList.length / this.itemsPerPageComment);
 
-    // Only show pages 1 and 2
-    return [1, 2].filter(page => page <= totalPages);
-  } else {
-    return [];
-  }
-}
+//     // Only show pages 1 and 2
+//     return [1, 2].filter(page => page <= totalPages);
+//   } else {
+//     return [];
+//   }
+// }
 
 
 

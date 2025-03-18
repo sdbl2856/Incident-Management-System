@@ -1,4 +1,4 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, ViewChild ,AfterViewInit} from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { CommentModel } from '../view-incident/comment-model';
 import { NgbNav } from '@ng-bootstrap/ng-bootstrap';
@@ -12,13 +12,12 @@ import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 import { TrackService } from './track.service';
 
-
-
 @Component({
   selector: 'app-track',
   templateUrl: './track.component.html',
   styleUrls: ['./track.component.scss']
 })
+
 export class TrackComponent {
   editorData: string = '';
   formValue: FormGroup;   
@@ -34,7 +33,7 @@ export class TrackComponent {
   not_filled=false;
   comment:any;
   selectedIncidentId:any;
-  commentList:any[];
+
   next_level:any;
   preLevel:any; 
   showSuccessMessage: boolean = false;
@@ -63,7 +62,6 @@ displayedCommentList: any[] = [];
 
   current_level : any ;
   
-
   constructor(private formBuilder: FormBuilder,private authService: AuthService,private reportService:ReportService,private _snackBar: MatSnackBar,  private userService: UserService,
     private trackService:TrackService,
   ) {
@@ -81,22 +79,30 @@ displayedCommentList: any[] = [];
 
   displayedColumns: string[] = ['description', 'commentedDate', 'added_level', 'addedUser'];
 
-  dataSource = new MatTableDataSource<Comment>([]); // Replace `Comment` with your data model
+  dataSource = new MatTableDataSource<Comment>([]);
+  commentList: Comment[] = [];
+
 
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
+
 
   
 
   ngOnInit(){
   
- 
     this.userId = this.authService.getId();
     this.empCode = this.authService.getempCode();
     this.getLevels();
     this.getPosts() ;
     console.log("user id : "+ this.userId);
     this.current_level = this.authService.getLevel();
+
+  }
+
+  ngAfterViewInit() {
+    this.dataSource.paginator = this.paginator;
+    this.dataSource.sort = this.sort;
   }
 
   getLevels() {
@@ -192,13 +198,12 @@ exportToExcel() {
 
   getPosts() {
 
-    const selectedSearchType = this.formValue.get('search_by').value;
-    const status = this.formValue.get('status').value;
-    const startDate = this.formValue.get('startDate').value;
-    const endDate = this.formValue.get('endDate').value;
+    const status = this.formValue.get('search_by').value || null;
+    const startDate = this.formValue.get('startDate').value || null;
+    const endDate = this.formValue.get('endDate').value || null;
 
     const incidentData = {    
-      status:selectedSearchType,
+      status:status,
       userId:this.userId,
       employeeCode:this.empCode,
       startDate:startDate,
@@ -220,13 +225,20 @@ exportToExcel() {
                 if (incident.incidentId == this.selectedIncidentId) {
                   this.commentList.push(comment);
                   console.log(this.commentList);
+                  this.dataSource.data = this.commentList;
+              
                 }
               });
             }
           });
           
-          this.currentPageComment = 1;
-          this.updateDisplayedCommentData();
+          setTimeout(() => {
+            if (this.paginator && this.sort) {
+              this.dataSource.paginator = this.paginator;
+              this.dataSource.sort = this.sort;
+            }
+          });
+
         }
   
         this.incidents = data.incidentDtoList;
@@ -371,50 +383,50 @@ exportToExcel() {
     }
   }
 
-// Methods for comment pagination
-prevCommentPage() {
-  if (this.currentPageComment > 1) {
-    this.currentPageComment--;
-    this.updateDisplayedCommentData();
-    console.log('Previous Comment Page:', this.currentPageComment);
-  }
-}
+// // Methods for comment pagination
+// prevCommentPage() {
+//   if (this.currentPageComment > 1) {
+//     this.currentPageComment--;
+//     this.updateDisplayedCommentData();
+//     console.log('Previous Comment Page:', this.currentPageComment);
+//   }
+// }
 
-nextCommentPage() {
-  const totalPages = Math.ceil(this.commentList.length / this.itemsPerPageComment);
-  if (this.currentPageComment < totalPages) {
-    this.currentPageComment++;
-    this.updateDisplayedCommentData();
-    console.log('Next Comment Page:', this.currentPageComment);
-  }
-}
+// nextCommentPage() {
+//   const totalPages = Math.ceil(this.commentList.length / this.itemsPerPageComment);
+//   if (this.currentPageComment < totalPages) {
+//     this.currentPageComment++;
+//     this.updateDisplayedCommentData();
+//     console.log('Next Comment Page:', this.currentPageComment);
+//   }
+// }
 
-goToCommentPage(page: number) {
-  this.currentPageComment = page;
-  this.updateDisplayedCommentData();
-}
+// goToCommentPage(page: number) {
+//   this.currentPageComment = page;
+//   this.updateDisplayedCommentData();
+// }
 
-updateDisplayedCommentData() {
-  if (this.commentList) {
-    const startIndex = (this.currentPageComment - 1) * this.itemsPerPageComment;
-    const endIndex = startIndex + this.itemsPerPageComment;
-    this.displayedCommentList = this.commentList.slice(startIndex, endIndex);
-  }
-}
+// updateDisplayedCommentData() {
+//   if (this.commentList) {
+//     const startIndex = (this.currentPageComment - 1) * this.itemsPerPageComment;
+//     const endIndex = startIndex + this.itemsPerPageComment;
+//     this.displayedCommentList = this.commentList.slice(startIndex, endIndex);
+//   }
+// }
 
-getCommentPageArray(): number[] {
-  if (this.commentList && this.commentList.length > 0) {
-    const totalPages = Math.ceil(this.commentList.length / this.itemsPerPageComment);
+// getCommentPageArray(): number[] {
+//   if (this.commentList && this.commentList.length > 0) {
+//     const totalPages = Math.ceil(this.commentList.length / this.itemsPerPageComment);
 
-    // Show only two pages around the current page
-    const startPage = Math.max(1, this.currentPageComment - 1);
-    const endPage = Math.min(totalPages, startPage + 1);
+//     // Show only two pages around the current page
+//     const startPage = Math.max(1, this.currentPageComment - 1);
+//     const endPage = Math.min(totalPages, startPage + 1);
 
-    // Generate an array with page numbers between startPage and endPage
-    return Array.from({ length: endPage - startPage + 1 }, (_, index) => startPage + index);
-  } else {
-    return [];
-  }
-}
+//     // Generate an array with page numbers between startPage and endPage
+//     return Array.from({ length: endPage - startPage + 1 }, (_, index) => startPage + index);
+//   } else {
+//     return [];
+//   }
+// }
 
 }

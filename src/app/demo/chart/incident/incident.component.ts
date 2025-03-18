@@ -372,7 +372,7 @@ export class IncidentComponent implements AfterViewInit {
                 return;
             }    
         }
-    }
+     }
     
      
       if (this.formValue.get('oc_date').hasError('futureDate') || this.formValue.get('detected_date').hasError('futureDate')) {
@@ -455,23 +455,23 @@ export class IncidentComponent implements AfterViewInit {
             console.log(`${key}: ${value}`);
         });
 
-        // this.incidentService.postIncidents(this.loggedUserId, formData).subscribe((response:any) => {
-        //   if(response['code'] == 200){             
-        //     this.loading = true;  
-        //     this.alertWithSuccess(); 
-        //     this.formValue.reset();
-        //     this.branch_div=false;
-        //     this.dep_div=false;
-        //     this.region_div=false;
-        //     this.selectedOption = null; 
-        //     $("#input-folder-3").fileinput('clear'); 
+        this.incidentService.postIncidents(this.loggedUserId, formData).subscribe((response:any) => {
+          if(response['code'] == 200){             
+            this.loading = true;  
+            this.alertWithSuccess(); 
+            this.formValue.reset();
+            this.branch_div=false;
+            this.dep_div=false;
+            this.region_div=false;
+            this.selectedOption = null; 
+            $("#input-folder-3").fileinput('clear'); 
     
-        //   }else{         
-        //     this.loading = true;        
-        //     this.alertWithError(response['error']);      
-        //   }
-        //     },
-        //   );
+          }else{         
+            this.loading = true;        
+            this.alertWithError(response['error']);      
+          }
+            },
+          );
       }
     } else {
 
@@ -682,9 +682,8 @@ export class IncidentComponent implements AfterViewInit {
                 }else if(this.branchCode != 123){
               
                 // Filter out the department you want to hide
-                    this.filteredDepartments = this.departments.filter(department => department.description !== 'N/A' && department.description !== 'IT Division');
+                  this.filteredDepartments = this.departments.filter(department => department.description !== 'N/A' && department.description !== 'IT Division');
                   
-
                 }
 
               // if(branchCode > 95){

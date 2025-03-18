@@ -1,9 +1,63 @@
+<!-- <div class="container"> -->
+  <div class="row justify-content-center">
+    <form [formGroup]="formValue" class="row g-3 align-items-end">
+ 
+      <div class="col-md-3">
+        <label for="normalStartDate" class="form-label">From:</label>
+        <input
+          type="date"
+          id="normalStartDate"
+          name="normalStartDate"
+          formControlName="startDate"
+          class="form-control"
+        />
+      </div>
 
+
+      <div class="col-md-3">
+        <label for="totDate" class="form-label">To:</label>
+        <input
+          type="date"
+          id="totDate"
+          name="totDate"
+          formControlName="endDate"
+          class="form-control"
+        />
+      </div>
+
+ 
+      <div class="col-md-3">
+        <label for="search_by" class="form-label">Status</label>
+        <select
+          id="search_by"
+          formControlName="search_by"
+          class="form-select"
+          required
+      
+        >
+          <option selected></option>
+          <option value="CO">COMPLETED</option>
+          <option value="DE">DECLINED</option>
+          <option value="PE">PENDING</option>
+          <option value="RE">REVERTED</option>
+        </select>
+      </div>
+
+ 
+      <div class="col-md-3 d-flex justify-content-center">
+        <button type="button" class="btn btn-primary w-100" (click)="getPosts()">Search</button>
+      </div>
+    </form>
+  </div>
+<!-- </div> -->
 
 <div class="col-sm-12">
   <div class="card-body">
 
     <ul class="nav nav-pills mb-3" ngbNav #nav1="ngbNav">
+
+
+
     
       <li class="nav-item" [ngbNavItem]="1">
    
@@ -14,6 +68,8 @@
               [options]="false"
               blockClass="table-border-style"
             >
+
+
 
             <div *ngIf="totalItems === 0" class="no-data-message">
               <p>No data to display.</p>
@@ -116,9 +172,10 @@
           </div>
         </ng-template>
       </li>
-      <li class="nav-item" [ngbNavItem]="2" >
-  
+
+
       
+      <li class="nav-item" [ngbNavItem]="2" >
         <ng-template ngbNavContent>
           <!-- table for view data-->
           <div class="form-view" *ngIf="showform">
@@ -464,7 +521,7 @@
                       <!-- Pagination -->
                       <mat-paginator [pageSize]="5" [pageSizeOptions]="[5, 10, 25]" aria-label="Select page"></mat-paginator>
                  
-            
+
                 </div>
               </div>
             </app-card>
@@ -474,60 +531,7 @@
         </ng-template>
       </li>
       
-      <!-- <div class="container">
-        <div class="row justify-content-center">
-          <form [formGroup]="formValue" class="row g-3 align-items-end">
-       
-            <div class="col-md-3">
-              <label for="normalStartDate" class="form-label">From:</label>
-              <input
-                type="date"
-                id="normalStartDate"
-                name="normalStartDate"
-                formControlName="startDate"
-                class="form-control"
-              />
-            </div>
-      
- 
-            <div class="col-md-3">
-              <label for="totDate" class="form-label">To:</label>
-              <input
-                type="date"
-                id="totDate"
-                name="totDate"
-                formControlName="endDate"
-                class="form-control"
-              />
-            </div>
-      
-       
-            <div class="col-md-3">
-              <label for="search_by" class="form-label">Status</label>
-              <select
-                id="search_by"
-                formControlName="search_by"
-                class="form-select"
-                required
-                (change)="getPosts()"
-              >
-                <option value="CO">COMPLETED</option>
-                <option value="DE">DECLINED</option>
-                <option value="PE">PENDING</option>
-                <option value="RE">REVERTED</option>
-              </select>
-            </div>
-      
-       
-            <div class="col-md-3 d-flex justify-content-center">
-              <button type="button" class="btn btn-primary w-100" (click)="getPosts()">Search</button>
-            </div>
-          </form>
-        </div>
-      </div> -->
-      
-      
-      
+  
     </ul>
     
     <div [ngbNavOutlet]="nav1" class="mt-2"></div>

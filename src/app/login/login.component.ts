@@ -96,6 +96,8 @@ onSubmit() {
         }else if(response.user.userT.type=="AU"){
           this.router.navigate(['/admin/report']);
 
+        }else if(response.user.userT.type=="NU"){
+          this.router.navigate(['/admin/incident']);
         }
 
       } else  if (response.code == 201){

@@ -9,7 +9,8 @@ import * as XLSX from 'xlsx';
 import { MatTableDataSource } from '@angular/material/table';
 import Swal from 'sweetalert2';
 import { UserService } from '../user/user.service';
-
+import { MatPaginator } from '@angular/material/paginator';
+import { MatSort } from '@angular/material/sort';
 
 @Component({
   selector: 'app-risk-department',
@@ -24,7 +25,7 @@ export class RiskDepartmentComponent {
   searchQuery: string = '';
   row:any;
   userId:any;
-  commentList:any[];
+  // commentList:any[];
   incidents:any[];
   selectedIncidentId:any;
   currentLevel:any;
@@ -96,10 +97,15 @@ export class RiskDepartmentComponent {
    
   }
 
-   displayedColumns: string[] = ['description', 'commentedDate', 'added_level', 'addedUser'];
-  
-    dataSource = new MatTableDataSource<Comment>([]); // Replace `Comment` with your data model
-  ngOnInit(){
+  displayedColumns: string[] = ['description', 'commentedDate', 'added_level', 'addedUser'];
+  dataSource = new MatTableDataSource<Comment>([]);
+  commentList: Comment[] = [];
+
+  @ViewChild(MatPaginator) paginator: MatPaginator;
+  @ViewChild(MatSort) sort: MatSort;
+
+
+    ngOnInit(){
 
     this.userId = this.authService.getId();
     this.currentLevel = this.authService.getLevel();
@@ -154,7 +160,10 @@ export class RiskDepartmentComponent {
   }
 
 
- 
+  ngAfterViewInit() {
+    this.dataSource.paginator = this.paginator;
+    this.dataSource.sort = this.sort;
+  }
   
 
   filterDepartments() {
@@ -247,13 +256,19 @@ export class RiskDepartmentComponent {
                   if (incident.incidentId == this.selectedIncidentId) {
                     this.commentList.push(comment);
                     console.log(this.commentList);
+                    this.dataSource.data = this.commentList;
                   }
                 });
               }
             });
-  
-            this.currentPageComment = 1;
-            this.updateDisplayedCommentData();
+
+              setTimeout(() => {
+                if (this.paginator && this.sort) {
+                  this.dataSource.paginator = this.paginator;
+                  this.dataSource.sort = this.sort;
+                }
+              });
+            
           }
           this.loading=false;
           this.incidents = data.incidentDtoList;
@@ -889,46 +904,46 @@ if(comment == null || !comment){
   // pagination close here 
 
 // Methods for comment pagination
-prevCommentPage() {
-  if (this.currentPageComment > 1) {
-    this.currentPageComment--;
-    this.updateDisplayedCommentData();
-    console.log('Previous Comment Page:', this.currentPageComment);
-  }
-}
+// prevCommentPage() {
+//   if (this.currentPageComment > 1) {
+//     this.currentPageComment--;
+//     this.updateDisplayedCommentData();
+//     console.log('Previous Comment Page:', this.currentPageComment);
+//   }
+// }
 
-nextCommentPage() {
-  const totalPages = Math.ceil(this.commentList.length / this.itemsPerPageComment);
-  if (this.currentPageComment < totalPages) {
-    this.currentPageComment++;
-    this.updateDisplayedCommentData();
-    console.log('Next Comment Page:', this.currentPageComment);
-  }
-}
+// nextCommentPage() {
+//   const totalPages = Math.ceil(this.commentList.length / this.itemsPerPageComment);
+//   if (this.currentPageComment < totalPages) {
+//     this.currentPageComment++;
+//     this.updateDisplayedCommentData();
+//     console.log('Next Comment Page:', this.currentPageComment);
+//   }
+// }
 
-goToCommentPage(page: number) {
-  this.currentPageComment = page;
-  this.updateDisplayedCommentData();
-}
+// goToCommentPage(page: number) {
+//   this.currentPageComment = page;
+//   this.updateDisplayedCommentData();
+// }
 
-updateDisplayedCommentData() {
-  if (this.commentList) {
-    const startIndex = (this.currentPageComment - 1) * this.itemsPerPageComment;
-    const endIndex = startIndex + this.itemsPerPageComment;
-    this.displayedCommentList = this.commentList.slice(startIndex, endIndex);
-  }
-}
+// updateDisplayedCommentData() {
+//   if (this.commentList) {
+//     const startIndex = (this.currentPageComment - 1) * this.itemsPerPageComment;
+//     const endIndex = startIndex + this.itemsPerPageComment;
+//     this.displayedCommentList = this.commentList.slice(startIndex, endIndex);
+//   }
+// }
 
-getCommentPageArray(): number[] {
-  if (this.commentList && this.commentList.length > 0) {
-    const totalPages = Math.ceil(this.commentList.length / this.itemsPerPageComment);
+// getCommentPageArray(): number[] {
+//   if (this.commentList && this.commentList.length > 0) {
+//     const totalPages = Math.ceil(this.commentList.length / this.itemsPerPageComment);
 
-    // Generate an array with page numbers up to totalPages
-    return Array.from({ length: totalPages }, (_, index) => index + 1);
-  } else {
-    return [];
-  }
-}
+//     // Generate an array with page numbers up to totalPages
+//     return Array.from({ length: totalPages }, (_, index) => index + 1);
+//   } else {
+//     return [];
+//   }
+// }
 
 
 
