@@ -48,20 +48,20 @@ export class RevertIncidentComponent implements AfterViewInit{
   row:any;
   selectedIncidentId: any;
   // commentList: any[];
-  loading = true;
+  loading: boolean = true;
   docList: any[];
    // New properties for pagination
-   currentPage: number = 1;
-   itemsPerPage: number = 5; 
+  //  currentPage: number = 1;
+  //  itemsPerPage: number = 5; 
    displayedIncidentList: any[] = [];
 
    uploadedFiles: File[] = []; 
    currentPageComment: number = 1;
    itemsPerPageComment: number = 5; 
    displayedCommentList: any[] = [];
+   selectedDepartmentId: any = null;
 
-
-
+   filteredDepartment: any[] = []; // Initialize as an empty array
    created_level: any;
    branch_div: boolean = false;
    region_div: boolean = false;
@@ -78,6 +78,7 @@ export class RevertIncidentComponent implements AfterViewInit{
   // pagedIncidents: any[] = [];
   // maxPage: number;
 
+  justification=false;
   specificSubCategory = [];
   specificSubTypes= [];
 
@@ -95,6 +96,13 @@ export class RevertIncidentComponent implements AfterViewInit{
   emtyMessage: string;
   incidentCount:number=0;
   empCode:any;
+  baseUrl:any;
+
+  paginatedIncidentList: any[] = [];
+  currentPage: number = 1;
+  itemsPerPage: number = 5;
+  totalPages: number = 0;
+
   constructor(
     private revertIncidentService: RevertIncidentService,
     private formBuilder: FormBuilder,
@@ -127,8 +135,8 @@ export class RevertIncidentComponent implements AfterViewInit{
       consequence: [''],
       risk_level: ['0'],
       root_cause: ['null'],
-      potential_amount: [''],
-      actual_amount: [''],
+      potential_amount: ['0'],
+      actual_amount: ['0'],
       comment: [''],
       recovery_action: ['null'],
       recoverd_amount: ['0'],
@@ -149,6 +157,25 @@ export class RevertIncidentComponent implements AfterViewInit{
     @ViewChild(MatPaginator) paginator: MatPaginator;
     @ViewChild(MatSort) sort: MatSort;
   
+    @ViewChild(MatPaginator) set matPaginator(paginator: MatPaginator) {
+      this.dataSource.paginator = paginator;
+     }
+
+
+  setDataSourceAttributes() {
+    this.dataSource.paginator = this.paginator;
+    this.dataSource.sort = this.sort;
+
+    if (this.paginator && this.sort) {
+      this.applyFilter('');
+    }
+  }
+
+  applyFilter(filterValue: string) {
+    filterValue = filterValue.trim(); // Remove whitespace
+    filterValue = filterValue.toLowerCase(); // Datasource defaults to lowercase matches
+    this.dataSource.filter = filterValue;
+}
 
   ngOnInit() {
 
@@ -170,22 +197,46 @@ export class RevertIncidentComponent implements AfterViewInit{
     console.log(this.userId);
     this.empCode = this.authService.getempCode();
     this.currentLevel = this.authService.getLevel();
+    this.baseUrl=this.authService.getResourceUrl();
     this.getRiskCauses();
 
-    if(this.userId == null){
-      console.log(" normal user  ");
+    // if(this.userId == null){
+    //   console.log(" normal user  ");
       this.getPosts2();     
-    }else if (this.userId != null){
-      console.log("db user ");
-      this.getPosts(this.userId,'RE');  
-    }
+    // }else if (this.userId != null){
+    //   console.log("db user ");
+    //   this.getPosts(this.userId,'RE');  
+    // }
 
   
     this.updateIncidentCount();
     this.getBranches();
     // console.log('Incidents count from ngOnInit: ' + this.incidentCount);
+
+    this.incidents = this.incidents || []; // Example function to fetch data
+    this.totalPages = Math.ceil(this.incidents.length / this.itemsPerPage);
+    this.updatePaginatedList();
   }
 
+  updatePaginatedList() {
+    if (!this.incidents || this.incidents.length === 0) {
+      this.paginatedIncidentList = [];
+      return;
+    }
+  
+    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+    const endIndex = startIndex + this.itemsPerPage;
+  
+    // Sort incidents in descending order by `incidentId`
+    this.paginatedIncidentList = this.incidents
+      .sort((a, b) => Number(b.incidentId) - Number(a.incidentId)) // Ensure `incidentId` is a number
+      .slice(startIndex, endIndex);
+  }
+
+  changePage(page: number) {
+    this.currentPage = page;
+    this.updatePaginatedList();
+  }
 
    ngAfterViewInit() {
 
@@ -197,13 +248,64 @@ export class RevertIncidentComponent implements AfterViewInit{
       browseLabel: 'Select File...',
       showUpload: false,
       showRemove: true,
-      allowedFileExtensions: ['jpg', 'png', 'pdf', 'docx'],
+      allowedFileExtensions: ['jpg', 'png', 'pdf', 'jpeg'],
       previewFileType: 'any',
       hideThumbnailContent: true
     });
 
   }
 
+
+  updateDisplayedData() {
+    if (this.incidents) {
+      const filteredIncidents = this.incidents.filter(incident =>
+        incident.incident_ref.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+        incident.incidentId.toString().toLowerCase().includes(this.searchQuery.toLowerCase())
+      );
+  
+      this.totalPages = Math.ceil(filteredIncidents.length / this.itemsPerPage);
+  
+      const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+      const endIndex = startIndex + this.itemsPerPage;
+  
+      this.paginatedIncidentList = filteredIncidents.slice(startIndex, endIndex);
+    }
+  }
+
+
+     // pagination start here
+    prevPage() {
+      if (this.currentPage > 1) {
+        this.currentPage--;
+        this.updateDisplayedData();
+      }
+    }
+  
+    nextPage() {
+      if (this.currentPage < this.totalPages) {
+        this.currentPage++;
+        this.updateDisplayedData();
+      }
+    }
+  
+    goToPage(page: number) {
+      if (page >= 1 && page <= this.totalPages) {
+        this.currentPage = page;
+        this.updateDisplayedData();
+      }
+    }
+
+
+
+  getPageArray(): number[] {
+    if (this.incidents && this.incidents.length > 0) {
+      const totalPages = Math.ceil(this.incidents.length / this.itemsPerPage);
+      return Array.from({ length: totalPages }, (_, index) => index + 1);
+    } else {
+      return [];
+    }
+  }
+  
   getBranches() {
     this.userService.getBranches().subscribe((data: any) => {
       // console.log(data);
@@ -211,19 +313,15 @@ export class RevertIncidentComponent implements AfterViewInit{
       this.regions = data.regions;
       this.departments = data.departmentList;
       // this.user_types = data.usertypeList;             
-      console.log(this.branches);
       this.filterDepartments();
-
-      // console.log(this.branches);
-      // console.log(this.regions);
-      // console.log(this.user_types);
     });
   }
   
   filterDepartments() {
     // Filter out the department you want to hide
     this.filteredDepartments = this.departments.filter(department => department.description !== 'N/A');
- }
+    console.log(this.filteredDepartments);
+  }
 
   onLevelChange(event: any) {
     // Access the selected value from the event
@@ -270,96 +368,105 @@ export class RevertIncidentComponent implements AfterViewInit{
 
 
   viewFile(event: Event) {
+    
     console.log("Inside viewFile method", event);
-  
+
     const target = event.target as HTMLSelectElement;
     const docPath = target.value;
-  
+
     if (docPath !== "se") {
-      let basePath = "http://localhost/"
-      console.log("Original docPath:", docPath);
-      let formattedPath = docPath.replace(/^[/\\]+/, "").replace(/\\/g, "/"); 
-      let fullPath = `${basePath}${formattedPath}`;
-  
-      console.log("Opening file at:", fullPath);
-      window.open(fullPath, "_blank");
+        let basePath = this.baseUrl;  // Assuming this.baseUrl is 'http://10.100.57.133:84'
+        console.log("Original docPath:", docPath);
+
+        // Strip off the local drive letter and convert backslashes to forward slashes
+        let formattedPath = docPath.replace(/^E:[/\\]+/, "").replace(/\\/g, "/");
+
+        // Construct the full URL path correctly, ensuring no redundant 'docs' part
+        let fullPath = `${basePath}${formattedPath}`;
+        console.log("Opening file at:", fullPath);
+        window.open(fullPath, "_blank");
     }
-  }
+}
   
-  getPosts(userId: any, selectedStatus: string) {
-    if (this.userId) {
-      console.log('Selected Incident ID:', this.selectedIncidentId);
-      // Include the selectedStatus parameter in the service call
-      this.riskDepartmentService.getPosts(this.userId, "RE")
-        .subscribe((data: any) => {
-          console.log('Service Response:', data);
-          if (data.code === 200) {
-            this.commentList = [];
-            this.loading = false;
-            data.incidentDtoList.forEach((incident) => {
-              if (incident.comments) {
-                incident.comments.forEach((comment) => {
-                  // Only push comments for the selected incident
-                  if (incident.incidentId == this.selectedIncidentId) {
-                    this.commentList.push(comment);
-                    console.log(this.commentList);
-                    this.dataSource.data = this.commentList;
-                  }
-                });
-              }
-            });
-  
-            setTimeout(() => {
-              if (this.paginator && this.sort) {
-                this.dataSource.paginator = this.paginator;
-                this.dataSource.sort = this.sort;
-              }
-            });
-  
-          }
-          this.incidents = data.incidentDtoList;
-          this.incidentCount = this.incidents.length;
-          this.totalItems = this.incidents?.length;
-          console.log(' this.totalItems :',   this.totalItems );
-          console.log('Incidents:', this.incidents);
-          console.log('Comments:', this.commentList);
-          this.updateDisplayedData();
-          this.authService.setIncidentCount(this.incidentCount);
-        });
-    } else {
-      console.log('userId is undefined');
-    }
+  // getPosts(userId: any, selectedStatus: string) {
+
+  //   console.log("inside getPosts 1");
+  //   if (this.userId) {
     
-  }
+  //     let data={
+  //       userId:this.userId,
+  //       status:'RE'
+  //     }
+  //     // Include the selectedStatus parameter in the service call
+  //     this.riskDepartmentService.getPosts(data)
+  //       .subscribe((data: any) => {
+  //         console.log('Service Response:', data);
+  //         if (data.code === 200) {
+  //           this.commentList = [];
+  //           this.loading = false;
+  //           data.incidentDtoList.forEach((incident) => {
+  //             if (incident.comments) {
+  //               incident.comments.forEach((comment) => {
+  //                 // Only push comments for the selected incident
+  //                 if (incident.incidentId == this.selectedIncidentId) {
+  //                   this.commentList.push(comment);
+  //                   console.log(this.commentList);
+  //                   this.dataSource.data = this.commentList;
+  //                 }
+  //               });
+  //             }
+  //           });
+  
+  //           setTimeout(() => {
+  //             if (this.paginator && this.sort) {
+  //               this.dataSource.paginator = this.paginator;
+  //               this.dataSource.sort = this.sort;
+  //             }
+  //           });
+  
+  //         }
+  //         this.incidents = data.incidentDtoList;
+  //         this.incidentCount = this.incidents.length;
+  //         this.totalItems = this.incidents?.length;
+  //         console.log(' this.totalItems :',   this.totalItems );
+  //         console.log('Incidents:', this.incidents);
+  //         console.log('Comments:', this.commentList);
+  //         this.updateDisplayedData();
+  //         this.authService.setIncidentCount(this.incidentCount);
+  //       });
+  //   } else {
+  //     console.log('userId is undefined');
+  //   }
+    
+  // }
   
 
 
 
   getPosts2() {
-
-    const incidentData = {
+    this.loading = true; 
+    console.log("inside getPosts 2");
+    const data = {
       status:'RE',
       userId:this.userId,
       employeeCode:this.empCode
     };
 
-    console.log(incidentData);
-    this.trackService.getPosts(incidentData)
+    console.log(this.selectedIncidentId);
+    this.revertIncidentService.getPosts(data)
       .subscribe((data: any) => {
         if (data.code === 200) {
-
+          this.loading=false;
           console.log(data.incidentDtoList);
           this.commentList = [];
-   
+       
           data.incidentDtoList.forEach((incident) => {
             if (incident.comments) {
+              console.log("inside comments search");
               incident.comments.forEach((comment) => {
-                // Only push comments for the selected incident
-                if (incident.incidentId == this.selectedIncidentId) {
                   this.commentList.push(comment);
                   console.log(this.commentList);
                   this.dataSource.data = this.commentList;
-                }
               });
             }
           });
@@ -376,6 +483,7 @@ export class RevertIncidentComponent implements AfterViewInit{
         this.incidents = data.incidentDtoList;
         const incidentCount = this.incidents?.length;
         this.totalItems = this.incidents?.length;
+        this.updatePaginatedList();
         console.log('Incident Count:', incidentCount);
         // Check if any incident is completed
         // this.isIncidentCompleted = this.incidents.some(incident => incident.status === 'CO')
@@ -405,13 +513,13 @@ export class RevertIncidentComponent implements AfterViewInit{
     this.nav1.select(1);
     this.showtable=true;
     this.showform=false;
-    if(this.userId == null){
-      console.log(" normal user  ");
+    // if(this.userId == null){
+      // console.log(" normal user  ");
       this.getPosts2();     
-    }else if (this.userId != null){
-      console.log("db user ");
-      this.getPosts(this.userId, 'RE');  
-    }
+    // }else if (this.userId != null){
+    //   console.log("db user ");
+    //   this.getPosts(this.userId, 'RE');  
+    // }
     // this.showform = false;
     // this.drop_down=true;
    
@@ -514,11 +622,14 @@ export class RevertIncidentComponent implements AfterViewInit{
   onEdit(row: any) {
   
     console.log(row);
+    
+    this.commentList = row.comments || []; 
+    this.dataSource.data = this.commentList; 
  
   if (row.documents && Array.isArray(row.documents)) {
     this.docList = row.documents;
   } else {
-    console.error('this.row.documents is undefined or not an array');
+    console.log('this.row.documents is undefined or not an array');
     this.docList = []; 
   }
  
@@ -530,19 +641,20 @@ export class RevertIncidentComponent implements AfterViewInit{
     }
     this.selectedIncidentId = row.incidentId;
     console.log(this.selectedIncidentId);
-    if(this.userId == null){
-      console.log(" normal user  ");
-      this.getPosts2();     
-    }else if (this.userId != null){
-      console.log("db user ");
-      this.getPosts(this.userId, 'RE');  
-    }
+    // if(this.userId == null){
+    //   console.log(" normal user  ");
+      // this.getPosts2();  
+      // this.getPosts(this.userId, 'RE');     
+    // }else if (this.userId != null){
+    //   console.log("db user ");
+    //   this.getPosts(this.userId, 'RE');  
+    // }
     this.showform = true;
     this.showtable = false;
     this.moveToNextTab();
     if(this.currentLevel=="RO"){
       this.formValue.get('description')?.disable();
-      // this.formValue.get('contact_number')?.disable();
+      this.formValue.get('contact_number')?.disable();
       this.formValue.get('reporting_officer')?.disable();
       this.formValue.get('oc_date')?.disable();
       this.formValue.get('detected_date')?.disable();
@@ -552,10 +664,19 @@ export class RevertIncidentComponent implements AfterViewInit{
       this.formValue.get('risk_cause')?.disable();
       this.formValue.get('subcat')?.disable();
       this.formValue.get('subtype')?.disable();
-      
+      this.formValue.get('potential_amount')?.disable();
+      this.formValue.get('actual_amount')?.disable();
+
+      this.formValue.get('recoverd_amount')?.disable();
+      this.formValue.get('account_number')?.disable();
+
       this.formValue.get('recoverd_amount')?.disable();
       this.formValue.get('account_number')?.disable();
       this.formValue.get('recovery_action')?.disable();
+
+      this.formValue.get('level')?.disable();
+      this.formValue.get('dep')?.disable();
+      this.formValue.get('branch')?.disable();
      
     }else {
       this.formValue.get('reporting_date')?.disable();
@@ -566,12 +687,13 @@ export class RevertIncidentComponent implements AfterViewInit{
       this.formValue.get('business_aria')?.disable();
       this.formValue.get('consequence')?.disable();
       this.formValue.get('risk_level')?.disable();
-      // this.formValue.get('root_cause')?.disable();
+      this.formValue.get('root_cause')?.disable();
       // this.formValue.get('potential_amount')?.disable();
       // this.formValue.get('actual_amount')?.disable();
 
     }
 
+       console.log("Occurrence Date:", row.occurence_date);
     this.formValue.controls['id'].setValue(row.id);
     this.formValue.controls['description'].setValue(row.inc_description);
     this.formValue.controls['contact_number'].setValue(row.contact_number);
@@ -580,21 +702,7 @@ export class RevertIncidentComponent implements AfterViewInit{
     this.formValue.controls['recoverd_amount'].setValue(row.recoverd_amount);
     this.formValue.controls['recovery_action'].setValue(row.recovery_action);
 
-
-  
-    this.formValue.controls['branch'].setValue(row?.branch?.branchId);
-    this.formValue.controls['region'].setValue(row?.region?.regionId);
-    this.formValue.controls['dep'].setValue(row?.department?.departmentId);
-
-    if(row?.department.departmentId !=0 || row?.department.departmentId != null){
-      this.formValue.controls['level'].setValue('DEPARTMENT');
-      this.dep_div=true;
-
-    }else{
-      this.formValue.controls['level'].setValue('BRANCH');
-      this.branch_div=true;
-    }
-
+    
     this.formValue.controls['oc_date'].setValue(
       this.datePipe.transform(row.occurence_date, 'yyyy-MM-dd'),
     );
@@ -619,6 +727,24 @@ export class RevertIncidentComponent implements AfterViewInit{
     this.onSubCategoryChange();
     this.formValue.controls['subtype'].setValue(row.sub_type.riskSubTypeId);
 
+  
+    this.formValue.controls['branch'].setValue(row?.branch?.branchId);
+    this.formValue.controls['region'].setValue(row?.region?.regionId);
+    this.formValue.controls['dep'].setValue(row?.department?.departmentId);
+
+    if (row?.department?.departmentId == 0 || row?.department?.departmentId == null) {
+    console.log("inside branch");
+    this.formValue.controls['level'].setValue('BRANCH');
+    this.branch_div = true;
+  } else {
+    console.log("inside department");
+    this.formValue.controls['level'].setValue('DEPARTMENT');
+    this.dep_div = true;
+  }
+
+
+ 
+
     // risk part 
     console.log(row.action);
     this.formValue.controls['action'].setValue(row.action);
@@ -635,6 +761,135 @@ export class RevertIncidentComponent implements AfterViewInit{
 
 
   }
+
+
+
+ alertWithConfirm(event: Event) {
+    this.selectedDepartmentId = (event.target as HTMLSelectElement).value; 
+    console.log("Selected Department ID:", this.selectedDepartmentId);
+  
+    const selectedDepartment = this.filteredDepartment.find(dep => dep.departmentId == this.selectedDepartmentId);
+    console.log("Selected Department Object:", selectedDepartment);
+  
+    Swal.fire({
+      icon: 'info',
+      title: "Are you sure?",
+      text: "You want to make these changes!",
+      showDenyButton: false,
+      showCancelButton: true,
+      cancelButtonText: "No",
+      confirmButtonText: "Yes",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.justification=true;
+        console.log("Confirmed DepartmentId :", this.selectedDepartmentId);
+        console.log("justification :", this.justification);
+        this.getjustification();
+
+      } 
+    });
+}
+
+
+getjustification() {
+  console.log("inside ro update");
+
+
+  const userId=this.userId;
+  const incidentId = this.selectedIncidentId;
+  const comment = this.formValue.value.comment;
+  const IncidentTypeId = this.formValue.value.incident_type;
+  const loss_event_typeId = this.formValue.value.loss_event_type;
+  const business_lineId= this.formValue.value.business_line;
+  const business_ariaId = this.formValue.value.business_aria;
+  const risk_dep_status = this.formValue.value.risk_dep_status;
+  const consequenceId = this.formValue.value.consequence;
+  const risk_levelId = this.formValue.value.risk_level;
+  const root_cause = this.formValue.value.root_cause;
+  const action_taken = this.formValue.value.action_taken;
+  const actual_amount = this.formValue.value.actual_amount;
+  const potential_amount = this.formValue.value.potential_amount;
+  // console.log(action_taken);
+  // Check for null or empty values
+
+  if(this.justification != true){
+    if (!comment || !IncidentTypeId || !loss_event_typeId  || !business_lineId || !business_ariaId || !consequenceId || !risk_levelId || !root_cause|| !action_taken){
+      
+        // Display an error message to the user
+        this.showEmtyMessage = true;
+        this.emtyMessage = 'Please fill in all required fields.';
+  
+          // Hide the error message after 3 seconds
+          setTimeout(() => {
+            this.showEmtyMessage = false;
+            this.emtyMessage = '';
+          }, 3000);
+          return;
+      }
+    
+   }else if(this.justification == true){
+
+      if(comment == null || !comment){
+        // Display an error message to the user
+      this.showEmtyMessage = true;
+      this.emtyMessage = 'Please fill the Comment Field.';
+
+      // Hide the error message after 3 seconds
+      setTimeout(() => {
+        this.showEmtyMessage = false;
+        this.emtyMessage = '';
+      }, 3000);
+      return;
+              
+     }
+
+   }
+
+  
+// console.log('IncidentTypeId ' + IncidentTypeId);
+  const incidentData = {
+    incidentId: incidentId,
+    description: comment,
+    commentedBy:userId,
+    incidentTypeId: IncidentTypeId, 
+    loss_event_typeId:loss_event_typeId,
+    business_lineId:business_lineId,
+    business_ariaId:business_ariaId,
+    consequenceId:consequenceId,
+    risk_levelId:risk_levelId,
+    rootCause:root_cause,
+    action:action_taken,
+    actual_amount:actual_amount,
+    potential_amount:potential_amount,
+    riskDepStatusId:risk_dep_status,
+    // current_level:this.next_level,
+    selectedDepartmentId:this.selectedDepartmentId,
+    justification:this.justification
+
+  };
+ 
+  console.log('model sent ' + incidentData);
+  this.riskDepartmentService
+    .updateIncidents(incidentId,incidentData)
+    .subscribe(
+      (res) => {  
+          this.hideSuccess();
+          this.getPosts2();
+          this.formValue.reset();      
+          this.showform = false;
+          this.showtable = true;
+          this.nav1.select(1); 
+          this.alertWithSuccess(); 
+          this.formValue.controls['status'].setValue(this.row.status);  
+      },
+      (err) => {
+        this.alertWithError(err.message);
+        setTimeout(() => {
+          this.hideSuccess();
+        }, 3000);
+      },
+    );
+}
 
   onRiskChange() {
     // console.log("inside on risk Change");
@@ -795,6 +1050,7 @@ export class RevertIncidentComponent implements AfterViewInit{
             potential_amount:potential_amount,
             riskDepStatusId:risk_dep_status,
             level:level,
+
     
           };
 
@@ -811,20 +1067,18 @@ export class RevertIncidentComponent implements AfterViewInit{
             .updateIncidents(formData)
             .subscribe(
               (res) => {
-                this.formValue.reset();
-                setTimeout(() => {
-                }, 3000);  
-                this.alertWithSuccess(); 
+                this.formValue.reset();      
                 this.showform = false;
                 this.showtable = true;
                 this.nav1.select(1); 
-                if(this.userId == null){
-                  console.log(" normal user  ");
+                this.alertWithSuccess(); 
+                // if(this.userId == null){
+                //   console.log(" normal user  ");
                   this.getPosts2();     
-                }else if (this.userId != null){
-                  console.log("db user ");
-                  this.getPosts(this.userId, 'RE');  
-                }
+                // }else if (this.userId != null){
+                //   console.log("db user ");
+                //   this.getPosts(this.userId, 'RE');  
+                // }
              
                },
               (err) => {
@@ -974,21 +1228,17 @@ export class RevertIncidentComponent implements AfterViewInit{
            .subscribe(
              (res) => {
               this.formValue.reset();
-              setTimeout(() => {
-              }, 3000); 
-              this.alertWithSuccess(); 
-              if(this.userId == null){
-                console.log(" normal user  ");
+              this.showform = false;
+              this.showtable = true;
+              this.nav1.select(1);
+              this.alertWithSuccess();    
+              // if(this.userId == null){
+              //   console.log(" normal user ");
                 this.getPosts2();     
-              }else if (this.userId != null){
-                console.log("db user ");
-                this.getPosts(this.userId, 'RE');  
-              }
-               setTimeout(() => {
-                 this.showform = false;
-                 this.showtable = true;
-                 this.nav1.select(1);
-               },3000);
+              // }else if (this.userId != null){
+              //   console.log("db user ");
+              //   this.getPosts(this.userId, 'RE');  
+              // }
                this.updateIncidentCount();    
              },
              (err) => {
@@ -1115,54 +1365,79 @@ export class RevertIncidentComponent implements AfterViewInit{
      }
 
 // pagination start here
-prevPage() {
-  if (this.currentPage > 1) {
-    this.currentPage--;
-    this.updateDisplayedData();
-    console.log('Previous Page:', this.currentPage);
-  }
-}
+// prevPage() {
+//   if (this.currentPage > 1) {
+//     this.currentPage--;
+//     this.updateDisplayedData();
+//     console.log('Previous Page:', this.currentPage);
+//   }
+// }
 
-nextPage() {
-  const totalPages = Math.ceil(this.incidents.length / this.itemsPerPage);
-  if (this.currentPage < totalPages) {
-    this.currentPage++;
-    this.updateDisplayedData();
-    console.log('Next Page:', this.currentPage);
-  }
-}
+// nextPage() {
+//   const totalPages = Math.ceil(this.incidents.length / this.itemsPerPage);
+//   if (this.currentPage < totalPages) {
+//     this.currentPage++;
+//     this.updateDisplayedData();
+//     console.log('Next Page:', this.currentPage);
+//   }
+// }
 
-goToPage(page: number) {
-  this.currentPage = page;
-  this.updateDisplayedData();
-}
+// goToPage(page: number) {
+//   this.currentPage = page;
+//   this.updateDisplayedData();
+// }
 
-updateDisplayedData() {
-  if (this.incidents) {
+// updateDisplayedData() {
+//   if (this.incidents) {
 
-    const filteredUsers = this.incidents.filter(incident => 
-      incident.incident_ref.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-      incident.incidentId.toString().toLowerCase().includes(this.searchQuery.toLowerCase())
-    );
+//     const filteredUsers = this.incidents.filter(incident => 
+//       incident.incident_ref.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+//       incident.incidentId.toString().toLowerCase().includes(this.searchQuery.toLowerCase())
+//     );
 
-    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
-    const endIndex = startIndex + this.itemsPerPage;
+//     const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+//     const endIndex = startIndex + this.itemsPerPage;
 
-    this.displayedIncidentList = filteredUsers.slice(startIndex, endIndex);
-  }
+//     this.displayedIncidentList = filteredUsers.slice(startIndex, endIndex);
+//   }
 
-}
+// }
 
-getPageArray(): number[] {
-  if (this.incidents && this.incidents.length > 0) {
-    const totalPages = Math.ceil(this.incidents.length / this.itemsPerPage);
+// updateDisplayedData() {
+//   if (this.incidents) {
+//     // Filter the incidents based on the search query
+//     const filteredUsers = this.incidents.filter(incident => 
+//       incident.incident_ref.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+//       incident.incidentId.toString().toLowerCase().includes(this.searchQuery.toLowerCase())
+//     );
 
-    // Only show pages 1 and 2
-    return [1, 2].filter(page => page <= totalPages);
-  } else {
-    return [];
-  }
-}
+//     // Sort the filtered incidents in descending order by incident_ref or incidentId
+//     const sortedUsers = filteredUsers.sort((a, b) => {
+//       // Sorting by incident_ref in descending order
+//       return b.incident_ref.localeCompare(a.incident_ref);  // Use `.localeCompare()` for string comparison
+
+//       // Alternatively, if you want to sort by `incidentId`, use this:
+//       // return b.incidentId - a.incidentId;  // Numeric comparison
+//     });
+
+//     // Pagination: Slice the sorted array to get the current page data
+//     const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+//     const endIndex = startIndex + this.itemsPerPage;
+
+//     this.displayedIncidentList = sortedUsers.slice(startIndex, endIndex);
+//   }
+// }
+
+// getPageArray(): number[] {
+//   if (this.incidents && this.incidents.length > 0) {
+//     const totalPages = Math.ceil(this.incidents.length / this.itemsPerPage);
+
+//     // Only show pages 1 and 2
+//     return [1, 2].filter(page => page <= totalPages);
+//   } else {
+//     return [];
+//   }
+// }
 // pagination close here 
 
 //  methods to your component class for comment pagination

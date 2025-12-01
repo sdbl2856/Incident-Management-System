@@ -30,30 +30,27 @@
   <div class="card-body">
     <ul class="nav nav-pills mb-3" ngbNav #nav1="ngbNav">
       <li class="nav-item" [ngbNavItem]="1">
-        <a
-          (click)="clickTab1()"
-          class="nav-link"
-          ngbNavLink
-          aria-controls="pills-home"
-          aria-selected="true"
-          >Incidents</a
-        >
+   
         <ng-template ngbNavContent>
           <div *ngIf="showdata">
             <app-card
-              cardTitle="Received Incidents"
+              cardTitle="Incidents"
               [options]="false"
               blockClass="table-border-style"
             >
 
-            <div *ngIf="!loading && totalItems === 0" class="no-data-message" style="text-align: center;">
+
+
+             <div *ngIf="!loading && totalItems == 0" class="no-data-message" style="text-align: center;">
               <p>No data to display.</p>
-            </div>
-            <div class="row">
+             </div>
+             <div class="row">
               <div class="col-4" *ngIf="totalItems > 0">
+                
                 <input  
+                
                 type="text" 
-                style="width: 70%;margin-left: 30%;"
+               
                 placeholder="REf/ID" 
                 [(ngModel)]="searchQuery" 
                 (input)="updateDisplayedData()"
@@ -62,16 +59,11 @@
               </div>
           
               <div class="col-4">
-                <!-- <div class="col-sm-1 mb-2" style="width:20px;">
-                  <div class="flag-container">
-                    <i class="material-icons" style="font-size: 30px;">flag</i>
-                  </div>
-                </div> -->
+
               </div>
               
-              
               <div class="col-4">
-                <div class="text-end" *ngIf="!loading && totalItems > 0" >
+                <div class="text-end" *ngIf="totalItems > 0" >
                   <button
                     class="btn btn-success custom-btn"
                     (click)="exportToExcel()"
@@ -80,79 +72,66 @@
                   </button>
                 </div>
               </div>
-            </div>
-            <br>
-
+             </div>
+  
+             <br>
               <!-- Table headers with sorting -->
-          
-              <table class="table-responsive" style="margin-left: 120px"  *ngIf="!loading && totalItems > 0">
-                <div class="table table-hover">
+              <div  *ngIf="totalItems > 0">
+              
+                <table class="table table-hover table-bordered">
                   <thead>
                     <tr>
-                      <th>#</th>
-                      <th>ID</th>
-                      <th>Reference No</th>
-                      <th>Status</th>
-                      <th>Current Level</th>
-                      <th>Reporting Date</th>
-                      <th>Reporting Officer</th>
-                     
-                      <th>Action</th>
+                      <th class="text-center">#</th>
+                      <th class="text-center">ID</th>
+                      <th class="text-center">Reference No</th>
+                      <th class="text-center">Status</th>
+                      <th class="text-center">Current Level</th>
+                      <th class="text-center">Reporting Date</th>
+                      <th class="text-center">Reporting Officer</th>
+                      <th class="text-center">Action</th>
                     </tr>
                   </thead>
-
-               
                   <tbody>
-                  
-                    <tr *ngFor="let row of displayedIncidentList; let i = index"
-                    [ngClass]="{ 'green-row': row.justification != 0 }">
-                
-
-                      <td  >{{ (currentPage - 1) * itemsPerPage + (i + 1) }}</td>
-                      <td >{{ row.incidentId }}</td>
-                      <td>{{ row.incident_ref}}</td>
-                      <td>{{ getStatusDescription(row.status) }}</td>
-                      <td>{{ row.currentLevel }}</td>
-                      <td>{{ row.reporting_date | date: "yyyy-MM-dd" }}</td>
-                      <td>{{ row.reporting_officer }}</td>
-                     
-                      <td>
-                        <button class="btn btn-primary" (click)="onView(row)">
-                          View
-                        </button>
-                        <br />
+                    <tr *ngFor="let row of paginatedIncidentList; let i = index" [ngClass]="{ 'green-row': row.justification === 1 }">
+                      <td class="text-center">{{ (currentPage - 1) * itemsPerPage + (i + 1) }}</td>
+                      <td class="text-center">{{ row.incidentId }}</td>
+                      <td class="text-center">{{ row.incident_ref }}</td>
+                      <td class="text-center">{{ getStatusDescription(row.status) }}</td>
+                      <td class="text-center">{{ row.currentLevel }}</td>
+                      <td class="text-center">{{ row.reporting_date | date: 'M/d/yy, h:mm a' }}</td>
+                      <td class="text-center">{{ row.reporting_officer }}</td>
+                      <td class="text-center">
+                        <button class="btn btn-primary btn-sm" (click)="onView(row)">View</button>
                       </td>
                     </tr>
                   </tbody>
+                </table>
 
-
+                <!-- Pagination Controls -->
+                <div class="pagination-controls text-center">
+                  <button
+                    class="btn btn-secondary btn-sm"
+                    [disabled]="currentPage === 1"
+                    (click)="changePage(currentPage - 1)"
+                  >
+                    Previous
+                  </button>
+                  <span style="margin: 0 10px;">Page {{ currentPage }} of {{ totalPages }}</span>
+                  <button
+                    class="btn btn-secondary btn-sm"
+                    [disabled]="currentPage === totalPages"
+                    (click)="changePage(currentPage + 1)"
+                  >
+                    Next
+                  </button>
+                
+                    Total: <strong>{{ totalItems }}</strong>
+                
                 </div>
-              </table>
-              <br />
-
-              <!-- pagination -->
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-left: 120px;"  *ngIf="!loading && totalItems > 0">
-                <h6>Total: {{ displayedIncidentList.length }} of {{ totalItems }}</h6>
-                <nav aria-label="Page navigation example" style="margin-right: 250px;">
-                  <ul class="pagination">
-                    <li class="page-item">
-                      <a class="page-link" href="javascript:" (click)="prevPage()" aria-label="Previous">
-                        <span aria-hidden="true">&laquo;</span>
-                        <span class="sr-only">Previous</span>
-                      </a>
-                    </li>
-                    <li class="page-item" *ngFor="let page of getPageArray()">
-                      <a class="page-link" href="javascript:" (click)="goToPage(page)">{{ page }}</a>
-                    </li>
-                    <li class="page-item">
-                      <a class="page-link" href="javascript:" (click)="nextPage()" aria-label="Next">
-                        <span aria-hidden="true">&raquo;</span>
-                        <span class="sr-only">Next</span>
-                      </a>
-                    </li>
-                  </ul>
-                </nav>
               </div>
+            
+              
+              
             </app-card>
           </div>
         </ng-template>
@@ -184,8 +163,10 @@
                 <div class="col-md-1"> <button (click)="clickTab1()" style="width:35px;height:35px;margin-bottom: 10px; border-radius:25px;" class="btn btn-outline-danger fa fa-times" ></button>                           
                 </div>
               </div>
+              <!-- <div class="card-content-container"> -->
                 <h4 class="text-center">CREATION LEVEL DETAILS</h4>
                 <br />
+
                 <div class="container">                   
 
                   <div class="row mb-4">
@@ -295,7 +276,7 @@
                       <strong><i ></i> Occurence Date:</strong>
                       <div class="detail">
                     
-                        <p class="field-value">{{ row.occurence_date | date: 'yyyy-MM-dd' }}</p>
+                        <p class="field-value">{{ row.occurence_date | date: 'M/d/yy, h:mm a' }}</p>
                       </div>
                     </div>
                 
@@ -304,7 +285,7 @@
                       <strong><i ></i> Detected Date:</strong>
                       <div class="detail">
                     
-                        <p class="field-value">{{ row.detected_date | date: 'yyyy-MM-dd' }}</p>
+                        <p class="field-value">{{ row.detected_date | date: 'M/d/yy, h:mm a' }}</p>
                       </div>
                     </div>
                   </div>
@@ -313,20 +294,19 @@
                       <strong><i></i>Reporting Date :</strong>
                       <div class="detail">
                         
-                        <p class="field-value">{{ row.reporting_date | date: 'yyyy-MM-dd' }}</p>
+                        <p class="field-value">{{ row.reporting_date | date: 'M/d/yy, h:mm a' }}</p>
                       </div>
                     </div>
-                    <div class="col-md-6" *ngIf="row.actual_amount">
+                    <div class="col-md-6" >
                       <strong><i></i>Actual Loss Amount :</strong>
                       <div class="detail">
                         
-                        <p class="field-value">{{ row.actual_amount }}</p>
+                        <p class="field-value">{{ row?.actual_amount }}</p>
                       </div>
                     </div>
                   </div>
+
                   <div class="row mb-4">
-
-
                     <div class="col-md-6" *ngIf="row.recoverd_amount">
                       <strong><i ></i>Recovered Amount :</strong>
                       <div class="detail">
@@ -342,12 +322,8 @@
                         <p class="field-value">{{ row.potential_amount}}</p>
                       </div>
                     </div>
-
-                
-                
-                 
-                   
                   </div>
+
                   <div class="row mb-4">
                                
                     <div class="col-md-6" *ngIf="row.department">
@@ -358,11 +334,11 @@
                         <p class="field-value">{{ row.department.description}}</p>
                       </div>
                     </div>
-                    <div class="col-md-6" *ngIf="row.recovery_action">
-                      <strong><i ></i>Recovery Action :</strong>
+                    <div class="col-md-6" >
+                      <strong><i ></i>Root Cause & Recovery Actions :</strong>
                       <div class="detail">
                      
-                        <p class="field-value">{{ row.recovery_action }}</p>
+                        <p class="field-value">{{ row?.recovery_action }}</p>
                       </div>
                     </div>
 
@@ -370,208 +346,96 @@
   
                   </div>
 
-                  <div class="row mb-4">            
-                    <div class="col-md-6" >
-                      <span style="font-weight: bold;color: red;">View Documents</span>
-                      <select
-                      style="width: 70%;"
-                      id="doc"
-                      name="doc"
-                      class="form-select"
-                      (change)="viewFile($event)"
-                       >
-                      <option selected value="se" disabled>Select docs to view</option>
-                      <option *ngFor="let doc of docList" [value]="doc.docPath">
-                        {{ doc.status }} - {{ doc.docType }}
-                      </option>
-                      </select>                
-                    </div>
-                   </div>
+           
+                         <!-- showing risk deparment data filled by RO -->
+                         <h4 *ngIf="row?.businessLine" class="text-center">RISK DEPARTMENT DETAILS</h4>
+                         <br />
 
-
-                  <!-- risk Department Deatails -->
-
-                  <div class="row mb-4">
-                    <div class="col-md-6" *ngIf="row.businessLine">
-                      <strong><i ></i> Business Line :</strong>
-                      <div class="detail">
-                        
-                        <p class="field-value">{{ row.businessLine.description }}</p>
-                      </div>
-                    </div>
-                    <div class="col-md-6" *ngIf="row.businessAria">
-                      <strong><i ></i> Business Aria :</strong>
-                      <div class="detail">
-                     
-                        <p class="field-value">{{ row.businessAria.description }}</p>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="row mb-4">
-                    <div class="col-md-6" *ngIf="row.consequence">
-                      <strong><i ></i> Consequence :</strong>
-                      <div class="detail">
-                       
-                        <p class="field-value">{{ row.consequence.description }}</p>
-                      </div>
-                    </div>
-                    <div class="col-md-6" *ngIf="row.riskLevel">
-                      <strong><i ></i> Risk-Level :</strong>
-                      <div class="detail">
-                     
-                        <p class="field-value">{{ row.riskLevel.description }}</p>
-                      </div>
-                    </div>
-                  </div>                 
-                  <div class="row mb-4">
-                    <div class="col-md-6" *ngIf="row.lossEventType">
-                      <strong><i ></i>LossEvent Type :</strong>
-                      <div class="detail">
-                        
-                        <p class="field-value"> {{ row.lossEventType.description }}</p>
-                      </div>
-                    </div>
-                    <div class="col-md-6" *ngIf="row.rootCause">
-                      <strong><i ></i>Root cause :</strong>
-                      <div class="detail" >
+                <div class="row mb-4">
+                  <div class="col-md-6" *ngIf="row?.businessLine">
+                    <strong><i ></i> Business Line :</strong>
+                    <div class="detail">
                       
-                        <p class="field-value">{{ row.rootCause  }}</p>
-                      </div>
+                      <p class="field-value">{{ row?.businessLine?.description }}</p>
                     </div>
                   </div>
-                  <div class="row mb-4">                 
-
-                    <div class="col-md-6" *ngIf="row.action">
-                      <strong><i ></i>Action Taken By the Risk Department :</strong>
-                      <div class="detail" >
-                       
-                        <p class="field-value">{{ row.action  }}</p>
-                      </div>
+                  <div class="col-md-6" *ngIf="row.businessAria">
+                    <strong><i ></i> Business Aria :</strong>
+                    <div class="detail">
+                   
+                      <p class="field-value">{{ row?.businessAria?.description }}</p>
                     </div>
+                  </div>
+                </div>
+                <div class="row mb-4">
+                  <div class="col-md-6" *ngIf="row.consequence">
+                    <strong><i ></i> Consequence :</strong>
+                    <div class="detail">
+                     
+                      <p class="field-value">{{ row?.consequence?.description }}</p>
+                    </div>
+                  </div>
+                  <div class="col-md-6" *ngIf="row.riskLevel">
+                    <strong><i ></i> Risk-Level :</strong>
+                    <div class="detail">
+                   
+                      <p class="field-value">{{ row?.riskLevel?.description }}</p>
+                    </div>
+                  </div>
+                </div>
+               
+                <div class="row mb-4">
 
+                  <div class="col-md-6" *ngIf="row.rootCause">
+                    <strong><i ></i>Root cause Analysis By the Risk Department :</strong>
+                    <div class="detail" >
+                    
+                      <p class="field-value">{{ row?.rootCause  }}</p>
+                    </div>
+                  </div>
+              
+                  <div class="col-md-6" *ngIf="row.action">
+                    <strong><i ></i>Action Taken By the Department :</strong>
+                    <div class="detail" >
+                     
+                      <p class="field-value">{{ row?.action  }}</p>
+                    </div>
                   </div>
 
-                  <!-- Show the Comments -->
+                 
+                </div>
+                <div class="row mb-4">
+                
+                  <div class="col-md-6" *ngIf="row.lossEventType">
+                    <strong><i ></i>LossEvent Type :</strong>
+                    <div class="detail">
+                      
+                      <p class="field-value"> {{ row?.lossEventType?.description }}</p>
+                    </div>
+                  </div>
+
+                  <div class="col-md-6" >
+                    <span style="font-weight: bold;color: red;">View Documents</span>
+                    <select
+                    style="width: 70%;"
+                    id="doc"
+                    name="doc"
+                    class="form-select"
+                    (change)="viewFile($event)"
+                     >
+                    <option selected value="se" disabled>Select docs to view</option>
+                    <option *ngFor="let doc of docList" [value]="doc.docPath">
+                      {{ doc.status }} - {{ doc.docPath }}
+                    </option>
+                    </select>                
+                  </div>
+
+                </div>
+
                 </div>
                 
                 <br>
-              
-                <!-- showing risk deparment data filled by RO -->
-                <div *ngIf="ro_data">
-                  <h4 class="text-center">RISK DEPARTMENT DETAILS</h4>
-                    <br />
-                  <div class="row" style="margin-left: 4%;">
-                   
-                    <div class="col-md-6">
-                      <div class="detail">
-                        <strong>Incident Type:</strong>
-                        <p style="display: inline-block" class="field-value">
-                          {{ row.incidentType.description }}
-                        </p>
-                      </div>
-                    </div>
-                    <div class="col-md-6">
-                      <div class="detail">
-                        <strong>Status :</strong>
-                        <p style="display: inline-block" class="field-value">
-                          {{ statusDescriptions[row.status] }}
-                        </p>
-                      </div>
-                    </div>
-                  
-                  </div>
-                  <div class="row" style="margin-left: 4%;">
-                    <div class="col-md-6">
-                      <div class="detail">
-                        <strong>Loss Event Type:</strong>
-                        <p style="display: inline-block" class="field-value">
-                          {{ row.lossEventType.description }}
-                        </p>
-                      </div>
-                    </div>
-                    <div class="col-md-6">
-                      <div class="detail">
-                        <strong>Business Line:</strong>
-                        <p style="display: inline-block" class="field-value">
-                          {{ row.businessLine.description }}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="row" style="margin-left: 4%;">
-                    <div class="col-md-6">
-                      <div class="detail">
-                        <strong>Business Aria:</strong>
-                        <p style="display: inline-block" class="field-value">
-                          {{ row.businessAria.description }}
-                        </p>
-                      </div>
-                    </div>
-                    <div class="col-md-6">
-                      <div class="detail">
-                        <strong>Consequences of incident:</strong>
-                        <p style="display: inline-block" class="field-value">
-                          {{ row.consequence.description }}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="row" style="margin-left: 4%;">
-                    <div class="col-md-6">
-                      <div class="detail">
-                        <strong>Risk Level:</strong>
-                        <p style="display: inline-block" class="field-value">
-                          {{ row.riskLevel.description }}
-                        </p>
-                      </div>
-                   </div>
-                    <div class="col-md-6">
-                      <div class="detail">
-                        <strong>Potential Loss Amount:</strong>
-                        <p style="display: inline-block" class="field-value">
-                          {{ row.potential_amount }}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="row" style="margin-left: 4%;">
-                    <div class="col-md-6">
-                      <div class="detail">
-                        <strong>Actual Amount:</strong>
-                        <p style="display: inline-block" class="field-value">
-                          {{ row.actual_amount }}
-                        </p>
-                      </div>
-                    </div>
-                    <div class="col-md-6">
-                     
-                    </div>
-                  </div>
-                  <div class="row" style="margin-left: 4%;">
-                    <div class="col-md-6">
-                      <div class="detail">
-                        <strong>Action Taken By the Risk Department :</strong>
-                        <!-- <p style="display: inline-block" class="field-value">
-                          {{ row.action }}
-                        </p> -->
-                        <textarea class="field-value textarea-field" readonly>{{ row.action }}</textarea>
-                      </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="detail">
-                          <strong>Root cause analysis:</strong>
-                          <!-- <p style="display: inline-block" class="field-value">
-                            {{ row.rootCause }}
-                          </p> -->
-                          <textarea class="field-value textarea-field" readonly>{{ row.rootCause }}</textarea>
-                        </div>
-                    </div>
-                  </div>
-                </div>
-                <br>
-            
-      
-
+  
                 <!-- RO filling Form Start  -->
                 <form
                   [formGroup]="formValue"
@@ -583,7 +447,7 @@
                   <div class="row" >
                     <div class="col-md-6">
                       <label style="font-weight: bold" class="comment-label"
-                        >Root Cause Analysis</label
+                        >Root Cause Analysis By the Risk Department </label
                       ><label style="color: red"> * </label>
                       <textarea
                         class="comment-input form-control"
@@ -754,6 +618,7 @@
                       >
                       <input
                         placeholder="Potential amount"
+                        readonly
                         style="width: 100%"
                         type="number"
                         formControlName="potential_amount"
@@ -769,6 +634,7 @@
                       >
                       <input
                         placeholder="Actual Amount"
+                        readonly
                         style="width: 100%"
                         type="number"
                         formControlName="actual_amount"
@@ -824,11 +690,13 @@
                       </button>
                      
                     </div>
+
                   </div>
+
                 </form>
 
-                <!-- Form End -->
-                <div
+                <!-- Alert Msg -->
+                 <div
                 *ngIf="showEmtyMessage"
                 class="emty-message"
                 style="
@@ -871,95 +739,94 @@
                       </div>
                     </div>
                   </form>
-                </div>
-                
-
-                <!-- other form end -->
-
+                </div>      
                 <!-- ORM form start -->
                 <form [formGroup]="formValue" *ngIf="status_fill">
-                  <div class="row align-items-center" style="margin-left: 14%;">
-                    <div class="col-md-4">
-                      <label style="font-weight: bold" class="comment-label"
-                        >Comment</label
-                      ><label style="color: red"> * </label>
+                    <div class="row align-items-center" style="margin-left: 14%;">
+                      <div class="col-md-4">
+                        <label style="font-weight: bold" class="comment-label"
+                          >Comment</label
+                        ><label style="color: red"> * </label>
 
-                      <br />
-                      <textarea
-                        class="comment-input form-control"
-                        rows="3"
-                        formControlName="comment"
-                        required
-                      ></textarea>
-                    </div>
+                        <br />
+                        <textarea
+                          class="comment-input form-control"
+                          rows="3"
+                          formControlName="comment"
+                          required
+                        ></textarea>
+                      </div>
 
-                    <div class="col-md-4">
-                      <label for="risk_dep_status" class="form-label"
-                        >Status</label
-                      ><label style="color: red"> * </label>
-                      <select
-                        id="risk_dep_status"
-                        formControlName="risk_status"
-                        class="form-select"
-                        required
-                      
-                      >
-                        <option value="CO">Completed</option>
-                        <option value="RE">Revert</option>
-                        <option value="DE">Declined</option>
-                        <option value="PE">Pending</option>
-                      </select>
-                    </div>
+                      <div class="col-md-4">
+                        <label for="risk_dep_status" class="form-label"
+                          >Status</label
+                        ><label style="color: red"> * </label>
+                        <select
+                          id="risk_dep_status"
+                          formControlName="risk_status"
+                          class="form-select"
+                          required
+                        
+                        >
+                          <option value="CO">Completed</option>
+                          <option value="RE">Revert</option>
+                          <option value="DE">Declined</option>
+                          <option value="PE">Pending</option>
+                        </select>
+                      </div>
 
-                    <div class="col-md-4">
-         
-                      <button class="btn btn-primary" (click)="updateStatus()" [disabled]="isIncidentCompleted">
-                        UPDATE
-                      </button>
+                      <div class="col-md-4">
+          
+                        <button class="btn btn-primary" (click)="updateStatus()" [disabled]="isIncidentCompleted">
+                          UPDATE
+                        </button>
+                      </div>
                     </div>
-                  </div>
                 </form>
-                   <!-- test srt -->
-                    <br>
-                   <div class="row no-margin" *ngIf="this.commentList.length > 0">
-                      
-                    <mat-card-title style="text-align: center;">Comments</mat-card-title>
                   
-                      <table mat-table [dataSource]="commentList" matSort class="mat-elevation-z8">
+                <!-- Comments -->
+             
+                <div class="row no-margin" *ngIf="this.commentList.length > 0">
+                  <mat-card-title style="text-align: center;">Comments</mat-card-title>
                 
-                        <!-- Description Column -->
-                        <ng-container matColumnDef="description">
-                          <th mat-header-cell *matHeaderCellDef mat-sort-header>Description</th>
-                          <td mat-cell *matCellDef="let comment">{{ comment.description }}</td>
-                        </ng-container>
+                  <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z8">
+                    <!-- Description Column -->
+                    <ng-container matColumnDef="description">
+                      <th mat-header-cell *matHeaderCellDef mat-sort-header>Description</th>
+                      <td mat-cell *matCellDef="let comment">{{ comment.description }}</td>
+                    </ng-container>
                 
-                        <!-- Date Column -->
-                        <ng-container matColumnDef="commentedDate">
-                          <th mat-header-cell *matHeaderCellDef mat-sort-header>Date</th>
-                          <td mat-cell *matCellDef="let comment">{{ comment.commentedDate | date: 'yyyy-MM-dd' }}</td>
-                        </ng-container>
-      
-                        <ng-container matColumnDef="added_level">
-                          <th mat-header-cell *matHeaderCellDef mat-sort-header>Added Level</th>
-                          <td mat-cell *matCellDef="let comment">{{ comment.added_level}}</td>
-                        </ng-container>
-      
-                        <ng-container matColumnDef="addedUser">
-                          <th mat-header-cell *matHeaderCellDef mat-sort-header>Added User</th>
-                          <td mat-cell *matCellDef="let comment">{{ comment.addedUser}}</td>
-                        </ng-container>
+                    <!-- Date Column -->
+                    <ng-container matColumnDef="commentedDate">
+                      <th mat-header-cell *matHeaderCellDef mat-sort-header>Date</th>
+                      <td mat-cell *matCellDef="let comment">{{ comment.commentedDate | date: 'M/d/yy, h:mm a' }}</td>
+                    </ng-container>
                 
-                        <!-- Header and Row Definitions -->
-                        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-                        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-                      </table>
+                    <!-- Added Level Column -->
+                    <ng-container matColumnDef="added_level">
+                      <th mat-header-cell *matHeaderCellDef mat-sort-header>Added Level</th>
+                      <td mat-cell *matCellDef="let comment">{{ comment.added_level }}</td>
+                    </ng-container>
                 
-                      <!-- Pagination -->
-                      <mat-paginator [pageSize]="5" [pageSizeOptions]="[5, 10, 25]" aria-label="Select page"></mat-paginator>
+                    <!-- Added User Column -->
+                    <ng-container matColumnDef="addedUser">
+                      <th mat-header-cell *matHeaderCellDef mat-sort-header>Added User</th>
+                      <td mat-cell *matCellDef="let comment">{{ comment.addedUser }}</td>
+                    </ng-container>
                 
-      
-                  </div>
-                      <!-- test end -->
+                    <!-- Header and Row Definitions -->
+                    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+                  </table>
+                
+                  <!-- Pagination -->
+                  <mat-paginator
+                    [pageSize]="3"
+                    [pageSizeOptions]="[3, 10, 25]"
+                    aria-label="Select page"
+                  ></mat-paginator>
+                </div>
+                <!-- </div> -->
               </app-card>
             </div>
           </div>
@@ -974,3 +841,40 @@
 <div *ngIf="loading" style="display: flex; justify-content: center; align-items: center; height: 100vh; width: 100%; position: absolute; top: 0; left: 0;">
   <img src="assets/images/loading.svg" style="width: 7%;" />
 </div>
+
+
+<style>
+  .table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+  }
+  
+  .table th,
+  .table td {
+    padding: 10px;
+    border: 1px solid #ddd;
+  }
+  
+  .table th {
+    background-color: #f4f4f4;
+    font-weight: bold;
+    text-align: center;
+  }
+  
+  .table-hover tbody tr:hover {
+    background-color: #f9f9f9;
+  }
+  
+  .table-bordered {
+    border: 1px solid #ddd;
+  }
+  
+  .green-row {
+    background-color: #e8f5e9; /* Light green for rows with justification */
+  }
+  
+  .text-center {
+    text-align: center;
+  }
+  </style>

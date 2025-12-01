@@ -1,4 +1,4 @@
-import { Component,AfterViewInit } from '@angular/core';
+import { Component,AfterViewInit, ElementRef, ViewChild } from '@angular/core';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { IncidentModel } from './incident-model';
 import { IncidentService } from './incident.service';
@@ -16,20 +16,22 @@ declare var $: any; // Import jQuery globally
   selector: 'app-incident',
   templateUrl: './incident.component.html',
   styleUrls: ['./incident.component.scss'],
+ 
 })
 export class IncidentComponent implements AfterViewInit {
-
+  @ViewChild('fileInput') fileInput: ElementRef; // Reference to the file input element
   ngAfterViewInit(): void {
     $("#input-folder-3").fileinput({
       theme: 'fas',  
       browseLabel: 'Select File...',
       showUpload: false, 
       showRemove: true,
-      allowedFileExtensions: ['jpg', 'png', 'pdf', 'docx'],
+      allowedFileExtensions: ['jpg', 'png', 'pdf','jpeg'],
       previewFileType: 'any',
       // uploadUrl: "/file-upload-batch/2",
       hideThumbnailContent: true 
     });
+    
   }
   
   risk_causes: any[];
@@ -87,19 +89,13 @@ export class IncidentComponent implements AfterViewInit {
     private router: Router,
     private authService: AuthService,
     private toastr: ToastrService,
-    private _snackBar: MatSnackBar
+    private _snackBar: MatSnackBar,
+  
   ) {
     
   }
 
-  // sdbLValidator(control: any) {
-  //   const value = control.value;
-  //   const isValid = /^SDBL\d+$/.test(value);
-  //   if (!isValid && value !== '') {
-  //     return { 'invalidSDBL': true };
-  //   }
-  //   return null;
-  // }
+
 
   pastDateValidator(): ValidatorFn {
     
@@ -186,8 +182,6 @@ export class IncidentComponent implements AfterViewInit {
     // console.log("branch *: "+this.branch);
   }
 
-  
-
   disableDate() {
     return false;
   }
@@ -258,6 +252,7 @@ export class IncidentComponent implements AfterViewInit {
   
   postDetails() {
     
+
     console.log("current level : " + this.currentLevel);
 
     let formData = new FormData();
@@ -326,7 +321,13 @@ export class IncidentComponent implements AfterViewInit {
       dep
     } = this.formValue.value;
   
-   
+      this.reporting_officer=this.empCode;
+    if(this.empCode == null || this.empCode == undefined) {
+      this.alertWithSuccess2();
+        return;
+     
+    }
+
 
     if (
       description !== null && description.trim() !== '' &&
@@ -334,8 +335,8 @@ export class IncidentComponent implements AfterViewInit {
       oc_date !== null && oc_date.trim() !== '' &&
       detected_date !== null && detected_date.trim() !== '' &&
       risk_owner !== null && risk_owner.trim() !== '' &&
-      risk_cause !== null && risk_cause.trim() !== '' &&
-      sub_category !== null && sub_category.trim() !== '' &&
+      // risk_cause !== null && risk_cause.trim() !== '' &&
+      // sub_category !== null && sub_category.trim() !== '' &&
       sub_type !== null && sub_type.trim() !== ''
       // reporting_officer !== null && reporting_officer.trim() !== '' &&
       // contact_number !== null && contact_number.trim() !== ''
@@ -422,29 +423,7 @@ export class IncidentComponent implements AfterViewInit {
             email :this.email
 
         }
-        // this.incidentmodel_obj.inc_description = description;
-        // this.incidentmodel_obj.occurence_date = oc_date;
-        // this.incidentmodel_obj.detected_date = detected_date;
-        // this.incidentmodel_obj.risk_owner = risk_owner;
-        // // this.incidentmodel_obj.risk_cause = risk_cause;
-        // // this.incidentmodel_obj.sub_category = sub_category;
-        // this.incidentmodel_obj.sub_type = { riskSubTypeId: sub_type };
-        // // this.incidentmodel_obj.currentLevel = this.currentLevel;
-        // this.incidentmodel_obj.created_Level = this.created_level;
-        // this.incidentmodel_obj.next_level = this.next_level;
-        // this.incidentmodel_obj.createdBy = this.loggedUserId;
-        // this.incidentmodel_obj.reporting_officer = this.empCode;
-        // this.incidentmodel_obj.contact_number = this.mobile;
-        // this.incidentmodel_obj.recovery_action = recovery_action;
-        // this.incidentmodel_obj.account_number = account_number;
-        // this.incidentmodel_obj.actual_amount = actual_loss_amount;
-        // this.incidentmodel_obj.potential_amount = potential_amount;
-        // this.incidentmodel_obj.recoverd_amount = recoverd_amount;
-        // this.incidentmodel_obj.level = this.selectedLevel;
-        // this.incidentmodel_obj.branchId = branch || 999;
-        // this.incidentmodel_obj.regionId = region || 11;
-        // this.incidentmodel_obj.depId = dep;
-        // this.incidentmodel_obj.email = this.email;
+     
   
         formData.append('incidentDTO', JSON.stringify(data));
 
@@ -455,6 +434,7 @@ export class IncidentComponent implements AfterViewInit {
             console.log(`${key}: ${value}`);
         });
 
+        this.loading=false;
         this.incidentService.postIncidents(this.loggedUserId, formData).subscribe((response:any) => {
           if(response['code'] == 200){             
             this.loading = true;  
@@ -463,8 +443,9 @@ export class IncidentComponent implements AfterViewInit {
             this.branch_div=false;
             this.dep_div=false;
             this.region_div=false;
-            this.selectedOption = null; 
-            $("#input-folder-3").fileinput('clear'); 
+            // this.selectedOption = null; 
+            $("#input-folder-3").fileinput('clear');
+            this.clearFileInput(); 
     
           }else{         
             this.loading = true;        
@@ -486,7 +467,9 @@ export class IncidentComponent implements AfterViewInit {
    
   }
 
-
+  clearFileInput(): void {
+    this.fileInput.nativeElement.value = ''; // Reset the file input field
+  }
 
 
   getRiskCauses() {
@@ -615,6 +598,31 @@ export class IncidentComponent implements AfterViewInit {
 
 
 
+  alertWithSuccess2() {
+  Swal.fire({
+    icon: 'info',
+    // title: 'CONFIRMATION',
+    html: `<div style="font-size:1.4em;font-weight:bold;color:black;">Your session has timed out due to inactivity. Please initiate the incident again.</div>`,
+    confirmButtonColor: "#03c9d7",
+    confirmButtonText: 'OK',
+    // showCancelButton: true,
+    // cancelButtonColor: '#d33',
+    // cancelButtonText: 'Cancel',
+    // showClass: {
+    //   popup: 'animate__animated animate__fadeInDown'
+    // },
+    // hideClass: {
+    //   popup: 'animate__animated animate__fadeOutUp'
+    // }
+  }).then((result) => {
+    if (result.isConfirmed) {
+      this.authService.logout();
+    
+    } 
+
+  });
+}
+
   alertWithSuccess() {
     Swal.fire({
       icon: 'success',
@@ -653,9 +661,8 @@ export class IncidentComponent implements AfterViewInit {
 
     const value = event; 
     console.log("Entered value:", value);
-    this.branchCode;
+  
    
-
     if(value != '' || value !=0 || value !=1){
          // Call your service to get the data
     this.incidentService.getName(value).subscribe(
@@ -668,7 +675,7 @@ export class IncidentComponent implements AfterViewInit {
             this.branchCode = parsedResponse.data ? parsedResponse.data.emp_branch_code : null;  
             this.email = parsedResponse.data ? parsedResponse.data.emp_email : null;  
             this.mobile = parsedResponse.data ? parsedResponse.data.emp_mob1 : null;  
-            console.log("branchCode:",this.branchCode);  
+            console.log("branchCode:",this.branchCode);
             if (this.branchCode) {
 
                 if(this.branchCode == 123){
@@ -677,7 +684,7 @@ export class IncidentComponent implements AfterViewInit {
                 console.log(DBCode?.departmentId);
                 this.formValue.get("level").setValue("DEPARTMENT");
                 this.selectedLevel='DEPARTMENT';
-                this.formValue.get("dep").setValue(DBCode?.departmentId);
+                this.formValue.get("dep").setValue(15);
                 this.created_level='DS'
                 }else if(this.branchCode != 123){
               

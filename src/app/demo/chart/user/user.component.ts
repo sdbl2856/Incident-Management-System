@@ -12,7 +12,7 @@ import Swal from 'sweetalert2';
   styleUrls: ['./user.component.scss'],
 })
 export class UserComponent implements OnInit {
-  users: any;
+
   userlist:any;
   formValue: any;
   usermodel_obj: UserModel = new UserModel();
@@ -31,14 +31,21 @@ export class UserComponent implements OnInit {
   logged_id: any;
   showSuccessMessage: boolean = false;
   successMessage: string = '';
-  searchQuery: string = '';
-  // New properties for pagination
-  currentPage: number = 1;
-  itemsPerPage: number = 6; 
-  displayedUserList: any[] = [];
 
+
+
+  // New properties for pagination
+  users: any[] = []; 
+  displayedUserList: any[] = []; 
+  currentPage: number = 1;
+  itemsPerPage: number = 5;
+  totalPages: number = 0;
+
+
+  totalItems: number = 0;
   // for search
   searchTerm: string = '';
+  searchQuery: string = ''; 
   // New property for filtered user list
  filteredUserList: any[] = [];
 
@@ -82,16 +89,71 @@ export class UserComponent implements OnInit {
   }
 
 
-  getPosts() {
-    this.userService.getPosts().subscribe((data: any) => {
-      this.userlist = data['userList'];
-      this.updateDisplayedData(); 
-      // this.applySearch();
-    });
-    
+  filterUsers() {
+    const filteredUsers = this.users.filter((user) =>
+      user.employeeCode.toLowerCase().includes(this.searchQuery.toLowerCase())
+    );
+  
+    this.totalPages = Math.ceil(filteredUsers.length / this.itemsPerPage);
+    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+    const endIndex = startIndex + this.itemsPerPage;
+  
+    this.displayedUserList = filteredUsers.slice(startIndex, endIndex);
   }
 
+  getPosts() {
+    this.userService.getPosts().subscribe(
+      (data: any) => {
+        console.log('Fetched data:', data); // Debugging: Check the response
+        this.users = data['userList'] || []; // Ensure `users` is an array
+        this.totalItems = this.users?.length;
+        this.totalPages = Math.ceil(this.users.length / this.itemsPerPage);
+        this.updatePaginatedList(); // Update the displayed data
+      },
+      (error) => {
+        console.error('Error fetching data:', error); // Debugging: Log errors
+      }
+    );
+  }
+  updatePaginatedList() {
+    if (!this.users || this.users.length === 0) {
+      this.displayedUserList = [];
+      return;
+    }
+  
+    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+    const endIndex = startIndex + this.itemsPerPage;
+  
+    // Sort users in descending order by `userId`
+    this.displayedUserList = this.users
+      .sort((a, b) => b.userId - a.userId) // Ensure `userId` is valid
+      .slice(startIndex, endIndex);
+  
+    console.log('Displayed User List:', this.displayedUserList); // Debugging: Check the displayed data
+  }
 
+  changePage(page: number) {
+    this.currentPage = page;
+    this.updatePaginatedList();
+  }
+
+  getPageArray(): number[] {
+    return Array.from({ length: this.totalPages }, (_, i) => i + 1);
+  }
+
+  prevPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.updatePaginatedList();
+    }
+  }
+
+  nextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.updatePaginatedList();
+    }
+  }
   getBranches() {
     this.userService.getBranches().subscribe((data: any) => {
       console.log(data);
@@ -137,11 +199,11 @@ onUserTypeChange() {
   this.showDepartmentDropdown = false;
 
   // Check the selected user type
-  if (userType === 'RC' || userType === 'BM' || userType === 'AD') {
+  if (userType === 'RC' || userType === 'BM' || userType === 'AD' || userType === 'AU' ) {
     // Enable and show both region and branch dropdowns
     this.showRegionDropdown = true;
     this.showBranchDropdown = true;
-
+    this.showDepartmentDropdown = true;
     // Enable region and branch controls
     this.formValue.get('region').enable();
     this.formValue.get('branch').enable();
@@ -314,15 +376,28 @@ if (!fullName || fullName.trim() === '' || !employeeCode || employeeCode.trim() 
     
     // console.log("dep id : "+this.usermodel_obj.depId );
     this.userService.postUser(this.usermodel_obj).subscribe(
-      (res) => {
-       this.alertWithSuccess();
+      (res:any) => {
+
+        if (res.code === 200) {
+          // Success
+          this.alertWithSuccess();
+      
+        } else if (res.code === 416) {
+          // User already exists
+          this.alertWithError(res.message || 'User already exists!');
+        } else {
+          // Handle other codes
+          this.alertWithError(res.message || 'An unexpected error occurred.');
+        }
+        this.update_btn=true;
+        this.create_btn=true;
         setTimeout(() => {
           this.hideSuccess();
           this.formValue.reset();
           this.getPosts();
           this.showContent = true;
           this.showForm = false;
-        }, 3000); 
+        }, 3000);
       },
       (err) => {
         this.alertWithError(err.message);
@@ -346,7 +421,10 @@ if (!fullName || fullName.trim() === '' || !employeeCode || employeeCode.trim() 
     return emailRegex.test(email);
   }
 
+
 updateUserDetails() {
+  
+    console.log("inside update user details");
 
     const userId = this.formValue.value.userId;
     const fullName = this.formValue.value.name;
@@ -354,8 +432,8 @@ updateUserDetails() {
     const grade = this.formValue.value.grade;
     const designation = this.formValue.value.designation;
     const email = this.formValue.value.email;
-    const region = this.formValue.value.region;
-    const branch = this.formValue.value.branch;
+    const region = this.formValue.value.region || 11;
+    const branch = this.formValue.value.branch || 999;
     const status = this.formValue.value.status;
     const userType = this.formValue.value.user_type;
     const dep = this.formValue.value.dep;
@@ -391,6 +469,8 @@ updateUserDetails() {
     this.usermodel_obj.updatedBy=updated_by;
     this.usermodel_obj.depId=dep;
 
+    console.log(this.usermodel_obj);
+
     this.userService.updateUser(this.usermodel_obj).subscribe(
       (res) => {
         console.log(res);
@@ -403,6 +483,8 @@ updateUserDetails() {
         this.showForm = false;
         this.showContent = true;
         this.getPosts();
+        this.update_btn=true;
+        this.create_btn=true;
         }, 3000);
       },
       (err) => {
@@ -429,26 +511,8 @@ updateUserDetails() {
     this.create_btn=true;
   }
 
-  // pagination start here
-  prevPage() {
-    if (this.currentPage > 1) {
-      this.currentPage--;
-      this.updateDisplayedData();
-    }
-  }
 
-  nextPage() {
-    const totalPages = Math.ceil(this.userlist.length / this.itemsPerPage);
-    if (this.currentPage < totalPages) {
-      this.currentPage++;
-      this.updateDisplayedData();
-    }
-  }
 
-  goToPage(page: number) {
-    this.currentPage = page;
-    this.updateDisplayedData();
-  }
 
   
     updateDisplayedData() {
@@ -468,26 +532,7 @@ updateUserDetails() {
   
   
 
-  getPageArray(): number[] {
-    if (this.userlist && this.userlist.length > 0) {
-      const totalPages = Math.ceil(this.userlist.length / this.itemsPerPage);
-      const displayedPages = 2;
-  
-      let startPage = Math.max(1, this.currentPage - Math.floor(displayedPages / 2));
-      let endPage = Math.min(totalPages, startPage + displayedPages - 1);
-  
-      if (totalPages <= displayedPages) {
-        startPage = 1;
-        endPage = totalPages;
-      } else if (endPage - startPage + 1 < displayedPages) {
-        startPage = Math.max(1, endPage - displayedPages + 1);
-      }
-  
-      return Array.from({ length: endPage - startPage + 1 }, (_, index) => startPage + index);
-    } else {
-      return [];
-    }
-  }
+
   // pagination close here 
   
   alertWithSuccess() {

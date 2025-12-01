@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input ,ViewEncapsulation} from '@angular/core';
 import { NavigationItem } from '../../navigation';
 import { animate, style, transition, trigger } from '@angular/animations';
 import { DattaConfig } from 'src/app/app-config';
@@ -7,6 +7,7 @@ import { DattaConfig } from 'src/app/app-config';
   selector: 'app-nav-collapse',
   templateUrl: './nav-collapse.component.html',
   styleUrls: ['./nav-collapse.component.scss'],
+  encapsulation: ViewEncapsulation.None,
   animations: [
     trigger('slideInOut', [
       transition(':enter', [

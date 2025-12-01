@@ -3,91 +3,75 @@
   <div>
     <app-card cardTitle="System Users" [options]="false" blockClass="table-border-style">
       <div class="table-responsive" style="margin-left: 35px">
-        <div class="table table-hover">
-          <div class="d-flex align-items-center">
-            <!-- <input style="width: 300px" type="text" [(ngModel)]="searchTerm" placeholder="Search by Name" class="search form-control" /> -->
+        <div class="d-flex align-items-center">
+          <input
+            style="width: 300px"
+            type="text"
+            [(ngModel)]="searchQuery"
+            (input)="filterUsers()"
+            placeholder="Search by Employee Code"
+            class="form-control"
+          />
+          <button style="margin-left: auto" (click)="contentChange()" class="btn btn-success">ADD NEW</button>
+        </div>
+        <br />
 
-            <button style="margin-left: 80%" (click)="contentChange()" class="btn-add btn btn-success">ADD NEW</button>
-          </div>
-          <br />
-          <div class="table-responsive" style="margin-left: 5%">
-            <div>
-              <div class="row">
-                <div class="col-4">
-                  <input 
-                  type="text" 
-                  placeholder="Search by Employee Code" 
-                  [(ngModel)]="searchQuery" 
-                  (input)="updateDisplayedData()"
-                  class="form-control"
-                />
-                </div>
-                <div class="col-4"></div>
-                <div class="col-4"></div>
-              </div>
+        <table class="table table-hover table-bordered">
+          <thead>
+            <tr>
+              <th class="text-center">#</th>
+              <!-- <th class="text-center">ID</th> -->
+              <th class="text-center">Name</th>
+              <!-- <th class="text-center">Designation</th> -->
+              <th class="text-center">Branch</th>
+              <th class="text-center">User Role</th>
+              <th class="text-center">Status</th>
+              <th class="text-center">Employee No</th>
+              <th class="text-center">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let row of displayedUserList; let index = index">
+              <td class="text-center">{{ (currentPage - 1) * itemsPerPage + (index + 1) }}</td>
+              <!-- <td class="text-center">{{ row.userId }}</td> -->
+              <td class="text-center">{{ row.fullName }}</td>
+              <!-- <td class="text-center">{{ row.designation }}</td> -->
+              <td class="text-center">{{ row.branch.description }}</td>
+              <td class="text-center">{{ row.userT.description }}</td>
+              <td class="text-center">{{ row.status }}</td>
+              <td class="text-center">{{ row.employeeCode }}</td>
+              <td class="text-center">
+                <button (click)="onEdit(row)" class="btn btn-primary btn-sm">
+                  <i class="fa fa-edit"></i> Edit
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Pagination Controls -->
+        <div class="pagination-controls text-center">
+          <button
+            class="btn btn-secondary btn-sm"
+            [disabled]="currentPage === 1"
+            (click)="prevPage()"
+          >
+            Previous
+          </button>
+          <span style="margin: 0 10px;">Page {{ currentPage }} of {{ totalPages }}</span>
+          <button
+            class="btn btn-secondary btn-sm"
+            [disabled]="currentPage === totalPages"
+            (click)="nextPage()"
+          >
+            Next
+          </button>
           
-              <table>
-                <thead>
-                  <tr>
-                    <th >ID</th>
-                    <th>Name</th>
-                 
-                    <th>Designation</th>
-                    <th>Branch</th>
-                    <th>Status</th>
-                    <th>Employee No</th>
-                    <th>Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr *ngFor="let row of displayedUserList">
-                    <td >{{ row.userId }}</td>
-                    <td>{{ row.fullName }}</td>
-                   
-                    <td>{{ row.designation }}</td>
-                    <td>{{ row.branch.description }}</td>
-                    <td>{{ row.status }}</td>
-                    <td>{{ row.employeeCode }}</td>
-                    <td class="cell-small">
-                      <button (click)="onEdit(row)" class="btn btn-primary">
-                        <i aria-hidden="true" class="fa fa-edit" style="padding-left: 10px"></i>
-                      </button>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
+          Total: <strong>{{ totalItems }}</strong>
         </div>
       </div>
     </app-card>
- 
   </div>
-
-  <!-- pagination -->
-  <nav style="margin-left: 78%" aria-label="Page navigation example">
-    <ul class="pagination">
-      <li class="page-item">
-        <a class="page-link" href="javascript:" (click)="prevPage()" aria-label="Previous">
-          <span aria-hidden="true">&laquo;</span>
-          <span class="sr-only">Previous</span>
-        </a>
-      </li>
-  
-      <li class="page-item" *ngFor="let page of getPageArray()">
-        <a class="page-link" href="javascript:" (click)="goToPage(page)">{{ page }}</a>
-      </li>
-  
-      <li class="page-item">
-        <a class="page-link" href="javascript:" (click)="nextPage()" aria-label="Next">
-          <span aria-hidden="true">&raquo;</span>
-          <span class="sr-only">Next</span>
-        </a>
-      </li>
-    </ul>
-  </nav>
-  
-  
 </div>
 
 <!--Add user Details-->
@@ -99,7 +83,11 @@
     [options]="false"
     blockClass="table-border-style"
   >
- 
+  <div class="row">
+    <div class="col-md-11"></div>
+    <div class="col-md-1"> <button (click)="clickCancel()" style="width:35px;height:35px;margin-bottom: 10px; border-radius:25px;" class="btn btn-outline-danger fa fa-times" ></button>                           
+    </div>
+  </div>
 
     <form [formGroup]="formValue" class="form">
       <h4
@@ -110,11 +98,7 @@
     Please Fill All the Fields correctly
 
      </h4>
-     <div *ngIf="showSuccessMessage" class="success-message" style="background-color:whitesmoke; padding: 10px; max-width: 400px; margin: 0 auto; display: flex; align-items: center; justify-content: center;">
-      <h4 style="color: rgb(6, 204, 39); margin: 0;">
-        {{ successMessage }}
-      </h4>
-    </div>
+ 
      
       <!-- sec 1 -->
       <div class="row">

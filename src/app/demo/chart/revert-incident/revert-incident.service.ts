@@ -16,9 +16,9 @@ export class RevertIncidentService {
 
   private baseUrl: string = this.authService.getBaseUrl();
 
-  getPosts(userId: number): Observable<any> {
-    const apiUrl = `${this.baseUrl}/incident/level/${userId}`;
-    return this.http.get<any>(apiUrl).pipe(
+  getPosts(data: any): Observable<any> {
+    const apiUrl = `${this.baseUrl}/incident/level/`;
+    return this.http.post<any>(apiUrl,data).pipe(
       map((res: any) => {
         return res;
       })

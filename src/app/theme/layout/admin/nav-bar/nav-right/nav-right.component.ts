@@ -37,6 +37,11 @@ export class NavRightComponent {
   friendId: boolean;
   name : any ;
   level:any;
+   branchDes : any ;
+   email:any;
+   username:any;
+  department:any;
+  departmentDes:any;
   user_types:any[];
   description:any;
 
@@ -57,10 +62,18 @@ export class NavRightComponent {
   }
 
   ngOnInit() {
+
     this.name = this.authService.getName();
     this.level=this.authService.getLevel();
+    this.email=this.authService.getEmail();
 
+    this.username = this.email.split('@')[0];
+    this.branchDes=this.authService.getBranchDes();
+    this.departmentDes = this.authService.getDepartmentDes();
+    console.log("branch : "+this.branchDes);
+    console.log("department : "+this.departmentDes);
     this.getBranches();
+
 
   }
 
@@ -78,7 +91,7 @@ export class NavRightComponent {
       // If a match is found, set the description
       if (userType.type === 'NU') {
         // If type is 'NU' (Created User), set description to 'Normal User'
-        this.description = 'Normal User';
+        this.description = 'Normal(AD) User';
       } else {
         // Otherwise, use the description from the userType object
         this.description = userType.description;

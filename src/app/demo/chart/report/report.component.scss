@@ -1,107 +1,117 @@
-
-
-
-
 .textarea-field {
-    width: 100%; /* Full width of the container */
-    min-height: 100px; /* Minimum height for better appearance */
-    padding: 10px; /* Padding inside the textarea */
-    border: 1px solid #ccc; /* Border color */
-    border-radius: 4px; /* Rounded corners */
-    background-color: #f9f9f9; /* Background color */
-    font-size: 14px; /* Font size */
-    line-height: 1.5; /* Adjust line-height for better readability */
-    box-sizing: border-box; /* Include padding and border in element's total width and height */
-    resize: none; /* Prevent resizing */
-    overflow: auto; /* Scroll if the content overflows */
-    white-space: pre-wrap; /* Preserve whitespace and wrap text */
-    word-break: break-word; /* Break long words to prevent overflow */
-  }
-  
-  
-  
-  
-  
-  .custom-btn {
-      margin-right: 60px; /* Adjust the value as needed */
-    }
-    
-   /* styles.css or styles.scss */
-  .larger-width-snackbar {
-    min-width: 500px; /* Adjust the width as needed */
-    min-height: 400px;
-    top: 0; /* Adjust the top position */
-  }
-  
-  .card-content-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-  
-  .card-content-container .row {
-    width: 100%;
-    max-width: 800px; /* Adjust the maximum width as needed */
-    margin: 0 auto;
-  }
-  
-  .detail {
-    text-align: left; /* Ensure text aligns to the left inside each detail div */
-  }
-  .detail strong {
-    font-weight: bold; /* Ensure titles are bold */
-  }
-  
-  .alert_msg {
-    color: red;
-    text-align: center;
-  }
-  
-  .success-message {
-    background-color: whitesmoke;
-    padding: 10px;
-    max-width: 400px;
-    margin: 0 auto;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  
-  .success-message h4 {
-    color: rgb(6, 204, 39);
-    margin: 0;
-  }
-  
-  .container {
-    padding: 20px;
-    background-color: #f9f9f9; /* Light background */
-    border-radius: 8px; /* Rounded corners */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow */
-  }
-  
-  .detail {
-    padding: 10px;
-    margin: 10px 0;
-    background-color: #ffffff; /* White background for details */
-    border: 1px solid #e0e0e0; /* Light border */
-    border-radius: 4px; /* Rounded corners */
-  }
-  
-  .detail strong {
-    color: #333; /* Dark text for labels */
-  }
-  
-  .field-value {
-    font-size: 1.1em; /* Slightly larger text for values */
-    color: #555; /* Medium gray for values */
-  }
-  
-  .no-data-message {
-    color: #999; /* Grey color */
-    text-align: center; /* Centered text */
-    margin-top: 20px; /* Add some margin */
-  }
-  
-  
-  
-  
+  width: 100%; /* Full width of the container */
+  min-height: 100px; /* Minimum height for better appearance */
+  padding: 10px; /* Padding inside the textarea */
+  border: 1px solid #ccc; /* Border color */
+  border-radius: 4px; /* Rounded corners */
+  background-color: #f9f9f9; /* Background color */
+  font-size: 14px; /* Font size */
+  line-height: 1.5; /* Adjust line-height for better readability */
+  box-sizing: border-box; /* Include padding and border in element's total width and height */
+  resize: none; /* Prevent resizing */
+  overflow: auto; /* Scroll if the content overflows */
+  white-space: pre-wrap; /* Preserve whitespace and wrap text */
+  word-break: break-word; /* Break long words to prevent overflow */
+}
+
+
+
+
+
+.larger-width-snackbar {
+  min-width: 500px; /* Adjust the width as needed */
+  min-height: 400px;
+  top: 0; /* Adjust the top position */
+}
+
+.card-content-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.card-content-container .row {
+  width: 100%;
+  max-width: 800px; /* Adjust the maximum width as needed */
+  margin: 0 auto;
+}
+
+.detail {
+  text-align: left; /* Ensure text aligns to the left inside each detail div */
+}
+.detail strong {
+  font-weight: bold; /* Ensure titles are bold */
+}
+
+.alert_msg {
+  color: red;
+  text-align: center;
+}
+
+.success-message {
+  background-color: whitesmoke;
+  padding: 10px;
+  max-width: 400px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.success-message h4 {
+  color: rgb(6, 204, 39);
+  margin: 0;
+}
+
+
+.hidden {
+  display: none !important;
+}
+// ---------------------
+
+.container {
+  padding: 20px;
+  background-color: #f9f9f9; /* Light background */
+  border-radius: 8px; /* Rounded corners */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+}
+
+.detail {
+  padding: 10px;
+  margin: 10px 0;
+  background-color: #ffffff; /* White background for details */
+  border: 1px solid #e0e0e0; /* Light border */
+  border-radius: 4px; /* Rounded corners */
+}
+
+.detail strong {
+  color: #333; /* Dark text for labels */
+}
+
+.field-value {
+  font-size: 1.1em; /* Slightly larger text for values */
+  color: #555; /* Medium gray for values */
+}
+
+.no-data-message {
+  color: #999; /* Grey color */
+  text-align: center; /* Centered text */
+  margin-top: 20px; /* Add some margin */
+}
+
+.green-row, .green-row td {
+  background-color: #E4A11B !important;
+}
+
+.loading-overlay {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  width: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: transparent; /* Ensure the background is transparent */
+  z-index: 1000; /* Ensure it appears above other content */
+}

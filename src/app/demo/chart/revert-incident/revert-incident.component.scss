@@ -25,6 +25,7 @@
 
 
 
+
 .field-label {
     font-weight: bold;
     // margin-right: 10px; 
@@ -65,4 +66,42 @@
 }
 
   
+
+
+.container {
+  padding: 20px;
+  background-color: #f9f9f9; /* Light background */
+  border-radius: 8px; /* Rounded corners */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+}
+
+.detail {
+  padding: 10px;
+  margin: 10px 0;
+  background-color: #ffffff; /* White background for details */
+  border: 1px solid #e0e0e0; /* Light border */
+  border-radius: 4px; /* Rounded corners */
+}
+
+.detail strong {
+  color: #333; /* Dark text for labels */
+}
+
+.field-value {
+  font-size: 1.1em; /* Slightly larger text for values */
+  color: #555; /* Medium gray for values */
+}
+
+.no-data-message {
+  color: #999; /* Grey color */
+  text-align: center; /* Centered text */
+  margin-top: 20px; /* Add some margin */
+}
+
+
+.green-row, .green-row td {
+  background-color: #E4A11B !important;
+  
+}
+
   

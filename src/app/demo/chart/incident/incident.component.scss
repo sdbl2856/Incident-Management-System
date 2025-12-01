@@ -9,17 +9,31 @@
 }
 
 
-  // .form-group{
-  //   font-weight: bold;
-  //   gap: 10px;
-  //   // width: 70%;
-  // }
+  .form-group{
+    font-weight: bold;
+    gap: 10px;
+    // width: 70%;
+  }
 
-  // .file-loading {
-  //   margin-top: 10px;
-  // }
+  .file-loading {
+    margin-top: 10px;
+  }
   
 
- 
+
+  .gap {
+    max-width: 1200px; /* Set a maximum width for the container */
+    margin: 0 auto; /* Center the container */
+    padding: 0 15px; /* Add padding for consistent spacing */
+  }
+  
+  .form {
+    width: 100%; /* Ensure the form takes the full width of the container */
+  }
+  
+  .row {
+    margin-left: 0;
+    margin-right: 0;
+  }
   
   

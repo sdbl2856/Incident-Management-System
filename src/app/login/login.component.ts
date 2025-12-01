@@ -50,8 +50,8 @@ onSubmit() {
       if (response.code == 200) {
         this.loginMessage = response.message;
         this.loginMessageClass = 'login-message';
-        console.log("response : "+response.user.incidentCount);
-        console.log("type : "+ response.user);
+        console.log("response : "+response.user.department.description);
+   
    
         this.username = '';
         this.password = '';
@@ -64,6 +64,8 @@ onSubmit() {
         this.authService.setEmail(response.user.email);
         this.authService.setBranch(response.user.branch);
         this.authService.setMobile(response.user.contactNo);
+        this.authService.setBranchDes(response.user.branch.description);
+        this.authService.setDepartmentDes(response.user.department.description);
         this.incidentCount = this.authService.getIncidentCount();
         this.authService.setIncidentCount(response.user.incidentCount);
         this.authService.setToken(response.token);
@@ -102,12 +104,14 @@ onSubmit() {
 
       } else  if (response.code == 201){
         this.loginMessage = response.message;
-        console.log(response);
+        console.log("normal user "+response);
 
         this.authService.setempCode(response.user.employeeCode);
         this.authService.setEmail(response.user.email);
         this.authService.setMobile(response.user.contactNo);
         this.authService.setLevel(response?.user?.userType);
+        this.authService.setBranch(response?.user?.branch);
+        this.authService.setDepartmentDes(response?.user?.department?.description);
         this.router.navigate(['/admin/incident']);
 
         

@@ -31,6 +31,7 @@
               "@angular/material/prebuilt-themes/indigo-pink.css",
               "node_modules/bootstrap/scss/bootstrap.scss",
               "src/styles.scss",
+              "node_modules/bootstrap-fileinput/css/fileinput.min.css",
               "node_modules/bootstrap-fileinput/css/fileinput.min.css"
             ],
             "scripts": [

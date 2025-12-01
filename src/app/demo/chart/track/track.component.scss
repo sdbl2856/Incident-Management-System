@@ -1,7 +1,3 @@
-
-
-
-
 .textarea-field {
   width: 100%; /* Full width of the container */
   min-height: 100px; /* Minimum height for better appearance */
@@ -18,14 +14,46 @@
   word-break: break-word; /* Break long words to prevent overflow */
 }
 
+#details-container {
+  font-family: Arial, sans-serif;
+  font-size: 12px;
+  line-height: 1.5;
+  padding: 10px; /* Add padding to prevent content from touching edges */
+  margin-bottom: 20px; /* Add spacing at the bottom */
+}
 
-
-
-
-.custom-btn {
-    margin-right: 60px; /* Adjust the value as needed */
+@media print {
+  .hide-on-print {
+    display: none !important;
   }
-  
+}
+
+@media print {
+
+  /* Hide the View Documents section */
+  .col-md-6:has(> #doc),
+  .col-md-6:has(> select#doc),
+  .col-md-6:has(> span[style*="color: red"]) {
+    display: none !important;
+  }
+
+  /* Hide mat-paginator and its controls */
+  mat-paginator,
+  .mat-paginator,
+  .mat-paginator-container,
+  .mat-paginator-page-size,
+  .mat-paginator-range-actions,
+  .mat-paginator-range-label,
+  .mat-paginator-navigation,
+  [aria-label="Select page"],
+  [aria-label="Items per page:"] {
+    display: none !important;
+  }
+}
+
+.hidden {
+  display: none !important;
+}
  /* styles.css or styles.scss */
 .larger-width-snackbar {
   min-width: 500px; /* Adjust the width as needed */
@@ -72,6 +100,8 @@
   margin: 0;
 }
 
+// ---------------------
+
 .container {
   padding: 20px;
   background-color: #f9f9f9; /* Light background */
@@ -102,8 +132,20 @@
   margin-top: 20px; /* Add some margin */
 }
 
-
 .green-row, .green-row td {
   background-color: #E4A11B !important;
-  
 }
+
+.loading-overlay {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  width: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: transparent; /* Ensure the background is transparent */
+  z-index: 1000; /* Ensure it appears above other content */
+}
+

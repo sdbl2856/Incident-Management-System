@@ -33,7 +33,6 @@ export class NavContentComponent implements OnInit {
 
   @ViewChild('navbarContent', { static: false }) navbarContent: ElementRef;
   @ViewChild('navbarWrapper', { static: false }) navbarWrapper: ElementRef;
-
   constructor(
     public nav: NavigationItem,
     private zone: NgZone,

@@ -1,0 +1,90 @@
+
+/* Sidebar Menu Items */
+.sidebar-menu {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+
+.sidebar {
+  background: #dce9ee;
+    // height: 100vh; /* Full height of the viewport */
+    // width: 250px; /* Fixed width for the sidebar */
+    // position: fixed; /* Ensure it stays in place */
+    // top: 0;
+    // left: 0;
+    // overflow-y: auto; /* Enable scrolling if content overflows */
+  }
+
+.sidebar-menu li {
+  padding: 15px 20px;
+  border-bottom: 1px solid #ccd4dc; /* Divider between items */
+}
+
+
+/* Sidebar Text */
+.pcoded-mtext {
+  font-size: 16px;
+  font-weight: 500;
+  color: #100f0f;
+}
+
+/* Sidebar Badges */
+.pcoded-badge {
+  margin-left: auto;
+  padding: 5px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: bold;
+  color: #f0e5e5;
+
+}
+
+
+
+// .pcoded-badge.label-warning {
+//   background-color: #f39c12;
+//   color: #fff;
+// }
+
+/* Hover Effects */
+.sidebar-menu li a:hover {
+  background-color:  #f1f2f4;
+  color: #dbddf0;
+}
+
+
+
+  
+/* Collapsible Sidebar */
+.sidebar.collapsed {
+  width: 80px;
+}
+
+.sidebar.collapsed .pcoded-mtext {
+  display: none;
+}
+
+
+.sidebar.collapsed .pcoded-micon {
+  margin-right: 0;
+  text-align: center;
+}
+
+
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 80px;
+  }
+
+  .sidebar-menu li a span {
+    display: none;
+  }
+
+  .sidebar.collapsed {
+    width: 60px;
+  }
+}

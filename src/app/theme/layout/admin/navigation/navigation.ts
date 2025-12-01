@@ -51,7 +51,7 @@ const NavigationItems: Navigation[] = [
 
   {
     id: 'chart-maps',
-    title: 'Incidents',
+    title: 'Dash-board',
     type: 'group',
     icon: 'icon-charts',
     children: [
@@ -66,20 +66,11 @@ const NavigationItems: Navigation[] = [
       },
       {
         id: 'revert-incident',
-        title: 'Reverted Incidents',
+        title: 'Reverts',
         type: 'item',
         url: 'revert-incident',
         classes: 'nav-item',
         icon: 'feather icon-rotate-cw',
-      },
-      {
-        id: 'report',
-        title: 'Reports',
-        type: 'item',
-        url: 'report',
-        classes: 'nav-item',
-        icon: 'feather icon-bar-chart',
-        
       },
       {
         id: 'risk-department',
@@ -98,15 +89,6 @@ const NavigationItems: Navigation[] = [
         classes: 'nav-item',
         icon: 'feather icon-activity',  
       },
-      // {
-      //   id: 'approved-incident',
-      //   title: 'Updated Incidents',
-      //   type: 'item',
-      //   url: 'approved-incident',
-      //   classes: 'nav-item',
-      //   icon: 'feather icon-file-text',
-        
-      // },
  
       {
         id: 'user',
@@ -115,6 +97,15 @@ const NavigationItems: Navigation[] = [
         url: 'user',
         classes: 'nav-item',
         icon: 'feather icon-user',
+      },
+      {
+        id: 'report',
+        title: 'Reports',
+        type: 'item',
+        url: 'report',
+        classes: 'nav-item',
+        icon: 'feather icon-bar-chart',
+        
       },
     ],
   },

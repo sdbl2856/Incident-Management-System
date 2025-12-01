@@ -2,30 +2,49 @@
   <li>
     <div class="dropdown drp-user" ngbDropdown placement="auto">
       <a href="javascript:" ngbDropdownToggle data-toggle="dropdown">
-        <i class="icon feather icon-settings"></i>
+      <i class="icon feather icon-user" style="font-size: 20px;">
+     <!-- User Role -->
+         <span ><span>Role : </span>{{ description || 'Normal(AD) User' }}</span>
+      </i>
       </a>
       <div
         class="dropdown-menu dropdown-menu-end profile-notification"
         ngbDropdownMenu
       >
         <div class="pro-head">
-          <img
-            src="assets/images/user/avatar-1.jpg"
+          <!-- <img
+            src="assets/images/user/image.jpg"
             class="img-radius"
             alt="User-Profile-Image"
-          />
-          <span>{{name}}</span>
-          <br><br>
+          /> -->
+          <!-- <span>{{name || username}}</span> -->
+          <br>
 
   
-          <span>User Level: {{ description || 'Normal User' }}</span>
+        <!-- User Info Card -->
+        <div class="user-info-card">
+          <div class="user-info-row">
+            <i class="feather icon-user"></i>
+            <span class="user-info-label">User:</span>
+            <span class="user-info-value">{{ name || username }}</span>
+          </div>
+          <div class="user-info-row" *ngIf="branchDes != null && branchDes != 'undefined' ">
+            <i class="feather icon-map-pin"></i>
+            <span class="user-info-label">Branch:</span>
+            <span class="user-info-value">{{ branchDes || 'N/A' }}</span>
+          </div>
+          <div class="user-info-row" *ngIf="departmentDes != 'undefined' && departmentDes != null">
+            <i class="feather icon-briefcase"></i>
+            <span class="user-info-label">Department:</span>
+            <span class="user-info-value">{{ departmentDes || 'N/A' }}</span>
+          </div>
+        </div>
 
-         
         </div>
         <ul class="pro-body">
           <li>
             <a href="javascript:" class="dropdown-item" (click)="logout()">
-              <i class="feather icon-user"></i> Log out
+             <i class="icon feather icon-log-out"></i> Log out
             </a>
           </li>
         </ul>

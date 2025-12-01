@@ -7,8 +7,11 @@ import { ReportService } from './report.service';
 import * as XLSX from 'xlsx';
 import { MatSnackBar, MatSnackBarConfig } from '@angular/material/snack-bar';
 import { UserService } from '../user/user.service';
+import { MatPaginator } from '@angular/material/paginator';
+import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
-
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 @Component({
   selector: 'app-report',
@@ -17,6 +20,7 @@ import { MatTableDataSource } from '@angular/material/table';
 })
 
 export class ReportComponent {
+  
   loading = true;
   formValue: FormGroup;   
   selectedOption: string = ''; 
@@ -53,12 +57,16 @@ export class ReportComponent {
   branches: any[];
   regions: any[];
   specificBranches = [];
-  totalItems:number=0;
+  baseUrl: string;
+  docList: any[] = [];
+  searchBar: boolean = true;
     // New properties for pagination
-    currentPage: number = 1;
-    itemsPerPage: number = 5; 
-    displayedIncidentList: any[] = [];
-
+    displayedIncidentList: any[] = []; // List of incidents to display on the current page
+    totalItems: number = 0; // Total number of incidents
+    itemsPerPage: number = 10; // Number of items per page
+    currentPage: number = 1; // Current page number
+    totalPages: number = 0; 
+    paginatedIncidentList: any[] = [];
     // Initialize currentPageComment and itemsPerPageComment
 currentPageComment: number = 1;
 itemsPerPageComment: number = 5; // or any desired number
@@ -69,6 +77,7 @@ displayedColumns: string[] = ['description', 'commentedDate', 'added_level', 'ad
   @ViewChild('nav1', { static: true }) nav1: NgbNav;
 
   current_level : any ;
+  searchQuery: any;
   
 
   constructor(private formBuilder: FormBuilder,private authService: AuthService,private reportService:ReportService,private _snackBar: MatSnackBar,  private userService: UserService,) {
@@ -88,10 +97,172 @@ displayedColumns: string[] = ['description', 'commentedDate', 'added_level', 'ad
 
   }
 
+   private paginator: MatPaginator;
+    private sort: MatSort;
+
+     @ViewChild(MatPaginator) set matPaginator(paginator: MatPaginator) {
+          this.dataSource.paginator = paginator;
+         }
+
+         setDataSourceAttributes() {
+          this.dataSource.paginator = this.paginator;
+          this.dataSource.sort = this.sort;
+      
+          if (this.paginator && this.sort) {
+            this.applyFilter('');
+          }
+        }
+
+        applyFilter(filterValue: string) {
+          filterValue = filterValue.trim(); // Remove whitespace
+          filterValue = filterValue.toLowerCase(); // Datasource defaults to lowercase matches
+          this.dataSource.filter = filterValue;
+      }
+
+        ngAfterViewInit() {
+          // Link the paginator and sort to the dataSource
+          this.dataSource.paginator = this.paginator;
+          this.dataSource.sort = this.sort;
+        }
+
   ngOnInit(){
     this.getLevels();
     this.userId = this.authService.getId();
+    this.baseUrl=this.authService.getResourceUrl();
+    console.log("this.baseUrl : "+ this.baseUrl);
     this.current_level = this.authService.getLevel();
+    this.calculateTotalPages();
+    this.updateDisplayedData();
+  }
+
+  generatePDF(): void {
+
+    const elementsToHide = document.querySelectorAll('.hide-on-print');
+    elementsToHide.forEach((el) => el.classList.add('hidden'));
+
+    const element = document.getElementById('details-container');
+    if (!element) return;
+  
+    html2canvas(element, { scale: 2 }).then((canvas) => {
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const imgWidth = pageWidth - 20; // 10mm margin each side
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      const margin = 10;
+  
+      let heightLeft = imgHeight;
+      let renderedHeight = 0;
+      let pageNum = 1;
+      const totalPages = Math.ceil(imgHeight / (pageHeight - 20));
+  
+      // Create a temporary canvas to crop each page
+      const pageCanvas = document.createElement('canvas');
+      const pageCtx = pageCanvas.getContext('2d')!;
+      const pageCanvasHeight = Math.floor((canvas.width / imgWidth) * (pageHeight - 20));
+      pageCanvas.width = canvas.width;
+      pageCanvas.height = pageCanvasHeight;
+  
+      while (heightLeft > 0) {
+        pageCtx.clearRect(0, 0, pageCanvas.width, pageCanvas.height);
+        pageCtx.drawImage(
+          canvas,
+          0, renderedHeight,
+          canvas.width, pageCanvasHeight,
+          0, 0,
+          canvas.width, pageCanvasHeight
+        );
+        const pageImgData = pageCanvas.toDataURL('image/png');
+        if (pageNum > 1) pdf.addPage();
+  
+        let y = 10;
+        if (pageNum === 1) {
+          // Title
+          pdf.setFontSize(16);
+          pdf.setFont('helvetica', 'bold');
+          pdf.text('Incident Details Report', pageWidth / 2, y + 5, { align: 'center' });
+  
+          // Date
+          const currentDate = new Date().toLocaleDateString();
+          pdf.setFontSize(10);
+          pdf.setFont('helvetica', 'normal');
+          pdf.text(`Generated on: ${currentDate}`, pageWidth / 2, y + 12, { align: 'center' });
+  
+          // Line
+          pdf.setLineWidth(0.5);
+          pdf.line(margin, y + 15, pageWidth - margin, y + 15);
+  
+          y += 20; // Leave space for title/date/line
+        }
+  
+        pdf.addImage(pageImgData, 'PNG', margin, y, imgWidth, pageHeight - y - 10);
+  
+        // Footer
+        pdf.setFontSize(10);
+        pdf.text(`Page ${pageNum} of ${totalPages}`, pageWidth / 2, pageHeight - 5, { align: 'center' });
+  
+        renderedHeight += pageCanvasHeight;
+        heightLeft -= (pageHeight - 20);
+        pageNum++;
+      }
+  
+      pdf.save('Incident_Details_Report.pdf');
+      elementsToHide.forEach((el) => el.classList.remove('hidden'));
+    });
+  }
+
+  viewFile(event: Event) {
+
+    console.log("Inside viewFile method", event);
+
+    const target = event.target as HTMLSelectElement;
+    const docPath = target.value;
+
+    if (docPath !== "se") {
+        let basePath = this.baseUrl;  // Assuming this.baseUrl is 'http://10.100.57.133:84'
+        console.log("Original docPath:", docPath);
+
+        // Strip off the local drive letter and convert backslashes to forward slashes
+        let formattedPath = docPath.replace(/^E:[/\\]+/, "").replace(/\\/g, "/");
+
+        // Construct the full URL path correctly, ensuring no redundant 'docs' part
+        let fullPath = `${basePath}${formattedPath}`;
+
+        console.log("Opening file at:", fullPath);
+        window.open(fullPath, "_blank");
+    }
+
+  }
+
+
+
+  calculateTotalPages(): void {
+    this.totalPages = Math.ceil(this.totalItems / this.itemsPerPage);
+  }
+
+
+  updateDisplayedData() {
+    if (this.incidents) {
+      const filteredIncidents = this.incidents.filter(incident =>
+        incident.incident_ref.includes(this.searchQuery) ||
+        incident.incidentId.toString().includes(this.searchQuery)
+      );
+  
+      this.totalPages = Math.ceil(filteredIncidents.length / this.itemsPerPage);
+  
+      const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+      const endIndex = startIndex + this.itemsPerPage;
+  
+      this.paginatedIncidentList = filteredIncidents.slice(startIndex, endIndex);
+    }
+  }
+
+
+  changePage(page: number): void {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+      this.updateDisplayedData();
+    }
   }
 
   getLevels() {
@@ -258,13 +429,13 @@ exportToExcel() {
       'Reporting Officer ': row.reporting_officer,
       'Contact Number ': row.contact_number,
       'Incident Type': row.incidentType ? row.incidentType.description : 'N/A',
-
+      'Root Cause & Recovery Actions':row.recovery_action || 'N/A',
       'Action Taken By the Department': row.action,
       'Loss Event Type': row.lossEventType?.description || 'N/A',
       'Business Line': row.businessLine?.description || 'N/A',
       'Business Aria': row.businessAria?.description || 'N/A',
       'Consequences of incident': row.consequence?.description || 'N/A',
-      'Root cause analysis': row.rootCause,
+      'Root cause Analysis By the Risk Department': row.rootCause,
       'Potential Loss Amount': row.potential_amount,
       'Actual Amount': row.actual_amount,
       'Risk Level': row.riskLevel?.description || 'N/A',
@@ -393,19 +564,27 @@ const incidentData = {
           this.updateDisplayedCommentData();
         }
   
-        this.incidents = data.incidentDtoList;
-         this.incidentCount = this.incidents?.length;
-         this.totalItems = this.incidents?.length;
-        console.log('Incident Count:', this.incidentCount);
+          this.incidents = data.incidentDtoList;
+          this.totalItems = this.incidents?.length || 0; 
+        console.log('Incident Count:',  this.totalItems);
         this.loading = true;
-        // Check if any incident is completed
-        // this.isIncidentCompleted = this.incidents.some(incident => incident.status === 'CO');
-  
         this.updateDisplayedData();
+        this.updatePaginatedList();
+
+
       });
   }
 
 
+  updatePaginatedList() {
+    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+    const endIndex = startIndex + this.itemsPerPage;
+  
+    // Sort incidents in descending order by `incidentId`
+    this.paginatedIncidentList = this.incidents
+      .sort((a, b) => b.incidentId - a.incidentId)
+      .slice(startIndex, endIndex);
+  }
 
 
   statusDescriptions: { [key: string]: string } = {
@@ -453,18 +632,53 @@ const incidentData = {
  
 
 
-   onView(row:any){
-      
-    console.log(row);
+  onView(row: any) {
+    this.row = row;
+    this.searchBar = false;
+  
+      this.commentList = row.comments || []; 
+      this.dataSource.data = this.commentList; 
+    // Ensure row and documents exist before accessing them
+    if (row.documents && Array.isArray(row.documents)) {
+      this.docList = this.row.documents;
+    } else {
+      console.error('this.row.documents is undefined or not an array');
+      this.docList = [];
+    }
+  
     this.selectedIncidentId = row.incidentId;
     console.log(this.selectedIncidentId);
-    this.getPosts();
+  
+    // Reset the comment list before pushing new ones
+    this.commentList = [];
+  
+    // Filter comments based on the selected incident
+    this.incidents.forEach((incident) => {
+      if (incident.comments) {
+        incident.comments.forEach((comment) => {
+          if (incident.incidentId == this.selectedIncidentId) {
+            this.commentList.push(comment);
+          }
+        });
+      }
+    });
+  
+    console.log(this.commentList);
+  
+    // Update dataSource with the filtered comment list
+    this.dataSource.data = this.commentList;
+  
+    // Ensure paginator and sort are correctly updated
+    if (this.paginator && this.sort) {
+      this.dataSource.paginator = this.paginator;
+      this.dataSource.sort = this.sort;
+    }
+  
+    // Move to the next tab and show the form
     this.moveToNextTab();
-    this.row = row;
     this.showdata = false;
     this.showform = true;
-    
- }
+  }
 
 
     // pagination start here
@@ -488,15 +702,15 @@ const incidentData = {
     this.updateDisplayedData();
   }
 
-  updateDisplayedData() {
-    console.log('Incidents:', this.incidents);
-    if (this.incidents) {
-      const startIndex = (this.currentPage - 1) * this.itemsPerPage;
-      const endIndex = startIndex + this.itemsPerPage;
-      this.displayedIncidentList = this.incidents.slice(startIndex, endIndex);
-      console.log('Incidents:', this.displayedIncidentList);
-    }
-  }
+  // updateDisplayedData() {
+  //   console.log('Incidents:', this.incidents);
+  //   if (this.incidents) {
+  //     const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+  //     const endIndex = startIndex + this.itemsPerPage;
+  //     this.displayedIncidentList = this.incidents.slice(startIndex, endIndex);
+  //     console.log('Incidents:', this.displayedIncidentList);
+  //   }
+  // }
 
   getPageArray(): number[] {
     if (this.incidents && this.incidents.length > 0) {

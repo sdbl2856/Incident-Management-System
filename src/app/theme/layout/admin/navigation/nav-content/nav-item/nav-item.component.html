@@ -1,54 +1,18 @@
-<ng-container *ngIf="!item.hidden && (
- 
-  ((userType === 'RC' || userType === 'BM' || userType === 'RM' || userType === 'RRC' || userType === 'DRC') && 
-   (item.url === 'risk-department' || item.url === 'incident' || item.url === 'revert-incident' || item.url === 'track')) ||
 
-
-  (userType === 'RO' && (item.url === 'risk-department' || item.url === 'revert-incident' || item.url === 'report')) ||
-
-
-  (userType === 'ORM' && (item.url === 'risk-department' || item.url === 'report')) ||
-
-
-  (userType === 'AD' && item.url === 'user') ||
-
-
-  (userType === 'AU' && (item.url === 'incident' || item.url === 'revert-incident' || item.url === 'report' || item.url === 'track' )) ||
-
-  
-  (userType !== 'ORM' && userType !== 'AD' && userType !== 'RO' && userType !== 'RC' && userType !== 'AU' && 
-   (item.url === 'incident' || item.url === 'track' || item.url === 'revert-incident'))
-)">
-
-
- 
-
-
-
-<!-- <ng-container *ngIf="!item.hidden && (
-  (userType === 'RC' || userType === 'BM' || userType === 'RM' || userType === 'RRC' || userType === 'DRC') && 
-  (item.url === 'risk-department' || item.url === 'incident' || item.url === 'revert-incident' || item.url === 'track') ||
-  
-  (userType === 'RO' && (item.url === 'risk-department' || item.url === 'revert-incident' || item.url === 'report')) ||
-  
-  (userType === 'ORM' && (item.url === 'risk-department' || item.url === 'report')) ||
-  
-  (userType === 'AD' && item.url === 'user') ||
-
-  (userType === 'AU' && item.url === 'report') ||
-
-  (userType !== 'ORM' && userType !== 'AD' && userType !== 'RO' && userType !== 'RC' && item.url === 'incident') || 
-  (userType !== 'ORM' && userType !== 'AD' && userType !== 'RO' && userType !== 'RC' && item.url === 'track')
-)"> -->
-
-
-
-
-
-
-
-
-
+<div class="sidebar">
+  <ng-container
+  *ngIf="!item.hidden && (
+    ((userType === 'RC' || userType === 'BM' || userType === 'RM' || userType === 'RRC' || userType === 'DRC') &&
+      (item.url === 'risk-department' || item.url === 'incident' || item.url === 'revert-incident' || item.url === 'track')) ||
+    (userType === 'RO' && (item.url === 'risk-department' || item.url === 'revert-incident' || item.url === 'report')) ||
+    (userType === 'ORM' && (item.url === 'risk-department' || item.url === 'report')) ||
+    (userType === 'AD' && item.url === 'user') ||
+    (userType === 'AU' && (item.url === 'incident' || item.url === 'revert-incident' || item.url === 'report' || item.url === 'track')) ||
+    (userType !== 'ORM' && userType !== 'AD' && userType !== 'RO' && userType !== 'RC' && userType !== 'AU' &&
+      (item.url === 'incident' || item.url === 'track' || item.url === 'revert-incident'))
+  )"
+>
+  <!-- Internal Links -->
   <li
     [ngClass]="item.classes"
     *ngIf="item.url && !item.external"
@@ -60,33 +24,39 @@
       [routerLink]="[item.url]"
       (click)="closeOtherMenu($event)"
     >
-    <ng-container *ngTemplateOutlet="itemIcon"></ng-container>
-<span class="pcoded-mtext" *ngIf="item.icon; else directTitle">
-  {{ item.title === 'Revert Incident' ? (item.title + '') : item.title }}
-</span>
+      <ng-container *ngTemplateOutlet="itemIcon"></ng-container>
+      <span class="pcoded-mtext" *ngIf="item.icon; else directTitle">
+        {{ item.title === 'Revert Incident' ? (item.title + '') : item.title }}
+      </span>
       <ng-template #directTitle>
         {{ item.title }}
       </ng-template>
       <ng-container *ngTemplateOutlet="itemBadge"></ng-container>
     </a>
   </li>
+
+  <!-- External Links -->
   <li [ngClass]="item.classes" *ngIf="item.url && item.external">
     <a [target]="item.target ? '_blank' : '_self'" [href]="item.url">
       <ng-container *ngTemplateOutlet="itemIcon"></ng-container>
-      <span class="pcoded-mtext" *ngIf="item.icon; else directTitle">{{
-        item.title
-      }}</span>
+      <span class="pcoded-mtext" *ngIf="item.icon; else directTitle">
+        {{ item.title }}
+      </span>
       <ng-template #directTitle>
         {{ item.title }}
       </ng-template>
       <ng-container *ngTemplateOutlet="itemBadge"></ng-container>
     </a>
   </li>
+
+  <!-- Icon Template -->
   <ng-template #itemIcon>
-    <span *ngIf="item.icon" class="pcoded-micon"
-      ><i class="feather" [ngClass]="item.icon"></i
-    ></span>
+    <span *ngIf="item.icon" class="pcoded-micon">
+      <i class="feather" [ngClass]="item.icon"></i>
+    </span>
   </ng-template>
+
+  <!-- Badge Template -->
   <ng-template #itemBadge>
     <span
       *ngIf="item.badge && themeLayout === 'vertical'"
@@ -97,53 +67,4 @@
     </span>
   </ng-template>
 </ng-container>
-
-<!-- <ng-container *ngIf="!item.hidden && (userType == 'BM')">
-  <li
-    [ngClass]="item.classes"
-    *ngIf="item.url && !item.external"
-    [routerLinkActive]="['active']"
-  >
-    <a
-      class="nav-link"
-      [target]="item.target ? '_blank' : '_self'"
-      [routerLink]="[item.url]"
-      (click)="closeOtherMenu($event)"
-    >
-      <ng-container *ngTemplateOutlet="itemIcon"></ng-container>
-      <span class="pcoded-mtext" *ngIf="item.icon; else directTitle">{{
-        item.title
-      }}</span>
-      <ng-template #directTitle>
-        {{ item.title }}
-      </ng-template>
-      <ng-container *ngTemplateOutlet="itemBadge"></ng-container>
-    </a>
-  </li>
-  <li [ngClass]="item.classes" *ngIf="item.url && item.external">
-    <a [target]="item.target ? '_blank' : '_self'" [href]="item.url">
-      <ng-container *ngTemplateOutlet="itemIcon"></ng-container>
-      <span class="pcoded-mtext" *ngIf="item.icon; else directTitle">{{
-        item.title
-      }}</span>
-      <ng-template #directTitle>
-        {{ item.title }}
-      </ng-template>
-      <ng-container *ngTemplateOutlet="itemBadge"></ng-container>
-    </a>
-  </li>
-  <ng-template #itemIcon>
-    <span *ngIf="item.icon" class="pcoded-micon"
-      ><i class="feather" [ngClass]="item.icon"></i
-    ></span>
-  </ng-template>
-  <ng-template #itemBadge>
-    <span
-      *ngIf="item.badge && themeLayout === 'vertical'"
-      class="pcoded-badge label"
-      [ngClass]="item.badge.type"
-    >
-      {{ item.badge.title }}
-    </span>
-  </ng-template>
-</ng-container> -->
+</div>

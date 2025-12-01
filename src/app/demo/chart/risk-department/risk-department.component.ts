@@ -61,8 +61,8 @@ export class RiskDepartmentComponent {
   export_btn=false;
   docList: any[];
    // New properties for pagination
-   currentPage: number = 1;
-   itemsPerPage: number = 5; 
+  //  currentPage: number = 1;
+  //  itemsPerPage: number = 5; 
    displayedIncidentList: any[] = [];
 
    currentPageComment: number = 1;
@@ -71,6 +71,12 @@ export class RiskDepartmentComponent {
    isIncidentCompleted = false;
    selectedDepartmentId: any = null;
    justification=false;
+   baseUrl:any;
+
+   paginatedIncidentList: any[] = [];
+   currentPage: number = 1;
+   itemsPerPage: number = 5;
+   totalPages: number = 0;
 
   constructor(private formBuilder: FormBuilder,private riskDepartmentService:RiskDepartmentService,private authService: AuthService,private revertIncidentService:RevertIncidentService,private userService :UserService ){
     this.formValue = this.formBuilder.group({
@@ -105,10 +111,30 @@ export class RiskDepartmentComponent {
   @ViewChild(MatSort) sort: MatSort;
 
 
+ @ViewChild(MatPaginator) set matPaginator(paginator: MatPaginator) {
+      this.dataSource.paginator = paginator;
+     }
+
+
+  setDataSourceAttributes() {
+    this.dataSource.paginator = this.paginator;
+    this.dataSource.sort = this.sort;
+
+    if (this.paginator && this.sort) {
+      this.applyFilter('');
+    }
+  }
+
+  applyFilter(filterValue: string) {
+    filterValue = filterValue.trim(); // Remove whitespace
+    filterValue = filterValue.toLowerCase(); // Datasource defaults to lowercase matches
+    this.dataSource.filter = filterValue;
+}
     ngOnInit(){
 
     this.userId = this.authService.getId();
     this.currentLevel = this.authService.getLevel();
+    this.baseUrl=this.authService.getResourceUrl();
     if(this.currentLevel=="ORM" ){
       this.ro_data=true;
       this.form_fill=false;
@@ -138,7 +164,7 @@ export class RiskDepartmentComponent {
       this.form_decide=true;
       this.status_fill=false;
     }else if(this.currentLevel=="DRC"){
-      this.ro_data=false;
+      this.ro_data=true;
       this.form_fill=false;
       this.form_decide=true;
       this.status_fill=false;
@@ -152,19 +178,88 @@ export class RiskDepartmentComponent {
     this.getTypes();
    
     this.getBranches();
-    this.getPosts(this.userId, 'PE');
+    this.getPosts();
     
 
-  
+    this.incidents = this.incidents || []; // Example function to fetch data
+    this.totalPages = Math.ceil(this.incidents.length / this.itemsPerPage);
+    this.updatePaginatedList();
 
   }
 
+  
+  updatePaginatedList() {
+    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+    const endIndex = startIndex + this.itemsPerPage;
+  
+    // Sort incidents in descending order by `incidentId`
+    this.paginatedIncidentList = this.incidents
+      .sort((a, b) => Number(b.incidentId) - Number(a.incidentId)) // Ensure `incidentId` is a number
+      .slice(startIndex, endIndex);
+  }
 
+  changePage(page: number) {
+    this.currentPage = page;
+    this.updatePaginatedList();
+  }
   ngAfterViewInit() {
+    // Link the paginator and sort to the dataSource
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
   }
+
+ 
+
+  updateDisplayedData() {
+    if (this.incidents) {
+      const filteredIncidents = this.incidents.filter(incident =>
+        incident.incident_ref.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+        incident.incidentId.toString().toLowerCase().includes(this.searchQuery.toLowerCase())
+      );
   
+      this.totalPages = Math.ceil(filteredIncidents.length / this.itemsPerPage);
+  
+      const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+      const endIndex = startIndex + this.itemsPerPage;
+  
+      this.paginatedIncidentList = filteredIncidents.slice(startIndex, endIndex);
+    }
+  }
+
+ 
+    // pagination start here
+    prevPage() {
+      if (this.currentPage > 1) {
+        this.currentPage--;
+        this.updateDisplayedData();
+      }
+    }
+  
+    nextPage() {
+      if (this.currentPage < this.totalPages) {
+        this.currentPage++;
+        this.updateDisplayedData();
+      }
+    }
+  
+    goToPage(page: number) {
+      if (page >= 1 && page <= this.totalPages) {
+        this.currentPage = page;
+        this.updateDisplayedData();
+      }
+    }
+
+
+
+  getPageArray(): number[] {
+    if (this.incidents && this.incidents.length > 0) {
+      const totalPages = Math.ceil(this.incidents.length / this.itemsPerPage);
+      return Array.from({ length: totalPages }, (_, index) => index + 1);
+    } else {
+      return [];
+    }
+  }
+
 
   filterDepartments() {
     // Filter out the department you want to hide
@@ -185,6 +280,7 @@ export class RiskDepartmentComponent {
 
   
   alertWithConfirm(event: Event) {
+    console.log("justification method");
     this.selectedDepartmentId = (event.target as HTMLSelectElement).value; 
     console.log("Selected Department ID:", this.selectedDepartmentId);
   
@@ -215,40 +311,49 @@ export class RiskDepartmentComponent {
      this.selectedStatus = this.formValue.value.status;
   
     if (this.userId ) {
-      this.getPosts(this.userId, this.selectedStatus);
+      this.getPosts();
     } else {
       console.error('userId is undefined');
     }
   }
 
   viewFile(event: Event) {
+    
     console.log("Inside viewFile method", event);
-  
+
     const target = event.target as HTMLSelectElement;
     const docPath = target.value;
-  
-    if (docPath !== "se") {
-      let basePath = "http://localhost/"
-      console.log("Original docPath:", docPath);
-      let formattedPath = docPath.replace(/^[/\\]+/, "").replace(/\\/g, "/"); 
-      let fullPath = `${basePath}${formattedPath}`;
-  
-      console.log("Opening file at:", fullPath);
-      window.open(fullPath, "_blank");
-    }
-  }
 
-  getPosts(userId: any, selectedStatus: string ) {
+    if (docPath !== "se") {
+        let basePath = this.baseUrl;  // Assuming this.baseUrl is 'http://10.100.57.133:84'
+        console.log("Original docPath:", docPath);
+
+        // Strip off the local drive letter and convert backslashes to forward slashes
+        let formattedPath = docPath.replace(/^E:[/\\]+/, "").replace(/\\/g, "/");
+
+        // Construct the full URL path correctly, ensuring no redundant 'docs' part
+        let fullPath = `${basePath}${formattedPath}`;
+
+        console.log("Opening file at:", fullPath);
+        window.open(fullPath, "_blank");
+    }
+}
+
+  getPosts() {
     if (this.userId) {
       console.log("selected incident ID :" + this.selectedIncidentId);
+      let data={
+        userId:this.userId,
+        status:'PE'
+      }
       this.loading=true;
-      this.riskDepartmentService.getPosts(this.userId, selectedStatus)
+      this.riskDepartmentService.getPosts(data)
         .subscribe((data: any) => {
           if (data.code === 200) {
             this.loading=false;
             this.commentList = [];
             console.log(data);
-           
+          
             data.incidentDtoList.forEach((incident) => {
               if (incident.comments) {
                 incident.comments.forEach((comment) => {
@@ -274,7 +379,7 @@ export class RiskDepartmentComponent {
           this.incidents = data.incidentDtoList;
           const incidentCount = this.incidents.length;
           this.totalItems = this.incidents?.length;
-          this.loading = false;
+          this.updatePaginatedList();
           console.log('Incident Count:', incidentCount);
   
           // Check if any incident is completed
@@ -297,9 +402,12 @@ export class RiskDepartmentComponent {
   };
 
   onView(row:any){
+
      console.log(row);
      this.row = row;
 
+     this.commentList = row.comments || []; 
+     this.dataSource.data = this.commentList; 
      // Ensure row and documents exist before accessing them
      if (row.documents && Array.isArray(row.documents)) {
        this.docList = this.row.documents;
@@ -310,7 +418,7 @@ export class RiskDepartmentComponent {
    
     this.selectedIncidentId = row.incidentId;
     console.log(this.selectedIncidentId);
-    this.getPosts(this.userId, "PE");
+    this.getPosts();
     this.moveToNextTab();
     this.row = row;
     this.showdata = false;
@@ -329,11 +437,18 @@ export class RiskDepartmentComponent {
      this.formValue.controls['potential_amount'].setValue(row.potential_amount);
      this.formValue.controls['actual_amount'].setValue(row.actual_amount);
      this.formValue.controls['risk_status'].setValue(row.status);
-     
      this.formValue.controls['account_number'].setValue(row.account_number);
      this.formValue.controls['recoverd_amount'].setValue(row.recoverd_amount);
      this.formValue.controls['recovery_action'].setValue(row.recovery_action);
      
+
+    //  this.formValue.controls['root_cause'].setValue(row.rootCause);
+    //  this.formValue.controls['potential_amount'].setValue(row.potential_amount);
+    //  this.formValue.controls['actual_amount'].setValue(row.actual_amount);
+    //  this.formValue.controls['risk_status'].setValue(row.status);
+    //  this.formValue.controls['account_number'].setValue(row.account_number);
+    //  this.formValue.controls['recoverd_amount'].setValue(row.recoverd_amount);
+    //  this.formValue.controls['recovery_action'].setValue(row.recovery_action);
      
 
   }
@@ -343,7 +458,7 @@ export class RiskDepartmentComponent {
     this.showdata = true;  
     this.showform = false;
     this.drop_down=true;
-    this.getPosts(this.userId, 'PE');
+    this.getPosts();
     // Reset comment form
     this.formValue.reset();
     
@@ -457,10 +572,6 @@ export class RiskDepartmentComponent {
         };
         this.riskDepartmentService.revertDetails(dataToSend).subscribe(
           (res) => {
-            setTimeout(() => {
-            }, 3000);
-            this.alertWithSuccess();   
-            this.getPosts(this.userId, "PE");
               this.hideSuccess();
               this.formValue.reset();
               this.showdata = true;  
@@ -468,6 +579,8 @@ export class RiskDepartmentComponent {
               this.nav1.select(1);
               this.drop_down=true;
               this.formValue.controls['status'].setValue(this.row.status);
+              this.alertWithSuccess();   
+              this.getPosts();
           },
           (err) => {
             console.log(err.message);
@@ -483,36 +596,7 @@ export class RiskDepartmentComponent {
    }
 
 
-   alertWithSuccess() {
-    Swal.fire({
-      icon: 'success',
-      title: 'Success...',
-      text: 'Successfully Done',
-      confirmButtonColor: "#03c9d7",
-      showClass: {
-        popup: 'animate__animated animate__fadeInDown' 
-      },
-      hideClass: {
-        popup: 'animate__animated animate__fadeOutUp' 
-      }
-    });
-  }
-  
-
-  alertWithError(msg: any){
-    Swal.fire({
-      icon: 'error',
-      title: 'Error...',
-      text: msg,
-      confirmButtonColor: "#03c9d7",
-      showClass: {
-        popup: 'animate__animated animate__fadeInDown' 
-      },
-      hideClass: {
-        popup: 'animate__animated animate__fadeOutUp' 
-      }
-    });  
-  }
+ 
   // by RO
     updateIncidents() {
       console.log("inside ro update");
@@ -614,19 +698,15 @@ export class RiskDepartmentComponent {
         .updateIncidents(incidentId,incidentData)
         .subscribe(
           (res) => {  
-            
-            this.alertWithSuccess();
-            setTimeout(() => {
               this.hideSuccess();
-                // Additional code to execute after the setTimeout
               this.formValue.reset();
               this.showdata = true;
               this.showform = false;
               this.nav1.select(1);
-              this.getPosts(this.userId,'PE');
+              this.getPosts();
               this.drop_down=true;
-              this.formValue.controls['status'].setValue(this.row.status);
-              }, 3000);  
+              this.formValue.controls['status'].setValue(this.row.status); 
+              this.alertWithSuccess();   
           },
           (err) => {
             this.alertWithError(err.message);
@@ -668,18 +748,14 @@ export class RiskDepartmentComponent {
          .updateStatus(incidentId,incidentData)
          .subscribe(
            (res) => {  
-
-            setTimeout(() => {
-              this.hideSuccess();
-            }, 3000);
-             this.alertWithSuccess();
-               this.formValue.reset();
-               this.showdata = true;
-               this.showform = false;
-               this.nav1.select(1);
-             this.getPosts(this.userId,'PE');
-             this.drop_down=true;
-             this.formValue.controls['status'].setValue(this.row.status); 
+            this.formValue.reset();
+            this.showdata = true;
+            this.showform = false;
+            this.nav1.select(1);
+            this.alertWithSuccess();
+            this.getPosts();
+            this.drop_down=true;
+            this.formValue.controls['status'].setValue(this.row.status);
            },
            (err) => {
             this.alertWithError(err.message);
@@ -690,8 +766,8 @@ export class RiskDepartmentComponent {
        );   
   }
 
-  forward(row) {
 
+  forward(row) {
 
     const comment = this.formValue.value.comment;
     const incidentId=row.incidentId
@@ -730,15 +806,14 @@ if(comment == null || !comment){
       console.log(this.userId);
       this.riskDepartmentService.forwardIncident(incidentId,dataToSend).subscribe(
         (res) => {
-          this.formValue.reset();
-          this.alertWithSuccess();
-          setTimeout(() => {
             this.hideSuccess();
+            this.formValue.reset();
             this.showdata = true;
             this.showform = false;
             this.nav1.select(1);
-            this.getPosts(this.userId,'PE');
-          }, 3000);
+            this.alertWithSuccess();
+            this.getPosts();
+            
         },
         (err) => {
           this.alertWithError(err.message);
@@ -774,19 +849,13 @@ if(comment == null || !comment){
 
       this.riskDepartmentService.sendBackIncident(incidentId,dataToSend).subscribe(
         (res) => {
-
-          setTimeout(() => {
-          }, 3000);
-          this.alertWithSuccess();
-      
             this.hideSuccess();
             this.formValue.reset();
             this.showdata = true;  
             this.showform = false;
             this.nav1.select(1);
-            this.getPosts(this.userId,'PE');
-      
-
+            this.alertWithSuccess();
+            this.getPosts();
         },
         (err) => {
 
@@ -845,25 +914,25 @@ if(comment == null || !comment){
     }
 
   // pagination start here
-  prevPage() {
-    if (this.currentPage > 1) {
-      this.currentPage--;
-      this.updateDisplayedData();
-    }
-  }
+  // prevPage() {
+  //   if (this.currentPage > 1) {
+  //     this.currentPage--;
+  //     this.updateDisplayedData();
+  //   }
+  // }
 
-  nextPage() {
-    const totalPages = Math.ceil(this.incidents.length / this.itemsPerPage);
-    if (this.currentPage < totalPages) {
-      this.currentPage++;
-      this.updateDisplayedData();
-    }
-  }
+  // nextPage() {
+  //   const totalPages = Math.ceil(this.incidents.length / this.itemsPerPage);
+  //   if (this.currentPage < totalPages) {
+  //     this.currentPage++;
+  //     this.updateDisplayedData();
+  //   }
+  // }
 
-  goToPage(page: number) {
-    this.currentPage = page;
-    this.updateDisplayedData();
-  }
+  // goToPage(page: number) {
+  //   this.currentPage = page;
+  //   this.updateDisplayedData();
+  // }
 
   // updateDisplayedData() {
   //   if (this.incidents) {
@@ -873,33 +942,60 @@ if(comment == null || !comment){
   //   }
   // }
 
-  updateDisplayedData() {
-  if (this.incidents) {
+//   updateDisplayedData() {
 
-    const filteredUsers = this.incidents.filter(incident => 
-      incident.incident_ref.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-      incident.incidentId.toString().toLowerCase().includes(this.searchQuery.toLowerCase())
-    );
+//   if (this.incidents) {
 
-    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
-    const endIndex = startIndex + this.itemsPerPage;
+//     const filteredUsers = this.incidents.filter(incident => 
+//       incident.incident_ref.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+//       incident.incidentId.toString().toLowerCase().includes(this.searchQuery.toLowerCase())
+//     );
 
-    this.displayedIncidentList = filteredUsers.slice(startIndex, endIndex);
-  }
+//     const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+//     const endIndex = startIndex + this.itemsPerPage;
 
-}
+//     this.displayedIncidentList = filteredUsers.slice(startIndex, endIndex);
+//   }
+
+// }
+
+// updateDisplayedData() {
+//   if (this.incidents) {
+//     // Filter the incidents based on the search query
+//     const filteredUsers = this.incidents.filter(incident => 
+//       incident.incident_ref.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+//       incident.incidentId.toString().toLowerCase().includes(this.searchQuery.toLowerCase())
+//     );
+
+//     // Sort the filtered incidents in descending order by incident_ref or incidentId
+//     const sortedUsers = filteredUsers.sort((a, b) => {
+//       // Sorting by incident_ref in descending order
+//       return b.incident_ref.localeCompare(a.incident_ref);  // Use `.localeCompare()` for string comparison
+
+//       // Alternatively, if you want to sort by `incidentId`, use this:
+//       // return b.incidentId - a.incidentId;  // Numeric comparison
+//     });
+
+//     // Pagination: Slice the sorted array to get the current page data
+//     const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+//     const endIndex = startIndex + this.itemsPerPage;
+
+//     this.displayedIncidentList = sortedUsers.slice(startIndex, endIndex);
+//   }
+// }
+
 
   
-  getPageArray(): number[] {
-    if (this.incidents && this.incidents.length > 0) {
-      const totalPages = Math.ceil(this.incidents.length / this.itemsPerPage);
+  // getPageArray(): number[] {
+  //   if (this.incidents && this.incidents.length > 0) {
+  //     const totalPages = Math.ceil(this.incidents.length / this.itemsPerPage);
   
-      // Only show pages 1 and 2
-      return [1, 2].filter(page => page <= totalPages);
-    } else {
-      return [];
-    }
-  }
+  //     // Only show pages 1 and 2
+  //     return [1, 2].filter(page => page <= totalPages);
+  //   } else {
+  //     return [];
+  //   }
+  // }
   
   // pagination close here 
 
@@ -953,7 +1049,36 @@ getStatusDescription(status: string): string {
 }
 
 
+alertWithSuccess() {
+  Swal.fire({
+    icon: 'success',
+    title: 'Success...',
+    text: 'Successfully Done',
+    confirmButtonColor: "#03c9d7",
+    showClass: {
+      popup: 'animate__animated animate__fadeInDown' 
+    },
+    hideClass: {
+      popup: 'animate__animated animate__fadeOutUp' 
+    }
+  });
+}
 
+
+alertWithError(msg: any){
+  Swal.fire({
+    icon: 'error',
+    title: 'Error...',
+    text: msg,
+    confirmButtonColor: "#03c9d7",
+    showClass: {
+      popup: 'animate__animated animate__fadeInDown' 
+    },
+    hideClass: {
+      popup: 'animate__animated animate__fadeOutUp' 
+    }
+  });  
+}
 
     
 }

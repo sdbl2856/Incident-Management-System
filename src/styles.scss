@@ -21,5 +21,22 @@
 
 @import "scss/custom";
 
-html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+html, body {
+  height: 100%; /* Full height for the gradient */
+  margin: 0; /* Remove default margin */
+  background: linear-gradient(135deg, #e4ebea, #a4deef) !important;
+}
+
+body, app-root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh; /* Ensure the app covers the full height */
+}
+
+app-root > * {
+  flex: 1; /* Allow child elements to stretch */
+}
+
+// html, body { height: 100%; }
+// body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif;  background: linear-gradient(135deg, #e4ebea, #a4deef);  }

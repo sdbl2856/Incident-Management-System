@@ -17,18 +17,15 @@ export class RiskDepartmentService {
   
   private baseUrl: string =  this.authService.getBaseUrl();
  
-  getPosts(userId: number, selectedStatus: string | undefined = undefined): Observable<any> {
-    let apiUrl = `${this.baseUrl}/incident/level/${userId}`;
-  
-    // If selectedStatus is provided, append it to the URL
-    if (selectedStatus !== undefined) {
-      apiUrl += `?status=${selectedStatus}`;
-    }
-    return this.http.get<any>(apiUrl).pipe(
+  getPosts(data:any): Observable<any> {
+    let apiUrl = `${this.baseUrl}/incident/level/`;
+    return this.http.post<any>(apiUrl, data).pipe(
       map((res: any) => {
         return res;
       })
     );
+
+ 
   }
 
   getTypes(): Observable<any[]> {
@@ -92,7 +89,6 @@ export class RiskDepartmentService {
   }
 
 
-  // ...........................
   sendBackIncident(incidentId: number, data: any): Observable<any> {
     const apiUrl = `${this.baseUrl}/incident/sendback/${incidentId}`;
     return this.http.post<any>(apiUrl, data)
@@ -101,6 +97,8 @@ export class RiskDepartmentService {
       }));
   }
   
+
+
   forwardIncident(incidentId: number, data: any): Observable<any> {
     const apiUrl = `${this.baseUrl}/incident/forward/${incidentId}`;
     return this.http.post<any>(apiUrl, data)
@@ -108,5 +106,7 @@ export class RiskDepartmentService {
         return res;
       }));
   }
+
+  
 
 }

@@ -9,19 +9,25 @@ import { Router } from '@angular/router';
 })
 export class AuthService {
 
-  // live
-
+  // live ** : 
   // private baseUrl = '//ims.sdb.lk:8082';
+  // private baseUrl = 'https://ims.sdb.lk';
+  // private RESOURCE_URL:string = "http://10.100.31.123:/";
+
 
   // Uat
-  //  private baseUrl = '//10.100.57.125:8084';
+  //  private baseUrl = '//10.100.57.125:8084'; 
+  //  private RESOURCE_URL:string = "http://10.100.57.125:84/";
+
+  //  test ldap
+  //  private baseUrl = '//172.16.15.21:8084';
+  //  private RESOURCE_URL:string = "http://172.16.15.21:84/";
 
   //  local
-  private baseUrl = '//localhost:8082';
+  private baseUrl = '//localhost:8084';
+  private RESOURCE_URL:string = "http://10.100.57.133:84/";
 
   private apiUrl = `${this.baseUrl}/login`;
-
-  private RESOURCE_URL:string = "http://localhost:3000/";
 
   constructor(private http: HttpClient, private router: Router) {}
 
@@ -86,6 +92,8 @@ export class AuthService {
     localStorage.removeItem('mobile');
     localStorage.removeItem('branch');
     localStorage.removeItem('email');
+    localStorage.removeItem('branchdes');
+    localStorage.removeItem('departmentdes');
     this.router.navigate(['/login']);
   }
 
@@ -111,6 +119,8 @@ export class AuthService {
   setBranch(branch: any) {
     localStorage.setItem('branch', branch);
   }
+
+
 
   getBranch() {
     return localStorage.getItem('branch');
@@ -185,6 +195,23 @@ export class AuthService {
 
       return this.RESOURCE_URL;
    } 
+
+     getBranchDes() {
+    return localStorage.getItem('branchdes');
+  }
+
+    setBranchDes(branchdes: any) {
+    localStorage.setItem('branchdes', branchdes);
+  }
+
+
+     getDepartmentDes() {
+    return localStorage.getItem('departmentdes');
+  }
+
+    setDepartmentDes(departmentdes: any) {
+    localStorage.setItem('departmentdes', departmentdes);
+  }
 
   
 }

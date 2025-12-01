@@ -19,7 +19,7 @@ export class ReportService {
   getPosts(data: any): Observable<any> {
 
     console.log("inside report service");
-    const apiUrl = `${this.baseUrl}/incident/search/`;
+    const apiUrl = `${this.baseUrl}/incident/report/`;
     return this.http.post<any>(apiUrl, data);
   }
 

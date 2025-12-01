@@ -1,74 +1,142 @@
 /* login.component.css */
 
-.login-container {
-  width: 350px;
-  margin: 0 auto;
-  padding: 20px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  background-color: #f4f4f4;
+/* Background Styling */
+.background {
+  background: linear-gradient(135deg, #e4ebea, #a4deef); /* Gradient background */
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-h2 {
+/* Login Container */
+.login-container {
+  background: #ffffff; /* White background for the form */
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2); /* Elevated shadow */
+  width: 400px;
   text-align: center;
+  animation: fadeIn 0.5s ease-in-out; /* Smooth fade-in animation */
+}
 
+/* Logo Section */
+.logo-container {
+  margin-bottom: 20px;
+}
+
+.logo-image {
+  width: 150px;
+  object-fit: contain;
+}
+
+/* Form Styling */
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
 .form-group {
-  margin-bottom: 15px;
+  display: flex;
+  flex-direction: column;
+  text-align: left;
 }
 
 label {
-  display: block;
+  font-size: 14px;
   font-weight: bold;
-  color: black;
+  color: #34495e;
+  margin-bottom: 5px;
 }
 
-input[type="text"],
-input[type="password"] {
-  width: 100%;
+input {
   padding: 10px;
-  margin-bottom: 10px;
-  border: 1px solid #ccc;
-  border-radius: 3px;
+  border: 1px solid #ccd4dc;
+  border-radius: 5px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.3s ease;
 }
 
-button {
-  width: 100%;
+input:focus {
+  border-color: #1abc9c;
+  box-shadow: 0 0 5px rgba(26, 188, 156, 0.5);
+}
+
+.error-message {
+  color: #e74c3c;
+  font-size: 12px;
+  margin-top: 5px;
+}
+
+/* Login Button */
+.login-button {
+  background: #5ac4ea;
+  color: #ffffff;
   padding: 10px;
-  background-color: #007bff;
-  color: #fff;
   border: none;
-  border-radius: 3px;
+  border-radius: 5px;
+  font-size: 16px;
+  font-weight: bold;
   cursor: pointer;
+  transition: background-color 0.3s ease;
 }
 
-button:hover {
-  background-color: #0056b3;
+.login-button:disabled {
+  background: #bdc3c7;
+  cursor: not-allowed;
 }
 
-/* CSS for a successful login message */
+.login-button:hover:not(:disabled) {
+  background: #5ac4ea;
+}
+
+/* Login Message */
 .login-message {
-color: green;
+  margin-top: 20px;
+  font-size: 14px;
+  font-weight: bold;
 }
 
-/* CSS for a failed login message */
-.login-message-failed {
-color: red;
+/* Loading Spinner */
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh; /* Full height of the viewport */
+  width: 100%; /* Full width of the viewport */
+  position: absolute; /* Overlay on top of the content */
+  top: 0;
+  left: 0;
+  background: transparent; /* Transparent background */
+  z-index: 1000; /* Ensure it appears above other content */
 }
 
-h6{
-font-weight: bold;
-font-size:larger;
-text-align: center;
+.loading-spinner {
+  width: 7%; /* Adjust spinner size */
+  animation: spin 1s linear infinite;
 }
 
-.background{
- width:"100%";
- height:100vh;
- display: flex;
- justify-content: center;
- align-items: center;
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Fade-in Animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 
